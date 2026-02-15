@@ -6,6 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "cf:deploy": "wrangler deploy --assets=.next/static",
+    "cf:deploy:prod": "bun run build && wrangler deploy --assets=.next/static",
     "lint": "eslint",
     "format": "prettier \"{app,lib}/**/*.{ts,tsx,js,jsx,json,md,css}\" --write",
     "format:check": "prettier \"{app,lib}/**/*.{ts,tsx,js,jsx,json,md,css}\" --check"

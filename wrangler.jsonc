@@ -1,0 +1,7 @@
+{
+  "name": "boba-tracker",
+  "compatibility_date": "2026-02-15",
+  "assets": {
+    "directory": ".next/static"
+  }
+}
