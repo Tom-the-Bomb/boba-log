@@ -1,6 +1,3 @@
-// default open-next.config.ts file created by @opennextjs/cloudflare
-import { defineCloudflareConfig } from "@opennextjs/cloudflare/config";
+import { defineCloudflareConfig } from "@opennextjs/cloudflare";
 
-export default defineCloudflareConfig({
-  // Use default cache behavior unless explicit bindings are configured in wrangler.
-});
+export default defineCloudflareConfig();
