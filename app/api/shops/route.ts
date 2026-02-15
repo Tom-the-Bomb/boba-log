@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getUsernameFromRequest } from "@/lib/request-auth";
-import { addShop } from "@/lib/users";
 import { processAndUploadAvatar } from "@/lib/avatar";
-import { getUserByUsername } from "@/lib/users";
+import { DEFAULT_SHOPS } from "@/lib/default-shops";
+import { getUsernameFromRequest } from "@/lib/request-auth";
+import { addShop, getUserByUsername } from "@/lib/users";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,9 +15,20 @@ export async function POST(request: NextRequest) {
     const name = String(formData.get("name") ?? "").trim();
     const avatarFile = formData.get("avatar");
 
-    if (!name || !(avatarFile instanceof File)) {
+    if (!name) {
       return NextResponse.json(
-        { error: "Shop name and avatar are required." },
+        { error: "Shop name is required." },
+        { status: 400 },
+      );
+    }
+
+    const hasUploadedAvatar = avatarFile instanceof File;
+    const isPresetShop = DEFAULT_SHOPS.some(
+      (shop) => shop.name.trim().toLowerCase() === name.toLowerCase(),
+    );
+    if (!hasUploadedAvatar && !isPresetShop) {
+      return NextResponse.json(
+        { error: "Shop avatar is required for custom shops." },
         { status: 400 },
       );
     }
@@ -27,17 +38,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    try {
-      await processAndUploadAvatar({
-        file: avatarFile,
-        userId: user._id.toString(),
-        shopName: name,
-      });
-    } catch {
-      return NextResponse.json(
-        { error: "Invalid avatar format. Use JPEG, PNG, or WebP." },
-        { status: 400 },
-      );
+    if (hasUploadedAvatar) {
+      try {
+        await processAndUploadAvatar({
+          file: avatarFile,
+          userId: user._id.toString(),
+          shopName: name,
+        });
+      } catch {
+        return NextResponse.json(
+          { error: "Invalid avatar format. Use JPEG, PNG, or WebP." },
+          { status: 400 },
+        );
+      }
     }
 
     const shop = await addShop(username, name);

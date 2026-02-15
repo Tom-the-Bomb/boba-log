@@ -1,6 +1,5 @@
 import sharp from "sharp";
 import { uploadAvatarToR2 } from "./r2";
-import { normalizeShopNameForAvatar } from "./shop-avatar";
 
 const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
@@ -28,7 +27,7 @@ export async function processAndUploadAvatar({
     throw new Error("Unsupported image format.");
   }
 
-  const normalizedShopName = normalizeShopNameForAvatar(shopName) || "shop";
+  const shopAvatarKey = shopName.trim() || "shop";
   const outputBuffer = await image
     .resize(256, 256, { fit: "cover", position: "centre" })
     .webp({ quality: 82 })
@@ -36,7 +35,7 @@ export async function processAndUploadAvatar({
 
   await uploadAvatarToR2({
     userId,
-    shopName: normalizedShopName,
+    shopName: shopAvatarKey,
     body: outputBuffer,
   });
 }

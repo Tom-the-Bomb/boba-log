@@ -1,13 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
-import AddShopModal from "../components/add-shop-modal";
-import DateRangeSlider from "../components/date-range-slider";
-import ShopCard from "../components/shop-card";
-import { useUser } from "../providers/user-provider";
-import { useTheme } from "../providers/theme-provider";
-import ThemeToggle from "../components/theme-toggle";
+import { toDateInputValue } from "@/lib/date";
+import {
+  DEFAULT_SHOPS,
+  type DefaultShopPresetOption,
+} from "@/lib/default-shops";
+import { BobaShop } from "@/lib/types";
 import {
   BarElement,
   CategoryScale,
@@ -16,9 +14,17 @@ import {
   LinearScale,
   Tooltip,
 } from "chart.js";
+import { useRouter } from "next/navigation";
+import type { ChangeEvent, FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Bar } from "react-chartjs-2";
-import { toDateInputValue } from "@/lib/date";
-import { BobaShop } from "@/lib/types";
+import AddShopModal from "../components/add-shop-modal";
+import DashboardFooter from "../components/dashboard-footer";
+import DashboardHeader from "../components/dashboard-header";
+import DashboardShopsSection from "../components/dashboard-shops-section";
+import DateRangeSlider from "../components/date-range-slider";
+import { useTheme } from "../providers/theme-provider";
+import { useUser } from "../providers/user-provider";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
@@ -299,7 +305,7 @@ export default function DashboardClient() {
     }
   }
 
-  async function onAvatarChange(event: React.ChangeEvent<HTMLInputElement>) {
+  async function onAvatarChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -321,10 +327,10 @@ export default function DashboardClient() {
     }
   }
 
-  async function handleAddShop(event: React.FormEvent<HTMLFormElement>) {
+  async function handleAddShop(event: FormEvent<HTMLFormElement>) {
     if (!user) return;
     event.preventDefault();
-    if (!newShopName.trim() || !newShopAvatarFile) return;
+    if (!newShopName.trim() || !newShopAvatarPreview) return;
 
     setIsAddingShop(true);
     setError("");
@@ -332,7 +338,9 @@ export default function DashboardClient() {
     try {
       const formData = new FormData();
       formData.append("name", newShopName.trim());
-      formData.append("avatar", newShopAvatarFile);
+      if (newShopAvatarFile) {
+        formData.append("avatar", newShopAvatarFile);
+      }
 
       const response = await fetch("/api/shops", {
         method: "POST",
@@ -359,6 +367,16 @@ export default function DashboardClient() {
     }
   }
 
+  function onPresetSelect(preset: DefaultShopPresetOption) {
+    if (newShopAvatarPreview.startsWith("blob:")) {
+      URL.revokeObjectURL(newShopAvatarPreview);
+    }
+    setNewShopName(preset.name);
+    setNewShopAvatarFile(null);
+    setNewShopAvatarPreview(preset.avatar);
+    setError("");
+  }
+
   function logout() {
     clearAuth();
     router.push("/auth");
@@ -376,22 +394,7 @@ export default function DashboardClient() {
 
   return (
     <div className="tea-grid-bg min-h-screen">
-      <header className="tea-page-padding tea-border-subtle flex items-center justify-between border-b py-6">
-        <div>
-          <h1 className="font-display tea-text-primary text-2xl font-medium tracking-tight">
-            Dashboard
-          </h1>
-          <p className="tea-text-muted mt-0.5 text-[10px] tracking-[0.2em] uppercase">
-            {user?.username ?? ""}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <ThemeToggle />
-          <button type="button" onClick={logout} className="tea-link">
-            Logout
-          </button>
-        </div>
-      </header>
+      <DashboardHeader username={user?.username ?? ""} onLogout={logout} />
 
       <main className="mx-auto w-full max-w-5xl px-10 py-16 sm:px-16 lg:px-24">
         <section className="mb-20">
@@ -418,36 +421,15 @@ export default function DashboardClient() {
 
         <div className="tea-line mb-20" />
 
-        <section className="mb-20">
-          <p className="tea-text-accent mb-10 text-xs tracking-[0.3em] uppercase">
-            Your shops
-          </p>
-          <div className="flex flex-wrap justify-center gap-10 lg:justify-start">
-            {shops.map((shop) => (
-              <ShopCard
-                key={shop.id}
-                shop={shop}
-                count={getShopCountForRange(shop)}
-                canUndo={(undoQueueMap[shop.id] ?? 0) > 0}
-                undoCount={undoQueueMap[shop.id] ?? 0}
-                isIncrementPending={Boolean(pendingIncrementMap[shop.id])}
-                onAddDrink={addDrink}
-                onUndo={undoDrink}
-              />
-            ))}
-
-            <button
-              type="button"
-              onClick={() => setIsModalOpen(true)}
-              className="tea-border-accent-hover tea-border-subtle flex h-44 w-full max-w-60 items-center justify-center border border-dashed"
-              aria-label="Add shop"
-            >
-              <span className="font-display tea-text-accent text-4xl font-medium opacity-80">
-                +
-              </span>
-            </button>
-          </div>
-        </section>
+        <DashboardShopsSection
+          shops={shops}
+          getShopCountForRange={getShopCountForRange}
+          undoQueueMap={undoQueueMap}
+          pendingIncrementMap={pendingIncrementMap}
+          onAddDrink={addDrink}
+          onUndoDrink={undoDrink}
+          onOpenAddModal={() => setIsModalOpen(true)}
+        />
 
         <div className="tea-line mb-20" />
 
@@ -503,23 +485,17 @@ export default function DashboardClient() {
         ) : null}
       </main>
 
-      <div className="tea-line tea-line-bottom tea-page-padding" />
-      <footer className="tea-page-padding flex items-center justify-between py-8">
-        <p className="tea-text-muted text-[10px] tracking-[0.25em] uppercase">
-          For tea lovers
-        </p>
-        <p className="tea-text-muted text-[10px] tracking-[0.25em] uppercase">
-          2026
-        </p>
-      </footer>
+      <DashboardFooter />
 
       <AddShopModal
         isOpen={isModalOpen}
         shopName={newShopName}
         avatar={newShopAvatarPreview}
+        presets={DEFAULT_SHOPS}
         isSubmitting={isAddingShop}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleAddShop}
+        onPresetSelect={onPresetSelect}
         onShopNameChange={setNewShopName}
         onAvatarChange={onAvatarChange}
       />

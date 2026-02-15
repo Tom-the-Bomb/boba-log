@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import type { FormEvent } from "react";
+import { useEffect, useState } from "react";
 import { useUser } from "../providers/user-provider";
 
 type AuthMode = "login" | "signup";
@@ -22,7 +23,7 @@ export default function AuthPage() {
     }
   }, [isLoadingUser, router, user]);
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsSubmitting(true);
     setError("");

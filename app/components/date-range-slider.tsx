@@ -1,7 +1,5 @@
 "use client";
 
-import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   formatShortDateUTC,
   inRangeInclusiveISO,
@@ -9,6 +7,8 @@ import {
   sameDayISO,
   toDateStringUTC,
 } from "@/lib/date";
+import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 interface DateRangeSliderProps {
   startDate: string;

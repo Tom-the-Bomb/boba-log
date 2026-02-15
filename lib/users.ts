@@ -1,15 +1,21 @@
 import { randomUUID } from "crypto";
 import { WithId } from "mongodb";
+import { DEFAULT_SHOPS } from "./default-shops";
 import { getUsersCollection } from "./mongodb";
-import { BobaShop, PublicUser, ShopDocument, UserDocument } from "./types";
 import { getPublicAvatarUrlFromKey } from "./r2";
-import { normalizeShopNameForAvatar } from "./shop-avatar";
+import { BobaShop, PublicUser, ShopDocument, UserDocument } from "./types";
 
 function toPublicShop(userId: string, shop: ShopDocument): BobaShop {
-  const normalizedShopName = normalizeShopNameForAvatar(shop.name) || "shop";
+  const shopAvatarKey = shop.name.trim() || "shop";
+  const defaultAvatar =
+    DEFAULT_SHOPS.find(
+      (defaultShop) =>
+        defaultShop.name.trim().toLowerCase() ===
+        shop.name.trim().toLowerCase(),
+    )?.avatar ?? null;
   return {
     ...shop,
-    avatar: getPublicAvatarUrlFromKey(userId, normalizedShopName),
+    avatar: defaultAvatar ?? getPublicAvatarUrlFromKey(userId, shopAvatarKey),
   };
 }
 

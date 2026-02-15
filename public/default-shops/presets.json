@@ -1,0 +1,34 @@
+[
+  {
+    "name": "Chagee",
+    "slug": "chagee",
+    "avatar": "/default-shops/chagee.webp"
+  },
+  {
+    "name": "Chapanda",
+    "slug": "chapanda",
+    "avatar": "/default-shops/chapanda.webp"
+  },
+  {
+    "name": "Chatime",
+    "slug": "chatime",
+    "avatar": "/default-shops/chatime.webp"
+  },
+  { "name": "Coco", "slug": "coco", "avatar": "/default-shops/coco.webp" },
+  {
+    "name": "Gong Cha",
+    "slug": "gong-cha",
+    "avatar": "/default-shops/gong-cha.webp"
+  },
+  {
+    "name": "Heytea",
+    "slug": "heytea",
+    "avatar": "/default-shops/heytea.webp"
+  },
+  {
+    "name": "Molly Tea",
+    "slug": "molly-tea",
+    "avatar": "/default-shops/molly-tea.webp"
+  },
+  { "name": "Naixue", "slug": "naixue", "avatar": "/default-shops/naixue.webp" }
+]

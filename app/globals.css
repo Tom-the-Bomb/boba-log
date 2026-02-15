@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@plugin "daisyui";
 
 :root {
   --tea-white: #fafaf7;
@@ -193,19 +192,6 @@ h6,
   border-radius: 0 9999px 9999px 0;
 }
 
-.tab,
-.label-text,
-.btn-ghost,
-.input,
-.file-input,
-.select,
-.textarea,
-.card,
-.navbar,
-.footer {
-  color: var(--tea-charcoal);
-}
-
 .tea-link {
   font-size: 0.75rem;
   letter-spacing: 0.15em;
@@ -247,9 +233,6 @@ h6,
 .tea-text-accent {
   color: var(--tea-sage);
 }
-.tea-text-warm {
-  color: var(--tea-gold);
-}
 .tea-hover-text-primary:hover {
   color: var(--tea-charcoal);
 }
@@ -278,9 +261,6 @@ h6,
 
 .tea-ring-subtle {
   --tw-ring-color: var(--tea-stone);
-}
-.tea-ring-strong {
-  --tw-ring-color: var(--tea-charcoal);
 }
 
 .tea-surface {
@@ -312,12 +292,4 @@ h6,
     padding-left: 6rem;
     padding-right: 6rem;
   }
-}
-
-.chart-surface {
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-  padding: 0;
 }

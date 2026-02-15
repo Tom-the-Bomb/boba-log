@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
 import { getUsernameFromRequest } from "@/lib/request-auth";
 import { incrementShop } from "@/lib/users";
+import { NextRequest, NextResponse } from "next/server";
 
 type Params = { params: Promise<{ shopId: string }> };
 

@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
 import { comparePassword, hashPassword, signToken } from "@/lib/auth";
 import { createUser, getUserByUsername } from "@/lib/users";
+import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {

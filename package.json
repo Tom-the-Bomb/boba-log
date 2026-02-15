@@ -14,7 +14,6 @@
     "@aws-sdk/client-s3": "^3.990.0",
     "bcryptjs": "^3.0.2",
     "chart.js": "^4.5.1",
-    "daisyui": "^5.5.18",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.511.0",
     "mongodb": "^6.20.0",
@@ -35,6 +34,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
     "prettier": "^3.8.1",
+    "prettier-plugin-organize-imports": "^4.3.0",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "tailwindcss": "^4",
     "typescript": "^5"

@@ -1,25 +1,32 @@
 "use client";
 
+import type { DefaultShopPresetOption } from "@/lib/default-shops";
 import Image from "next/image";
+import type { ChangeEvent, FormEvent } from "react";
+import DefaultShopsSection from "./default-shops-section";
 
 interface AddShopModalProps {
   isOpen: boolean;
   shopName: string;
   avatar: string;
+  presets: readonly DefaultShopPresetOption[];
   isSubmitting: boolean;
   onClose: () => void;
-  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onPresetSelect: (preset: DefaultShopPresetOption) => void;
   onShopNameChange: (value: string) => void;
-  onAvatarChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onAvatarChange: (event: ChangeEvent<HTMLInputElement>) => void;
 }
 
 export default function AddShopModal({
   isOpen,
   shopName,
   avatar,
+  presets,
   isSubmitting,
   onClose,
   onSubmit,
+  onPresetSelect,
   onShopNameChange,
   onAvatarChange,
 }: AddShopModalProps) {
@@ -39,6 +46,11 @@ export default function AddShopModal({
           Add shop
         </h3>
         <form className="mt-8 space-y-6" onSubmit={onSubmit}>
+          <DefaultShopsSection
+            presets={presets}
+            onPresetSelect={onPresetSelect}
+          />
+
           <div>
             <label
               htmlFor="modal-shop-name"
@@ -67,8 +79,7 @@ export default function AddShopModal({
               type="file"
               accept="image/*"
               onChange={onAvatarChange}
-              className="tea-text-muted file:tea-surface-muted file:tea-text-primary w-full text-sm file:mr-4 file:border-0 file:px-4 file:py-2 file:text-xs file:tracking-wider file:uppercase"
-              required
+              className="tea-text-muted file:tea-surface-muted file:tea-text-primary w-full text-sm file:mr-4 file:border-0 file:py-2 file:text-xs file:tracking-wider file:uppercase"
             />
           </div>
 

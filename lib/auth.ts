@@ -1,10 +1,12 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-const jwtSecret = process.env.JWT_SECRET;
-
-if (!jwtSecret) {
-  throw new Error("Missing JWT_SECRET in environment variables.");
+function getJwtSecret() {
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) {
+    throw new Error("Missing JWT_SECRET in environment variables.");
+  }
+  return jwtSecret;
 }
 
 export interface AuthTokenPayload {
@@ -23,9 +25,19 @@ export async function comparePassword(
 }
 
 export function signToken(payload: AuthTokenPayload) {
-  return jwt.sign(payload, jwtSecret, { expiresIn: "30d" });
+  return jwt.sign(payload, getJwtSecret(), { expiresIn: "30d" });
 }
 
 export function verifyToken(token: string) {
-  return jwt.verify(token, jwtSecret) as AuthTokenPayload;
+  const decoded = jwt.verify(token, getJwtSecret());
+  if (
+    !decoded ||
+    typeof decoded !== "object" ||
+    !("username" in decoded) ||
+    typeof decoded.username !== "string"
+  ) {
+    throw new Error("Invalid token payload.");
+  }
+
+  return { username: decoded.username };
 }

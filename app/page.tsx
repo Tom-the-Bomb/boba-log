@@ -1,7 +1,34 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import TeaCupMark from "./components/tea-cup-mark";
-import TeaLeafMark from "./components/tea-leaf-mark";
+import TeaCupMark from "./components/icons/tea-cup-mark";
+import TeaLeafMark from "./components/icons/tea-leaf-mark";
 import ThemeToggle from "./components/theme-toggle";
+
+const SITE_URL = "https://boba.tomthebomb.dev";
+const SOCIAL_IMAGE_URL = `${SITE_URL}/icon-512.png`;
+
+export const metadata: Metadata = {
+  title: "Home",
+  description:
+    "Track your tea ritual with boba shop logging, drink totals, and simple trend insights.",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    url: SITE_URL,
+    images: [
+      {
+        url: SOCIAL_IMAGE_URL,
+        width: 512,
+        height: 512,
+        alt: "Boba Tracker app icon",
+      },
+    ],
+  },
+  twitter: {
+    images: [SOCIAL_IMAGE_URL],
+  },
+};
 
 export default function Home() {
   return (

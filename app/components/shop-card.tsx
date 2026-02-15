@@ -1,5 +1,5 @@
-import Image from "next/image";
 import { BobaShop } from "@/lib/types";
+import Image from "next/image";
 
 interface ShopCardProps {
   shop: BobaShop;
