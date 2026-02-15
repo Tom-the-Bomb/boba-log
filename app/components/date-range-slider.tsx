@@ -211,13 +211,13 @@ export default function DateRangeSlider({
         />
       </button>
 
-      {calendarOpen && phase === "selecting-end" ? (
+      {calendarOpen && phase === "selecting-end" && (
         <p className="tea-text-accent mt-2 text-center text-[10px] tracking-[0.15em]">
           Select end date
         </p>
-      ) : null}
+      )}
 
-      {calendarOpen ? (
+      {calendarOpen && (
         <div className="mx-auto mt-4 w-full max-w-xs">
           <div className="mb-3 flex items-center justify-between">
             <button
@@ -282,7 +282,7 @@ export default function DateRangeSlider({
             })}
           </div>
         </div>
-      ) : null}
+      )}
     </section>
   );
 }

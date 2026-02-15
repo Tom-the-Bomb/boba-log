@@ -125,9 +125,9 @@ export default function AuthPage() {
               />
             </div>
 
-            {error ? (
+            {error && (
               <p className="text-xs tracking-wide text-red-600">{error}</p>
-            ) : null}
+            )}
 
             <button
               type="submit"

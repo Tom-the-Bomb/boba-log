@@ -1,7 +1,9 @@
 {
   "name": "boba-tracker",
   "compatibility_date": "2026-02-15",
+  "main": ".open-next/worker.js",
+  "compatibility_flags": ["nodejs_compat"],
   "assets": {
-    "directory": ".next/static"
+    "directory": ".open-next/assets"
   }
 }

@@ -478,11 +478,11 @@ export default function DashboardClient() {
           )}
         </section>
 
-        {error ? (
+        {error && (
           <p className="mb-8 text-center text-xs tracking-wide text-red-600">
             {error}
           </p>
-        ) : null}
+        )}
       </main>
 
       <DashboardFooter />

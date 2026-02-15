@@ -83,7 +83,7 @@ export default function AddShopModal({
             />
           </div>
 
-          {avatar ? (
+          {avatar && (
             <div className="pt-2">
               <p className="tea-text-muted mb-2 text-[10px] tracking-[0.2em] uppercase">
                 Preview
@@ -97,7 +97,7 @@ export default function AddShopModal({
                 unoptimized
               />
             </div>
-          ) : null}
+          )}
 
           <div className="flex items-center justify-end gap-5 pt-6">
             <button type="button" onClick={onClose} className="tea-link">

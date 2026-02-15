@@ -82,7 +82,7 @@ export default function DefaultShopsSection({
           ))}
         </div>
       </div>
-      {isPresetsCollapsible ? (
+      {isPresetsCollapsible && (
         <button
           type="button"
           onClick={() => setIsPresetsExpanded((current) => !current)}
@@ -104,7 +104,7 @@ export default function DefaultShopsSection({
             />
           </svg>
         </button>
-      ) : null}
+      )}
     </div>
   );
 }
