@@ -55,7 +55,8 @@ export async function POST(request: Request) {
         shops: existing.shops,
       },
     });
-  } catch {
+  } catch (err) {
+    console.error("Auth error:", err);
     return NextResponse.json(
       { error: "Something went wrong." },
       { status: 500 },
