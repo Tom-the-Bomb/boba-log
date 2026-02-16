@@ -16,8 +16,41 @@ export interface UploadAvatarInput {
   body: Buffer;
 }
 
+const AVATAR_EXISTS_CACHE_TTL_MS = 5 * 60 * 1000;
+const avatarExistsCache = new Map<
+  number,
+  { exists: boolean; expiresAt: number }
+>();
+
 export function getPublicAvatarUrl(shopId: number) {
   return `https://pub-6f87896bfc764c28b490965d4a30c76d.r2.dev/${shopId}.webp`;
+}
+
+export async function checkPublicAvatarExists(shopId: number) {
+  const now = Date.now();
+  const cached = avatarExistsCache.get(shopId);
+  if (cached && cached.expiresAt > now) {
+    return cached.exists;
+  }
+
+  try {
+    const response = await fetch(getPublicAvatarUrl(shopId), {
+      method: "HEAD",
+      cache: "no-store",
+    });
+    const exists = response.ok;
+    avatarExistsCache.set(shopId, {
+      exists,
+      expiresAt: now + AVATAR_EXISTS_CACHE_TTL_MS,
+    });
+    return exists;
+  } catch {
+    avatarExistsCache.set(shopId, {
+      exists: false,
+      expiresAt: now + AVATAR_EXISTS_CACHE_TTL_MS,
+    });
+    return false;
+  }
 }
 
 export async function uploadAvatarToR2({ shopId, body }: UploadAvatarInput) {
@@ -30,4 +63,9 @@ export async function uploadAvatarToR2({ shopId, body }: UploadAvatarInput) {
       CacheControl: "public, max-age=31536000, immutable",
     }),
   );
+
+  avatarExistsCache.set(shopId, {
+    exists: true,
+    expiresAt: Date.now() + AVATAR_EXISTS_CACHE_TTL_MS,
+  });
 }

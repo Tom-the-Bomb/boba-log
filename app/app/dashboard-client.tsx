@@ -197,7 +197,7 @@ export default function DashboardClient() {
     if (!user) return;
     event.preventDefault();
     const trimmedShopName = shopName.trim();
-    if (!trimmedShopName || !avatarPreview) return;
+    if (!trimmedShopName) return;
 
     setIsAddingShop(true);
     setError("");

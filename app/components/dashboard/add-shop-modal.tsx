@@ -105,7 +105,7 @@ export default function AddShopModal({
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || !avatar}
+              disabled={isSubmitting}
               className="tea-cta px-6 py-3 text-xs tracking-[0.15em] uppercase disabled:opacity-40"
             >
               {isSubmitting ? "Adding..." : "Add shop"}

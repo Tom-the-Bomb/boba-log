@@ -1,6 +1,6 @@
 import { getDb } from "./db";
 import { DEFAULT_SHOPS } from "./default-shops";
-import { getPublicAvatarUrl } from "./r2";
+import { checkPublicAvatarExists, getPublicAvatarUrl } from "./r2";
 import { BobaShop, PublicUser, ShopDocument } from "./types";
 
 interface UserRow {
@@ -22,16 +22,27 @@ interface DateRow {
   count: number;
 }
 
-function toPublicShop(shop: ShopDocument): BobaShop {
+async function toPublicShop(shop: ShopDocument): Promise<BobaShop> {
   const defaultAvatar =
     DEFAULT_SHOPS.find(
       (defaultShop) =>
         defaultShop.name.trim().toLowerCase() ===
         shop.name.trim().toLowerCase(),
     )?.avatar ?? null;
+
+  if (defaultAvatar) {
+    return {
+      ...shop,
+      avatar: defaultAvatar,
+    };
+  }
+
+  const r2AvatarUrl = getPublicAvatarUrl(shop.id);
+  const hasR2Avatar = await checkPublicAvatarExists(shop.id);
+
   return {
     ...shop,
-    avatar: defaultAvatar ?? getPublicAvatarUrl(shop.id),
+    avatar: hasR2Avatar ? r2AvatarUrl : null,
   };
 }
 
@@ -70,7 +81,7 @@ async function getShopAsPublic(
     .all<DateRow>();
 
   const doc = buildShopDocument(shopRow, dateRows.results);
-  return toPublicShop(doc);
+  return await toPublicShop(doc);
 }
 
 export async function getUserByUsername(username: string) {
@@ -140,10 +151,16 @@ export async function getPublicUser(
       datesByShop.set(row.shop_id, arr);
     }
 
-    for (const shopRow of shopRows.results) {
-      const doc = buildShopDocument(shopRow, datesByShop.get(shopRow.id) ?? []);
-      shops.push(toPublicShop(doc));
-    }
+    const publicShops = await Promise.all(
+      shopRows.results.map(async (shopRow) => {
+        const doc = buildShopDocument(
+          shopRow,
+          datesByShop.get(shopRow.id) ?? [],
+        );
+        return await toPublicShop(doc);
+      }),
+    );
+    shops.push(...publicShops);
   }
 
   return {
@@ -166,7 +183,7 @@ export async function addShop(
 
   const shopId = result.meta.last_row_id as number;
   const doc: ShopDocument = { id: shopId, name, total: 0, dates: {} };
-  return toPublicShop(doc);
+  return await toPublicShop(doc);
 }
 
 function todayIsoDateKey() {

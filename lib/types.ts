@@ -8,7 +8,7 @@ export interface ShopDocument {
 }
 
 export interface BobaShop extends ShopDocument {
-  avatar: string;
+  avatar: string | null;
 }
 
 export interface PublicUser {

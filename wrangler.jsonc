@@ -27,7 +27,7 @@
 	"keep_vars": true,
 	"d1_databases": [
 		{
-			"binding": "boba_log",
+			"binding": "DB",
 			"database_name": "boba-log",
 			"database_id": "57e1ae51-d7a1-4129-8ae8-cc4a64952f1b",
 			"remote": true

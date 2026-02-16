@@ -4,7 +4,7 @@ import ThemeToggle from "../theme-toggle";
 
 export default function Nav() {
   return (
-    <header className="tea-page-padding reveal flex items-center justify-between py-8">
+    <header className="tea-page-padding reveal flex items-center justify-between py-4 sm:py-8">
       <div className="flex items-center gap-3">
         <TeaLeafMark />
         <span className="tea-text-primary text-sm font-medium tracking-[0.2em] uppercase">

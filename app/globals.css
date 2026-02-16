@@ -41,6 +41,7 @@
 }
 
 body {
+  margin: 0;
   background: var(--tea-white);
   color: var(--tea-charcoal);
   font-family: var(--font-sora), "Sora", sans-serif;
@@ -58,7 +59,7 @@ h6,
 
 @keyframes slideUp {
   from {
-    transform: translateY(20px);
+    transform: translateY(-12px);
     opacity: 0;
   }
   to {
@@ -271,12 +272,12 @@ h6,
 }
 
 .tea-page-padding {
-  padding-left: 2rem;
-  padding-right: 2rem;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
 }
 .tea-page-padding-sm {
-  padding-left: 2rem;
-  padding-right: 2rem;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
 }
 
 @media (min-width: 640px) {

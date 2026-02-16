@@ -1,5 +1,5 @@
 import { processAndUploadAvatar } from "@/lib/avatar";
-import { DEFAULT_SHOPS } from "@/lib/default-shops";
+import { getPublicAvatarUrl } from "@/lib/r2";
 import { getUsernameFromRequest } from "@/lib/request-auth";
 import { addShop, getUserByUsername } from "@/lib/users";
 import { NextRequest, NextResponse } from "next/server";
@@ -23,15 +23,6 @@ export async function POST(request: NextRequest) {
     }
 
     const hasUploadedAvatar = avatarFile instanceof File;
-    const isPresetShop = DEFAULT_SHOPS.some(
-      (shop) => shop.name.trim().toLowerCase() === name.toLowerCase(),
-    );
-    if (!hasUploadedAvatar && !isPresetShop) {
-      return NextResponse.json(
-        { error: "Shop avatar is required for custom shops." },
-        { status: 400 },
-      );
-    }
 
     const user = await getUserByUsername(username);
     if (!user) {
@@ -46,6 +37,7 @@ export async function POST(request: NextRequest) {
           file: avatarFile,
           shopId: shop.id,
         });
+        shop.avatar = getPublicAvatarUrl(shop.id);
       } catch {
         return NextResponse.json(
           { error: "Invalid avatar format. Use JPEG, PNG, or WebP." },

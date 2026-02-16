@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
-    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy -- --keep-vars",
+    "preview": "opennextjs-cloudflare build -- --webpack && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build -- --turbopack && opennextjs-cloudflare deploy -- --keep-vars",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "lint": "eslint . && prettier --check . && tsc --noEmit",
     "lint:fix": "eslint --fix . && prettier --write . && tsc --noEmit",
