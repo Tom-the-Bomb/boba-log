@@ -16,14 +16,14 @@
 .dark {
   --tea-white: #121417;
   --tea-mist: #1b1f24;
-  --tea-stone: #343c45;
+  --tea-stone: #4a5360;
   --tea-charcoal: #f1f3f5;
   --tea-ink: #e4e8ed;
   --tea-sage: #a8bc96;
   --tea-matcha: #c1d4af;
   --tea-gold: #d9c088;
   --tea-faint: #93a0ad;
-  --tea-grid-line: rgba(147, 160, 173, 0.18);
+  --tea-grid-line: rgba(147, 160, 173, 0.14);
 }
 
 @theme inline {
@@ -55,6 +55,16 @@ h5,
 h6,
 .font-display {
   font-family: var(--font-bricolage), "Bricolage Grotesque", sans-serif;
+}
+
+h2,
+h3 {
+  font-weight: normal;
+}
+
+h2:not(.font-display),
+h3:not(.font-display) {
+  font-family: var(--font-sora), "Sora", sans-serif;
 }
 
 @keyframes slideUp {

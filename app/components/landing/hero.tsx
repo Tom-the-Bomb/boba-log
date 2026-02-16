@@ -5,7 +5,11 @@ export default function Hero() {
   return (
     <main className="tea-page-padding flex flex-1 flex-col items-start justify-center py-12 sm:py-20">
       <div className="w-full max-w-3xl">
-        <h1 className="reveal reveal-d2 font-display tea-text-primary text-5xl leading-[1.08] font-semibold sm:mt-2 sm:text-6xl lg:text-7xl">
+        <h3 className="reveal reveal-d1 tea-text-accent text-xs tracking-[0.35em] uppercase">
+          Track &middot; Discover &middot; Savor
+        </h3>
+
+        <h1 className="reveal reveal-d2 font-display tea-text-primary mt-6 text-5xl leading-[1.08] font-semibold sm:mt-8 sm:text-6xl lg:text-7xl">
           Your tea,
           <br />
           <span className="tea-text-accent">your ritual.</span>
@@ -15,10 +19,6 @@ export default function Hero() {
           A quiet space to log your favorite tea shops, track every drink, and
           find the patterns in what you love.
         </h2>
-
-        <h3 className="reveal reveal-d1 tea-text-accent mt-4 text-xs tracking-[0.35em] uppercase">
-          Track &middot; Discover &middot; Savor
-        </h3>
 
         <div className="reveal reveal-d4 mt-8 flex items-center gap-5 sm:mt-12 sm:gap-8">
           <Link

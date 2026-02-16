@@ -8,7 +8,15 @@ export const GRANULARITY_OPTIONS: readonly Granularity[] = [
   "weekday",
 ];
 
-const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
+const WEEKDAY_LABELS = [
+  "Sun",
+  "Mon",
+  "Tue",
+  "Wed",
+  "Thu",
+  "Fri",
+  "Sat",
+] as const;
 const MONTH_LABELS = [
   "Jan",
   "Feb",
@@ -72,11 +80,11 @@ export function buildShopCounts(
   }));
 }
 
-export function getTotalCount(shopCounts: readonly ShopCountItem[]): number {
+export function getTotalCount(shopCounts: ShopCountItem[]): number {
   return shopCounts.reduce((sum, item) => sum + item.count, 0);
 }
 
-export function buildByShopChartData(shopCounts: readonly ShopCountItem[]) {
+export function buildByShopChartData(shopCounts: ShopCountItem[]) {
   return {
     labels: shopCounts.map(({ shop }) => shop.name),
     datasets: [
@@ -133,7 +141,7 @@ export function buildTrendsChartData(
   }
 
   return {
-    labels,
+    labels: labels as string[],
     datasets: [
       {
         label: `Boba per ${granularity}`,
