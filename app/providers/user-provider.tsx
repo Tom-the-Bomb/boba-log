@@ -48,7 +48,7 @@ export default function UserProvider({ children }: { children: ReactNode }) {
     if (typeof window === "undefined") {
       return null;
     }
-    return window.localStorage.getItem(AUTH_STORAGE_KEY);
+    return localStorage.getItem(AUTH_STORAGE_KEY);
   });
   const [username, setUsername] = useState<string | null>(null);
   const [createdAt, setCreatedAt] = useState<number | null>(null);
@@ -56,7 +56,7 @@ export default function UserProvider({ children }: { children: ReactNode }) {
   const [isLoadingUser, setIsLoadingUser] = useState(true);
 
   const logout = useCallback(() => {
-    window.localStorage.removeItem(AUTH_STORAGE_KEY);
+    localStorage.removeItem(AUTH_STORAGE_KEY);
     setToken(null);
     setUsername(null);
     setCreatedAt(null);
@@ -91,7 +91,7 @@ export default function UserProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(
     async (nextToken: string) => {
-      window.localStorage.setItem(AUTH_STORAGE_KEY, nextToken);
+      localStorage.setItem(AUTH_STORAGE_KEY, nextToken);
       setToken(nextToken);
       setIsLoadingUser(true);
 

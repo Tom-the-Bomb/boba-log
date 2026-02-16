@@ -6,13 +6,16 @@ import { defineConfig, globalIgnores } from "eslint/config";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  ...eslintPluginPrettierRecommended,
+  eslintPluginPrettierRecommended,
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
     "out/**",
     "build/**",
+    ".open-next/**",
+    ".wrangler/**",
+    "node_modules/**",
     "next-env.d.ts",
   ]),
 ]);

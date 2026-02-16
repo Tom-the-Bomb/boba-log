@@ -1,4 +1,4 @@
-export default function DashboardFooter() {
+export default function Footer() {
   return (
     <>
       <div className="tea-line tea-line-bottom tea-page-padding" />

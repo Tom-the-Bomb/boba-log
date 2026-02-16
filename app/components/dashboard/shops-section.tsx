@@ -1,7 +1,7 @@
 import type { BobaShop } from "@/lib/types";
 import ShopCard from "./shop-card";
 
-interface DashboardShopsSectionProps {
+interface ShopsSectionProps {
   shops: BobaShop[];
   getShopCountForRange: (shop: BobaShop) => number;
   undoQueueMap: Record<string, number>;
@@ -11,7 +11,7 @@ interface DashboardShopsSectionProps {
   onOpenAddModal: () => void;
 }
 
-export default function DashboardShopsSection({
+export default function ShopsSection({
   shops,
   getShopCountForRange,
   undoQueueMap,
@@ -19,7 +19,7 @@ export default function DashboardShopsSection({
   onAddDrink,
   onUndoDrink,
   onOpenAddModal,
-}: DashboardShopsSectionProps) {
+}: ShopsSectionProps) {
   return (
     <section className="mb-20">
       <p className="tea-text-accent mb-10 text-xs tracking-[0.3em] uppercase">

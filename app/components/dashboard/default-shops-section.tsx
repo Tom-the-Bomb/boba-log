@@ -22,7 +22,6 @@ export default function DefaultShopsSection({
   useLayoutEffect(() => {
     const container = presetsContainerRef.current;
     if (!container) return;
-    setHasMeasured(false);
 
     const measure = () => {
       const items = Array.from(container.children) as HTMLElement[];
@@ -38,6 +37,7 @@ export default function DefaultShopsSection({
       for (const item of items) {
         if (item.offsetTop > firstTop + 1) {
           hasMultipleRows = true;
+          break;
         }
       }
 
@@ -48,7 +48,7 @@ export default function DefaultShopsSection({
       setHasMeasured(true);
     };
 
-    measure();
+    const initialMeasureFrame = requestAnimationFrame(measure);
 
     const observer = new ResizeObserver(measure);
     observer.observe(container);
@@ -56,10 +56,11 @@ export default function DefaultShopsSection({
       observer.observe(child);
     }
 
-    window.addEventListener("resize", measure);
+    addEventListener("resize", measure);
     return () => {
+      cancelAnimationFrame(initialMeasureFrame);
       observer.disconnect();
-      window.removeEventListener("resize", measure);
+      removeEventListener("resize", measure);
     };
   }, [presets]);
 

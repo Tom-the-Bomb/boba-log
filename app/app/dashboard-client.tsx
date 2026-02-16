@@ -1,11 +1,19 @@
 "use client";
 
+import { buildDashboardChartOptions } from "@/lib/dashboard-chart-options";
+import {
+  buildByShopChartData,
+  buildShopCounts,
+  buildTrendsChartData,
+  getShopCountForRange,
+  getTotalCount,
+  type Granularity,
+} from "@/lib/dashboard-metrics";
 import { toDateInputValue } from "@/lib/date";
 import {
   DEFAULT_SHOPS,
   type DefaultShopPresetOption,
 } from "@/lib/default-shops";
-import { resizeImageToWebP } from "@/lib/resize-image";
 import { BobaShop } from "@/lib/types";
 import {
   BarElement,
@@ -18,25 +26,26 @@ import {
 import { useRouter } from "next/navigation";
 import type { ChangeEvent, SubmitEventHandler } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Bar } from "react-chartjs-2";
-import AddShopModal from "../components/add-shop-modal";
-import DashboardFooter from "../components/dashboard-footer";
-import DashboardHeader from "../components/dashboard-header";
-import DashboardShopsSection from "../components/dashboard-shops-section";
-import DateRangeSlider from "../components/date-range-slider";
+import AddShopModal from "../components/dashboard/add-shop-modal";
+import ByShopChart from "../components/dashboard/by-shop-chart";
+import DateRangeSlider from "../components/dashboard/date-range-slider";
+import Footer from "../components/dashboard/footer";
+import Header from "../components/dashboard/header";
+import ShopsSection from "../components/dashboard/shops-section";
+import TrendsChart from "../components/dashboard/trends-chart";
+import useShopDraft from "../hooks/use-shop-draft";
 import { useTheme } from "../providers/theme-provider";
 import { useUser } from "../providers/user-provider";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
-type Granularity = "year" | "month" | "weekday";
-const Y_AXIS_TICK_COUNT = 5;
+const EMPTY_SHOPS: BobaShop[] = [];
 
 export default function DashboardClient() {
   const router = useRouter();
   const { user, isLoadingUser, logout: clearAuth, setUserShops } = useUser();
   const { isDark } = useTheme();
-  const shops = user?.shops ?? [];
+  const shops = user?.shops ?? EMPTY_SHOPS;
   const [error, setError] = useState("");
   const [undoQueueMap, setUndoQueueMap] = useState<Record<string, number>>({});
   const [pendingIncrementMap, setPendingIncrementMap] = useState<
@@ -48,18 +57,16 @@ export default function DashboardClient() {
   const [granularity, setGranularity] = useState<Granularity>("year");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newShopName, setNewShopName] = useState("");
-  const [newShopAvatarFile, setNewShopAvatarFile] = useState<File | null>(null);
-  const [newShopAvatarPreview, setNewShopAvatarPreview] = useState("");
   const [isAddingShop, setIsAddingShop] = useState(false);
-
-  useEffect(() => {
-    return () => {
-      if (newShopAvatarPreview) {
-        URL.revokeObjectURL(newShopAvatarPreview);
-      }
-    };
-  }, [newShopAvatarPreview]);
+  const {
+    shopName,
+    setShopName,
+    avatarFile,
+    avatarPreview,
+    handleAvatarInputChange,
+    selectPreset,
+    resetDraft,
+  } = useShopDraft();
 
   useEffect(() => {
     if (!isLoadingUser && !user) {
@@ -77,177 +84,68 @@ export default function DashboardClient() {
     }
   }, [endDate, startDate, user]);
 
-  const getShopCountForRange = useCallback(
+  const getShopCountForCurrentRange = useCallback(
     (shop: BobaShop) => {
-      if (!startDate || !endDate) return shop.total;
-
-      const start = new Date(`${startDate}T00:00:00.000Z`);
-      const end = new Date(`${endDate}T23:59:59.999Z`);
-
-      return Object.entries(shop.dates).reduce((sum, [isoDate, count]) => {
-        const point = new Date(isoDate);
-        if (point >= start && point <= end) {
-          return sum + count;
-        }
-        return sum;
-      }, 0);
+      return getShopCountForRange(shop, startDate, endDate);
     },
     [endDate, startDate],
   );
 
   const shopCounts = useMemo(
-    () => shops.map((shop) => ({ shop, count: getShopCountForRange(shop) })),
-    [shops, getShopCountForRange],
+    () => buildShopCounts(shops, startDate, endDate),
+    [shops, startDate, endDate],
   );
 
-  const totalCount = useMemo(
-    () => shopCounts.reduce((sum, item) => sum + item.count, 0),
+  const totalCount = useMemo(() => getTotalCount(shopCounts), [shopCounts]);
+
+  const byShopChartData = useMemo(
+    () => buildByShopChartData(shopCounts),
     [shopCounts],
   );
 
-  const firstChartData = useMemo(
-    () => ({
-      labels: shopCounts.map(({ shop }) => shop.name),
-      datasets: [
-        {
-          label: "Drinks",
-          data: shopCounts.map(({ count }) => count),
-          backgroundColor: "rgba(123, 139, 111, 0.6)",
-          borderRadius: 4,
-        },
-      ],
-    }),
-    [shopCounts],
+  const trendsChartData = useMemo(
+    () => buildTrendsChartData(shops, startDate, endDate, granularity),
+    [shops, startDate, endDate, granularity],
   );
-
-  const secondChartData = useMemo(() => {
-    const bucketMap: Record<string, number> = {};
-    const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    const monthLabels = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
-
-    for (const shop of shops) {
-      for (const [isoDate, count] of Object.entries(shop.dates)) {
-        const point = new Date(isoDate);
-        const start = startDate ? new Date(`${startDate}T00:00:00.000Z`) : null;
-        const end = endDate ? new Date(`${endDate}T23:59:59.999Z`) : null;
-
-        if (start && point < start) continue;
-        if (end && point > end) continue;
-
-        let key = "";
-        if (granularity === "year") {
-          key = String(point.getUTCFullYear());
-        } else if (granularity === "month") {
-          key = monthLabels[point.getUTCMonth()];
-        } else {
-          key = weekdayLabels[point.getUTCDay()];
-        }
-
-        bucketMap[key] = (bucketMap[key] ?? 0) + count;
-      }
-    }
-
-    let labels: string[];
-    if (granularity === "month") {
-      labels = monthLabels;
-    } else if (granularity === "weekday") {
-      labels = weekdayLabels;
-    } else {
-      const currentYear = String(new Date().getUTCFullYear());
-      const yearLabels = new Set(Object.keys(bucketMap));
-      yearLabels.add(currentYear);
-      labels = Array.from(yearLabels).sort((a, b) => Number(a) - Number(b));
-    }
-
-    const data = labels.map((label) => bucketMap[label] ?? 0);
-
-    return {
-      labels,
-      datasets: [
-        {
-          label: `Boba per ${granularity}`,
-          data,
-          backgroundColor: "rgba(196, 169, 106, 0.6)",
-          borderRadius: 4,
-        },
-      ],
-    };
-  }, [shops, startDate, endDate, granularity]);
 
   const chartOptions = useMemo(
-    () => ({
-      alignToPixels: true,
-      responsive: true,
-      maintainAspectRatio: false,
-      layout: {
-        padding: 0,
-      },
-      plugins: {
-        legend: {
-          labels: {
-            color: isDark ? "#F1F3F5" : "#1A1A1A",
-            font: { family: "Sora, sans-serif", size: 11 },
-          },
-        },
-      },
-      scales: {
-        x: {
-          ticks: {
-            display: true,
-            color: isDark ? "#93A0AD" : "#B5AFA5",
-            font: { family: "Sora, sans-serif", size: 10 },
-          },
-          grid: { display: false },
-          border: {
-            display: true,
-            color: isDark
-              ? "rgba(147, 160, 173, 0.55)"
-              : "rgba(212, 207, 199, 0.8)",
-            width: 1,
-          },
-        },
-        y: {
-          beginAtZero: true,
-          afterDataLimits: (scale: { min: number; max: number }) => {
-            scale.min = 0;
-            const dynamicStep = Math.max(
-              1,
-              Math.ceil(scale.max / (Y_AXIS_TICK_COUNT - 1)),
-            );
-            scale.max = dynamicStep * (Y_AXIS_TICK_COUNT - 1);
-          },
-          ticks: {
-            display: true,
-            color: isDark ? "#93A0AD" : "#B5AFA5",
-            font: { family: "Sora, sans-serif", size: 10 },
-            count: Y_AXIS_TICK_COUNT,
-            precision: 0,
-          },
-          grid: { display: false },
-          border: {
-            display: true,
-            color: isDark
-              ? "rgba(147, 160, 173, 0.55)"
-              : "rgba(212, 207, 199, 0.8)",
-            width: 1,
-          },
-        },
-      },
-    }),
+    () => buildDashboardChartOptions(isDark),
     [isDark],
+  );
+
+  const applyShopUpdate = useCallback(
+    (updatedShop: BobaShop) => {
+      setUserShops((current) =>
+        current.map((shop) =>
+          shop.id === updatedShop.id ? updatedShop : shop,
+        ),
+      );
+    },
+    [setUserShops],
+  );
+
+  const requestShopUpdate = useCallback(
+    async (
+      shopId: number,
+      path: "increment" | "undo",
+      fallbackError: string,
+    ) => {
+      const response = await fetch(`/api/shops/${shopId}/${path}`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${user?.token}` },
+      });
+      const data = (await response.json()) as {
+        error?: string;
+        shop?: BobaShop;
+      };
+
+      if (!response.ok || !data.shop) {
+        throw new Error(data.error ?? fallbackError);
+      }
+
+      applyShopUpdate(data.shop);
+    },
+    [applyShopUpdate, user?.token],
   );
 
   async function addDrink(shopId: number) {
@@ -257,21 +155,7 @@ export default function DashboardClient() {
     setPendingIncrementMap((current) => ({ ...current, [shopId]: true }));
 
     try {
-      const response = await fetch(`/api/shops/${shopId}/increment`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${user.token}` },
-      });
-      const data = (await response.json()) as {
-        error?: string;
-        shop?: BobaShop;
-      };
-      if (!response.ok) {
-        throw new Error(data.error ?? "Could not increment.");
-      }
-
-      setUserShops((current) =>
-        current.map((shop) => (shop.id === shopId ? data.shop! : shop)),
-      );
+      await requestShopUpdate(shopId, "increment", "Could not increment.");
       setUndoQueueMap((current) => ({
         ...current,
         [shopId]: (current[shopId] ?? 0) + 1,
@@ -288,21 +172,7 @@ export default function DashboardClient() {
     if ((undoQueueMap[shopId] ?? 0) <= 0) return;
 
     try {
-      const response = await fetch(`/api/shops/${shopId}/undo`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${user.token}` },
-      });
-      const data = (await response.json()) as {
-        error?: string;
-        shop?: BobaShop;
-      };
-      if (!response.ok) {
-        throw new Error(data.error ?? "Could not undo.");
-      }
-
-      setUserShops((current) =>
-        current.map((shop) => (shop.id === shopId ? data.shop! : shop)),
-      );
+      await requestShopUpdate(shopId, "undo", "Could not undo.");
       setUndoQueueMap((current) => ({
         ...current,
         [shopId]: Math.max((current[shopId] ?? 0) - 1, 0),
@@ -313,25 +183,11 @@ export default function DashboardClient() {
   }
 
   async function onAvatarChange(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-      setError("Invalid avatar format. Use JPEG, PNG, or WebP.");
-      return;
-    }
-
-    try {
-      const resized = await resizeImageToWebP(file);
-      if (newShopAvatarPreview) {
-        URL.revokeObjectURL(newShopAvatarPreview);
-      }
-      const nextPreview = URL.createObjectURL(resized);
-      setNewShopAvatarFile(resized);
-      setNewShopAvatarPreview(nextPreview);
+    const avatarError = await handleAvatarInputChange(event);
+    if (avatarError) {
+      setError(avatarError);
+    } else {
       setError("");
-    } catch {
-      setError("Could not process image.");
     }
   }
 
@@ -340,16 +196,17 @@ export default function DashboardClient() {
   ) {
     if (!user) return;
     event.preventDefault();
-    if (!newShopName.trim() || !newShopAvatarPreview) return;
+    const trimmedShopName = shopName.trim();
+    if (!trimmedShopName || !avatarPreview) return;
 
     setIsAddingShop(true);
     setError("");
 
     try {
       const formData = new FormData();
-      formData.append("name", newShopName.trim());
-      if (newShopAvatarFile) {
-        formData.append("avatar", newShopAvatarFile);
+      formData.append("name", trimmedShopName);
+      if (avatarFile) {
+        formData.append("avatar", avatarFile);
       }
 
       const response = await fetch("/api/shops", {
@@ -370,9 +227,7 @@ export default function DashboardClient() {
 
       setUserShops((current) => [...current, data.shop as BobaShop]);
       setIsModalOpen(false);
-      setNewShopName("");
-      setNewShopAvatarFile(null);
-      setNewShopAvatarPreview("");
+      resetDraft();
     } catch {
       setError("Could not add boba shop.");
     } finally {
@@ -381,12 +236,7 @@ export default function DashboardClient() {
   }
 
   function onPresetSelect(preset: DefaultShopPresetOption) {
-    if (newShopAvatarPreview.startsWith("blob:")) {
-      URL.revokeObjectURL(newShopAvatarPreview);
-    }
-    setNewShopName(preset.name);
-    setNewShopAvatarFile(null);
-    setNewShopAvatarPreview(preset.avatar);
+    selectPreset(preset);
     setError("");
   }
 
@@ -407,7 +257,7 @@ export default function DashboardClient() {
 
   return (
     <div className="tea-grid-bg min-h-screen">
-      <DashboardHeader username={user?.username ?? ""} onLogout={logout} />
+      <Header username={user?.username ?? ""} onLogout={logout} />
 
       <main className="mx-auto w-full max-w-5xl px-10 py-16 sm:px-16 lg:px-24">
         <section className="mb-20">
@@ -436,9 +286,9 @@ export default function DashboardClient() {
 
         <div className="tea-line mb-20" />
 
-        <DashboardShopsSection
+        <ShopsSection
           shops={shops}
-          getShopCountForRange={getShopCountForRange}
+          getShopCountForRange={getShopCountForCurrentRange}
           undoQueueMap={undoQueueMap}
           pendingIncrementMap={pendingIncrementMap}
           onAddDrink={addDrink}
@@ -448,50 +298,19 @@ export default function DashboardClient() {
 
         <div className="tea-line mb-20" />
 
-        <section className="mb-20">
-          <h2 className="font-display tea-text-primary mb-8 text-xl font-medium tracking-tight">
-            By shop
-          </h2>
-          {shops.length === 0 ? (
-            <p className="tea-text-secondary text-sm">
-              Add your first shop to start charting.
-            </p>
-          ) : (
-            <div className="h-72 w-full">
-              <Bar data={firstChartData} options={chartOptions} />
-            </div>
-          )}
-        </section>
+        <ByShopChart
+          hasShops={shops.length > 0}
+          data={byShopChartData}
+          options={chartOptions}
+        />
 
-        <section className="mb-20">
-          <div className="mb-8 flex flex-wrap items-center gap-8">
-            <h2 className="font-display tea-text-primary text-xl font-medium tracking-tight">
-              Trends
-            </h2>
-            <div className="tea-border-subtle flex gap-4 border-b">
-              {(["year", "month", "weekday"] as Granularity[]).map((value) => (
-                <button
-                  key={value}
-                  onClick={() => setGranularity(value)}
-                  className={`pb-2 text-[10px] tracking-[0.2em] uppercase transition-colors duration-200 ${
-                    granularity === value
-                      ? "tea-border-strong tea-text-primary border-b-2"
-                      : "tea-text-muted tea-hover-text-primary"
-                  }`}
-                >
-                  {value}
-                </button>
-              ))}
-            </div>
-          </div>
-          {shops.length === 0 ? (
-            <p className="tea-text-secondary text-sm">No data yet.</p>
-          ) : (
-            <div className="h-72 w-full">
-              <Bar data={secondChartData} options={chartOptions} />
-            </div>
-          )}
-        </section>
+        <TrendsChart
+          hasShops={shops.length > 0}
+          data={trendsChartData}
+          options={chartOptions}
+          granularity={granularity}
+          onGranularityChange={setGranularity}
+        />
 
         {error && (
           <p className="mb-8 text-center text-xs tracking-wide text-red-600">
@@ -500,18 +319,18 @@ export default function DashboardClient() {
         )}
       </main>
 
-      <DashboardFooter />
+      <Footer />
 
       <AddShopModal
         isOpen={isModalOpen}
-        shopName={newShopName}
-        avatar={newShopAvatarPreview}
+        shopName={shopName}
+        avatar={avatarPreview}
         presets={DEFAULT_SHOPS}
         isSubmitting={isAddingShop}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleAddShop}
         onPresetSelect={onPresetSelect}
-        onShopNameChange={setNewShopName}
+        onShopNameChange={setShopName}
         onAvatarChange={onAvatarChange}
       />
     </div>

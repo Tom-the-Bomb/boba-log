@@ -1,14 +1,11 @@
-import ThemeToggle from "./theme-toggle";
+import ThemeToggle from "../theme-toggle";
 
-interface DashboardHeaderProps {
+interface HeaderProps {
   username: string;
   onLogout: () => void;
 }
 
-export default function DashboardHeader({
-  username,
-  onLogout,
-}: DashboardHeaderProps) {
+export default function Header({ username, onLogout }: HeaderProps) {
   return (
     <header className="tea-page-padding tea-border-subtle flex items-center justify-between border-b py-6">
       <div>

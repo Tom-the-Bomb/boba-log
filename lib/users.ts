@@ -74,7 +74,7 @@ async function getShopAsPublic(
 }
 
 export async function getUserByUsername(username: string) {
-  const db = await getDb();
+  const db = getDb();
   return db
     .prepare(
       "SELECT id, username, hashed_password, created_at FROM users WHERE username = ?",
@@ -87,7 +87,7 @@ export async function createUser(
   username: string,
   hashedPassword: string,
 ): Promise<PublicUser> {
-  const db = await getDb();
+  const db = getDb();
   const createdAt = Math.floor(Date.now() / 1000);
 
   await db
@@ -107,7 +107,7 @@ export async function createUser(
 export async function getPublicUser(
   username: string,
 ): Promise<PublicUser | null> {
-  const db = await getDb();
+  const db = getDb();
 
   const user = await db
     .prepare("SELECT username, created_at FROM users WHERE username = ?")
@@ -157,7 +157,7 @@ export async function addShop(
   username: string,
   name: string,
 ): Promise<BobaShop> {
-  const db = await getDb();
+  const db = getDb();
 
   const result = await db
     .prepare("INSERT INTO shops (username, name, total) VALUES (?, ?, 0)")
@@ -181,7 +181,7 @@ export async function incrementShop(
   username: string,
   shopId: number,
 ): Promise<BobaShop | null> {
-  const db = await getDb();
+  const db = getDb();
 
   const owns = await db
     .prepare("SELECT 1 FROM shops WHERE id = ? AND username = ?")
@@ -209,7 +209,7 @@ export async function undoShopIncrement(
   username: string,
   shopId: number,
 ): Promise<BobaShop | null> {
-  const db = await getDb();
+  const db = getDb();
 
   const owns = await db
     .prepare("SELECT 1 FROM shops WHERE id = ? AND username = ?")
