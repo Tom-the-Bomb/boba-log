@@ -1,15 +1,26 @@
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+// Use Cloudflare R2 binding when available (Workers/Pages environment)
+// Falls back to AWS SDK for other environments (local dev, SSR)
+function getR2Bucket(): R2Bucket | null {
+  // @ts-expect-error - Cloudflare binding available in Workers runtime
+  return globalThis.AVATAR_BUCKET ?? null;
+}
 
-const bucketName = process.env.R2_BUCKET_NAME!;
+// Fallback AWS SDK client for non-Workers environments
+let awsSdkClient: any = null;
+async function getAwsR2Client() {
+  if (awsSdkClient) return awsSdkClient;
 
-const r2Client = new S3Client({
-  region: "auto",
-  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-  credentials: {
-    accessKeyId: process.env.R2_ACCESS_KEY!,
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
-  },
-});
+  const { S3Client } = await import("@aws-sdk/client-s3");
+  awsSdkClient = new S3Client({
+    region: "auto",
+    endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+    credentials: {
+      accessKeyId: process.env.R2_ACCESS_KEY!,
+      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+    },
+  });
+  return awsSdkClient;
+}
 
 interface UploadAvatarInput {
   shopId: number;

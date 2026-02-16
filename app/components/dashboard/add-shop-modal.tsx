@@ -11,6 +11,7 @@ interface AddShopModalProps {
   avatar: string;
   presets: readonly DefaultShopPresetOption[];
   isSubmitting: boolean;
+  error: string;
   onClose: () => void;
   onSubmit: SubmitEventHandler<HTMLFormElement>;
   onPresetSelect: (preset: DefaultShopPresetOption) => void;
@@ -24,6 +25,7 @@ export default function AddShopModal({
   avatar,
   presets,
   isSubmitting,
+  error,
   onClose,
   onSubmit,
   onPresetSelect,
@@ -97,6 +99,12 @@ export default function AddShopModal({
                 unoptimized
               />
             </div>
+          )}
+
+          {error && (
+            <p className="tea-form-error pt-2 text-center">
+              {error}
+            </p>
           )}
 
           <div className="flex items-center justify-end gap-5 pt-6">

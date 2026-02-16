@@ -326,7 +326,7 @@ export default function DashboardClient() {
           onGranularityChange={setGranularity}
         />
 
-        {error && (
+        {error && !isModalOpen && (
           <p className="mb-8 text-center text-xs tracking-wide text-red-600">
             {error}
           </p>
@@ -341,7 +341,11 @@ export default function DashboardClient() {
         avatar={avatarPreview}
         presets={DEFAULT_SHOPS}
         isSubmitting={isAddingShop}
-        onClose={() => setIsModalOpen(false)}
+        error={error}
+        onClose={() => {
+          setIsModalOpen(false);
+          setError("");
+        }}
         onSubmit={handleAddShop}
         onPresetSelect={onPresetSelect}
         onShopNameChange={setShopName}
