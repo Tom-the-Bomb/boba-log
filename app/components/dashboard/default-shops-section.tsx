@@ -86,7 +86,7 @@ export default function DefaultShopsSection({
         <button
           type="button"
           onClick={() => setIsPresetsExpanded((current) => !current)}
-          className="tea-link mt-2 inline-flex items-center gap-1 py-1.5 text-[10px]"
+          className="tea-link mt-2 inline-flex items-center gap-1 py-1.5 text-[10px]!"
         >
           {isPresetsExpanded ? "Show less" : "Show more"}
           <ChevronDown

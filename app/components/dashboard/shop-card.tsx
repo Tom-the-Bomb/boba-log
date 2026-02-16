@@ -34,7 +34,7 @@ export default function ShopCard({
         aria-label={`Add drink for ${shop.name}`}
       >
         <div className="flex flex-col items-center">
-          {shop.avatar && (
+          {shop.avatar ? (
             <Image
               src={shop.avatar}
               alt={shop.name}
@@ -43,12 +43,10 @@ export default function ShopCard({
               className="tea-ring-subtle h-14 w-14 rounded-full object-cover ring-1"
               unoptimized
             />
+          ) : (
+            <span aria-hidden className="h-14 w-14 rounded-full opacity-0" />
           )}
-          <h3
-            className={`tea-text-primary text-xs font-medium tracking-widest uppercase ${
-              shop.avatar ? "mt-3" : "mt-0"
-            }`}
-          >
+          <h3 className="tea-text-primary mt-3 text-xs font-medium tracking-widest uppercase">
             {shop.name}
           </h3>
           <p className="font-display tea-text-accent mt-2 text-5xl font-medium tracking-tight">
