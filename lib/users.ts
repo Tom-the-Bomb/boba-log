@@ -71,7 +71,9 @@ async function getShopAsPublic(
     .bind(shopId)
     .first<ShopRow>();
 
-  if (!shopRow) return null;
+  if (!shopRow) {
+    return null;
+  }
 
   const dateRows = await db
     .prepare(
@@ -125,7 +127,9 @@ export async function getPublicUser(
     .bind(username)
     .first<{ username: string; created_at: number }>();
 
-  if (!user) return null;
+  if (!user) {
+    return null;
+  }
 
   const shopRows = await db
     .prepare("SELECT id, name, total FROM shops WHERE username = ?")
@@ -205,7 +209,9 @@ export async function incrementShop(
     .bind(shopId, username)
     .first();
 
-  if (!owns) return null;
+  if (!owns) {
+    return null;
+  }
 
   const dateKey = todayIsoDateKey();
 
@@ -233,7 +239,9 @@ export async function undoShopIncrement(
     .bind(shopId, username)
     .first();
 
-  if (!owns) return null;
+  if (!owns) {
+    return null;
+  }
 
   const shop = await db
     .prepare("SELECT total FROM shops WHERE id = ?")

@@ -5,7 +5,17 @@ import { resizeImageToWebP } from "@/lib/resize-image";
 import type { ChangeEvent } from "react";
 import { useEffect, useState } from "react";
 
-const ALLOWED_AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp"];
+function isImageMimeType(mimeType: string) {
+  return mimeType.toLowerCase().startsWith("image/");
+}
+
+function getAvatarProcessingErrorMessage(error: unknown) {
+  if (error instanceof DOMException || error instanceof TypeError) {
+    return "This image format or codec isn't supported by your browser. Try another image file.";
+  }
+
+  return "Could not process image.";
+}
 
 function revokeObjectUrlIfNeeded(url: string) {
   if (url.startsWith("blob:")) {
@@ -28,10 +38,12 @@ export default function useShopDraft() {
     event: ChangeEvent<HTMLInputElement>,
   ): Promise<string | null> {
     const file = event.target.files?.[0];
-    if (!file) return null;
+    if (!file) {
+      return null;
+    }
 
-    if (!ALLOWED_AVATAR_TYPES.includes(file.type)) {
-      return "Invalid avatar format. Use JPEG, PNG, or WebP.";
+    if (file.type && !isImageMimeType(file.type)) {
+      return "Invalid avatar format. Please upload an image file.";
     }
 
     try {
@@ -41,8 +53,8 @@ export default function useShopDraft() {
       setAvatarFile(resized);
       setAvatarPreview(nextPreview);
       return null;
-    } catch {
-      return "Could not process image.";
+    } catch (error) {
+      return getAvatarProcessingErrorMessage(error);
     }
   }
 

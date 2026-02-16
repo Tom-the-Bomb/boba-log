@@ -49,8 +49,7 @@ export async function POST(request: Request) {
     const token = await signToken({ username: existing.username });
     const user = await getPublicUser(existing.username);
     return NextResponse.json({ token, user });
-  } catch (err) {
-    console.error("Auth error:", err);
+  } catch {
     return NextResponse.json(
       { error: "Something went wrong." },
       { status: 500 },

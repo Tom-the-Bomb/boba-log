@@ -1,6 +1,6 @@
 import defaultShops from "@/public/default-shops/presets.json";
 
-export interface DefaultShopPreset {
+interface DefaultShopPreset {
   name: string;
   slug: string;
   avatar: string;
@@ -11,4 +11,4 @@ export type DefaultShopPresetOption = Pick<
   "name" | "avatar"
 >;
 
-export const DEFAULT_SHOPS: ReadonlyArray<DefaultShopPreset> = defaultShops;
+export const DEFAULT_SHOPS: readonly DefaultShopPreset[] = defaultShops;

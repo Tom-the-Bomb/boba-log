@@ -11,7 +11,7 @@ const r2Client = new S3Client({
   },
 });
 
-export interface UploadAvatarInput {
+interface UploadAvatarInput {
   shopId: number;
   body: Buffer;
 }

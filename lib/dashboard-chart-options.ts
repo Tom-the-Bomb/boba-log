@@ -1,6 +1,6 @@
 import type { ChartOptions } from "chart.js";
 
-export const DEFAULT_Y_AXIS_TICK_COUNT = 5;
+const DEFAULT_Y_AXIS_TICK_COUNT = 5;
 
 export function buildDashboardChartOptions(
   isDark: boolean,

@@ -71,8 +71,6 @@ Create the D1 database:
 bun wrangler d1 create boba-log
 ```
 
-Then copy the returned `database_id` into `wrangler.jsonc` under `d1_databases[0].database_id`.
-
 Apply schema:
 
 ```bash

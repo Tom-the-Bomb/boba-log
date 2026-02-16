@@ -2,7 +2,7 @@ import type { BobaShop } from "@/lib/types";
 import ShopCard from "./shop-card";
 
 interface ShopsSectionProps {
-  shops: BobaShop[];
+  shops: readonly BobaShop[];
   getShopCountForRange: (shop: BobaShop) => number;
   undoQueueMap: Record<string, number>;
   pendingIncrementMap: Record<string, boolean>;

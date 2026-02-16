@@ -10,7 +10,7 @@ function getJwtSecret() {
   return jwtSecret;
 }
 
-export interface AuthTokenPayload {
+interface AuthTokenPayload {
   username: string;
 }
 
@@ -41,7 +41,9 @@ export async function comparePassword(
   storedHash: string,
 ): Promise<boolean> {
   const [saltHex, hashHex] = storedHash.split(":");
-  if (!saltHex || !hashHex) return false;
+  if (!saltHex || !hashHex) {
+    return false;
+  }
   const salt = hexToBuf(saltHex);
   const keyMaterial = await crypto.subtle.importKey(
     "raw",
@@ -74,7 +76,9 @@ export async function verifyToken(
   token: string,
 ): Promise<{ username: string }> {
   const isValid = await jwt.verify(token, getJwtSecret());
-  if (!isValid) throw new Error("Invalid token.");
+  if (!isValid) {
+    throw new Error("Invalid token.");
+  }
 
   const { payload } = jwt.decode<AuthTokenPayload>(token);
   if (!payload || typeof payload.username !== "string") {

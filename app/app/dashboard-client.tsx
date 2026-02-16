@@ -39,7 +39,7 @@ import { useUser } from "../providers/user-provider";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
-const EMPTY_SHOPS: BobaShop[] = [];
+const EMPTY_SHOPS: readonly BobaShop[] = [];
 
 export default function DashboardClient() {
   const router = useRouter();
@@ -75,7 +75,9 @@ export default function DashboardClient() {
   }, [isLoadingUser, router, user]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      return;
+    }
     if (!startDate) {
       setStartDate(toDateInputValue(new Date(user.createdAt * 1000)));
     }
@@ -149,8 +151,12 @@ export default function DashboardClient() {
   );
 
   async function addDrink(shopId: number) {
-    if (!user) return;
-    if (pendingIncrementMap[shopId]) return;
+    if (!user) {
+      return;
+    }
+    if (pendingIncrementMap[shopId]) {
+      return;
+    }
 
     setPendingIncrementMap((current) => ({ ...current, [shopId]: true }));
 
@@ -168,8 +174,12 @@ export default function DashboardClient() {
   }
 
   async function undoDrink(shopId: number) {
-    if (!user) return;
-    if ((undoQueueMap[shopId] ?? 0) <= 0) return;
+    if (!user) {
+      return;
+    }
+    if ((undoQueueMap[shopId] ?? 0) <= 0) {
+      return;
+    }
 
     try {
       await requestShopUpdate(shopId, "undo", "Could not undo.");
@@ -194,10 +204,14 @@ export default function DashboardClient() {
   async function handleAddShop(
     event: Parameters<SubmitEventHandler<HTMLFormElement>>[0],
   ) {
-    if (!user) return;
+    if (!user) {
+      return;
+    }
     event.preventDefault();
     const trimmedShopName = shopName.trim();
-    if (!trimmedShopName) return;
+    if (!trimmedShopName) {
+      return;
+    }
 
     setIsAddingShop(true);
     setError("");

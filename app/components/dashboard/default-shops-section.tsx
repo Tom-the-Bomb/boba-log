@@ -21,7 +21,9 @@ export default function DefaultShopsSection({
 
   useLayoutEffect(() => {
     const container = presetsContainerRef.current;
-    if (!container) return;
+    if (!container) {
+      return;
+    }
 
     const measure = () => {
       const items = Array.from(container.children) as HTMLElement[];

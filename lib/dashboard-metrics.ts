@@ -8,7 +8,7 @@ export const GRANULARITY_OPTIONS: readonly Granularity[] = [
   "weekday",
 ];
 
-const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
 const MONTH_LABELS = [
   "Jan",
   "Feb",
@@ -22,9 +22,9 @@ const MONTH_LABELS = [
   "Oct",
   "Nov",
   "Dec",
-];
+] as const;
 
-export interface ShopCountItem {
+interface ShopCountItem {
   shop: BobaShop;
   count: number;
 }
@@ -35,7 +35,9 @@ interface DateBounds {
 }
 
 function getDateBounds(startDate: string, endDate: string): DateBounds | null {
-  if (!startDate || !endDate) return null;
+  if (!startDate || !endDate) {
+    return null;
+  }
 
   return {
     start: new Date(`${startDate}T00:00:00.000Z`),
@@ -49,7 +51,9 @@ export function getShopCountForRange(
   endDate: string,
 ): number {
   const bounds = getDateBounds(startDate, endDate);
-  if (!bounds) return shop.total;
+  if (!bounds) {
+    return shop.total;
+  }
 
   return Object.entries(shop.dates).reduce((sum, [isoDate, count]) => {
     const point = new Date(isoDate);
@@ -58,7 +62,7 @@ export function getShopCountForRange(
 }
 
 export function buildShopCounts(
-  shops: BobaShop[],
+  shops: readonly BobaShop[],
   startDate: string,
   endDate: string,
 ): ShopCountItem[] {
@@ -68,11 +72,11 @@ export function buildShopCounts(
   }));
 }
 
-export function getTotalCount(shopCounts: ShopCountItem[]): number {
+export function getTotalCount(shopCounts: readonly ShopCountItem[]): number {
   return shopCounts.reduce((sum, item) => sum + item.count, 0);
 }
 
-export function buildByShopChartData(shopCounts: ShopCountItem[]) {
+export function buildByShopChartData(shopCounts: readonly ShopCountItem[]) {
   return {
     labels: shopCounts.map(({ shop }) => shop.name),
     datasets: [
@@ -87,7 +91,7 @@ export function buildByShopChartData(shopCounts: ShopCountItem[]) {
 }
 
 export function buildTrendsChartData(
-  shops: BobaShop[],
+  shops: readonly BobaShop[],
   startDate: string,
   endDate: string,
   granularity: Granularity,
@@ -116,7 +120,7 @@ export function buildTrendsChartData(
     }
   }
 
-  let labels: string[];
+  let labels: readonly string[];
   if (granularity === "month") {
     labels = MONTH_LABELS;
   } else if (granularity === "weekday") {

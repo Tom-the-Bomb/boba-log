@@ -250,9 +250,6 @@ h6,
 .tea-border-strong {
   border-color: var(--tea-charcoal);
 }
-.tea-border-accent {
-  border-color: var(--tea-sage);
-}
 .tea-border-accent-hover:hover {
   border-color: var(--tea-sage);
 }
@@ -293,6 +290,15 @@ h6,
 
 .tea-input-line {
   @apply w-full border-b bg-transparent py-2.5 text-sm outline-none;
+}
+
+.tea-input-error {
+  border-color: var(--tea-gold);
+}
+
+.tea-form-error {
+  @apply mt-2 text-xs tracking-wide;
+  color: var(--tea-gold);
 }
 
 .tea-auth-tab {

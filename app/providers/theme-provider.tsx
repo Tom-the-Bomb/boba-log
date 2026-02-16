@@ -22,9 +22,13 @@ const THEME_STORAGE_KEY = "boba_theme";
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<ThemeMode>(() => {
-    if (typeof window === "undefined") return "light";
+    if (typeof window === "undefined") {
+      return "light";
+    }
     const stored = localStorage.getItem(THEME_STORAGE_KEY);
-    if (stored === "light" || stored === "dark") return stored;
+    if (stored === "light" || stored === "dark") {
+      return stored;
+    }
     return matchMedia("(prefers-color-scheme: dark)").matches
       ? "dark"
       : "light";

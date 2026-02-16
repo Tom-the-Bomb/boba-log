@@ -80,7 +80,9 @@ export default function UserProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const refreshUser = useCallback(async () => {
-    if (!token) return;
+    if (!token) {
+      return;
+    }
     setIsLoadingUser(true);
     try {
       await loadUser(token);

@@ -38,6 +38,7 @@
     "prettier": "^3.8.1",
     "prettier-plugin-organize-imports": "^4.3.0",
     "prettier-plugin-tailwindcss": "^0.7.2",
+    "schema-dts": "^1.1.5",
     "tailwindcss": "^4",
     "typescript": "^5",
     "wrangler": "^4.65.0"

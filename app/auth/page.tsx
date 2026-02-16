@@ -15,8 +15,31 @@ export default function AuthPage() {
   const [mode, setMode] = useState<AuthMode>("login");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [usernameError, setUsernameError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  function validateUsername(value: string) {
+    const normalized = value.trim();
+    if (!normalized) {
+      return "Username is required.";
+    }
+    if (normalized.length < 3) {
+      return "Username must be at least 3 characters.";
+    }
+    return "";
+  }
+
+  function validatePassword(value: string) {
+    if (!value) {
+      return "Password is required.";
+    }
+    if (value.length < 6) {
+      return "Password must be at least 6 characters.";
+    }
+    return "";
+  }
 
   useEffect(() => {
     if (!isLoadingUser && user) {
@@ -28,6 +51,17 @@ export default function AuthPage() {
     event: Parameters<SubmitEventHandler<HTMLFormElement>>[0],
   ) {
     event.preventDefault();
+
+    const nextUsernameError = validateUsername(username);
+    const nextPasswordError = validatePassword(password);
+    setUsernameError(nextUsernameError);
+    setPasswordError(nextPasswordError);
+
+    if (nextUsernameError || nextPasswordError) {
+      setError("");
+      return;
+    }
+
     setIsSubmitting(true);
     setError("");
 
@@ -96,7 +130,7 @@ export default function AuthPage() {
             </button>
           </div>
 
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-6" onSubmit={handleSubmit} noValidate>
             <div>
               <label
                 htmlFor="auth-username"
@@ -107,11 +141,30 @@ export default function AuthPage() {
               <input
                 id="auth-username"
                 value={username}
-                onChange={(event) => setUsername(event.target.value)}
-                className="tea-text-primary tea-border-accent-focus tea-border-subtle tea-input-line transition-colors"
-                required
-                minLength={3}
+                onChange={(event) => {
+                  const nextUsername = event.target.value;
+                  setUsername(nextUsername);
+                  if (usernameError) {
+                    setUsernameError(validateUsername(nextUsername));
+                  }
+                }}
+                onBlur={() => setUsernameError(validateUsername(username))}
+                className={`tea-text-primary tea-border-accent-focus tea-border-subtle tea-input-line transition-colors ${
+                  usernameError ? "tea-input-error" : ""
+                }`}
+                aria-describedby={
+                  usernameError ? "auth-username-error" : undefined
+                }
               />
+              {usernameError && (
+                <p
+                  id="auth-username-error"
+                  className="tea-form-error"
+                  role="alert"
+                >
+                  {usernameError}
+                </p>
+              )}
             </div>
             <div>
               <label
@@ -124,15 +177,36 @@ export default function AuthPage() {
                 id="auth-password"
                 type="password"
                 value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                className="tea-text-primary tea-border-accent-focus tea-border-subtle tea-input-line transition-colors"
-                required
-                minLength={6}
+                onChange={(event) => {
+                  const nextPassword = event.target.value;
+                  setPassword(nextPassword);
+                  if (passwordError) {
+                    setPasswordError(validatePassword(nextPassword));
+                  }
+                }}
+                onBlur={() => setPasswordError(validatePassword(password))}
+                className={`tea-text-primary tea-border-accent-focus tea-border-subtle tea-input-line transition-colors ${
+                  passwordError ? "tea-input-error" : ""
+                }`}
+                aria-describedby={
+                  passwordError ? "auth-password-error" : undefined
+                }
               />
+              {passwordError && (
+                <p
+                  id="auth-password-error"
+                  className="tea-form-error"
+                  role="alert"
+                >
+                  {passwordError}
+                </p>
+              )}
             </div>
 
             {error && (
-              <p className="text-xs tracking-wide text-red-600">{error}</p>
+              <p className="tea-form-error" role="alert">
+                {error}
+              </p>
             )}
 
             <button

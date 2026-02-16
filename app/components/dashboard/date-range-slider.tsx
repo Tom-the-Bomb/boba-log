@@ -35,8 +35,8 @@ const MONTH_NAMES = [
   "October",
   "November",
   "December",
-];
-const WEEKDAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+] as const;
+const WEEKDAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"] as const;
 
 export default function DateRangeSlider({
   startDate,
@@ -55,9 +55,13 @@ export default function DateRangeSlider({
   const maxDay = useMemo(() => parseDateStringUTC(maxDate), [maxDate]);
 
   useEffect(() => {
-    if (!endDate) return;
+    if (!endDate) {
+      return;
+    }
     const end = parseDateStringUTC(endDate);
-    if (Number.isNaN(end.getTime())) return;
+    if (Number.isNaN(end.getTime())) {
+      return;
+    }
     setViewYear(end.getUTCFullYear());
     setViewMonth(end.getUTCMonth());
   }, [endDate]);
@@ -81,7 +85,9 @@ export default function DateRangeSlider({
     [phase, startDate, onStartChange, onEndChange],
   );
 
-  if (!startDate || !endDate || !minDate || !maxDate) return null;
+  if (!startDate || !endDate || !minDate || !maxDate) {
+    return null;
+  }
 
   const daysInMonth = new Date(
     Date.UTC(viewYear, viewMonth + 1, 0),
@@ -89,7 +95,9 @@ export default function DateRangeSlider({
   const firstDayOfWeek = new Date(Date.UTC(viewYear, viewMonth, 1)).getUTCDay();
 
   const calendarDays: (string | null)[] = [];
-  for (let i = 0; i < firstDayOfWeek; i++) calendarDays.push(null);
+  for (let i = 0; i < firstDayOfWeek; i++) {
+    calendarDays.push(null);
+  }
   for (let day = 1; day <= daysInMonth; day++) {
     calendarDays.push(
       toDateStringUTC(new Date(Date.UTC(viewYear, viewMonth, day))),
@@ -134,31 +142,48 @@ export default function DateRangeSlider({
     const baseClass =
       "relative z-10 flex h-8 w-8 items-center justify-center text-xs transition-colors duration-100";
 
-    if (isDisabled) return `${baseClass} cursor-not-allowed text-tea-stone/50`;
-    if (isStart || isEnd)
+    if (isDisabled) {
+      return `${baseClass} cursor-not-allowed text-tea-stone/50`;
+    }
+    if (isStart || isEnd) {
       return `${baseClass} cursor-pointer rounded-full bg-tea-sage text-tea-white font-medium`;
-    if (isInRange)
+    }
+    if (isInRange) {
       return `${baseClass} cursor-pointer bg-tea-sage/15 tea-text-primary`;
-    if (isToday)
+    }
+    if (isToday) {
       return `${baseClass} cursor-pointer tea-text-accent font-medium`;
+    }
 
     return `${baseClass} cursor-pointer tea-text-primary hover:bg-tea-mist rounded-full`;
   };
 
   const getRangeBackground = (day: string | null, index: number): string => {
-    if (!day) return "";
+    if (!day) {
+      return "";
+    }
 
     const isInRange = inRangeInclusiveISO(day, startDate, endDate);
     const isStart = sameDayISO(day, startDate);
     const isEnd = sameDayISO(day, endDate);
 
-    if (!isInRange || startDate === endDate) return "";
+    if (!isInRange || startDate === endDate) {
+      return "";
+    }
 
     const col = index % 7;
-    if (isStart) return "cal-range-start";
-    if (isEnd) return "cal-range-end";
-    if (col === 0) return "cal-range-row-start";
-    if (col === 6) return "cal-range-row-end";
+    if (isStart) {
+      return "cal-range-start";
+    }
+    if (isEnd) {
+      return "cal-range-end";
+    }
+    if (col === 0) {
+      return "cal-range-row-start";
+    }
+    if (col === 6) {
+      return "cal-range-row-end";
+    }
     return "cal-range-mid";
   };
 
@@ -269,7 +294,9 @@ export default function DateRangeSlider({
                   <button
                     type="button"
                     onClick={() => {
-                      if (!isDisabled) handleDayClick(day);
+                      if (!isDisabled) {
+                        handleDayClick(day);
+                      }
                     }}
                     disabled={isDisabled}
                     className={getDayClasses(day)}

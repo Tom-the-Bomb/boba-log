@@ -1,4 +1,4 @@
-export type DateCountMap = Record<string, number>;
+type DateCountMap = Record<string, number>;
 
 export interface ShopDocument {
   id: number;

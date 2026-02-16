@@ -1,20 +1,21 @@
 import {
-  APP_ICON_ALT,
-  SITE_NAME,
-  SITE_URL,
-  SOCIAL_IMAGE_URL,
-} from "@/lib/site";
+  HOME_ORGANIZATION_JSONLD,
+  HOME_WEBPAGE_JSONLD,
+  HOME_WEBSITE_JSONLD,
+} from "@/lib/jsonld/home";
+import { APP_ICON_ALT, SITE_URL, SOCIAL_IMAGE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 import Footer from "./components/landing/footer";
 import Hero from "./components/landing/hero";
 import Nav from "./components/landing/nav";
+import JsonLd from "./components/seo/json-ld";
 
 export const metadata: Metadata = {
   title: {
-    absolute: SITE_NAME,
+    absolute: "Boba Log | Track Tea Shops, Drinks, and Trends",
   },
   description:
-    "Track your tea ritual with boba shop logging, drink totals, and simple trend insights.",
+    "Track every bubble tea visit in one clean dashboard. Log shops, upload avatars, count drinks by date, and spot weekly or monthly trends across your favorites.",
   alternates: {
     canonical: "/",
   },
@@ -37,6 +38,14 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <div className="tea-grid-bg relative flex min-h-screen flex-col">
+      <JsonLd
+        data={[
+          HOME_ORGANIZATION_JSONLD,
+          HOME_WEBSITE_JSONLD,
+          HOME_WEBPAGE_JSONLD,
+        ]}
+      />
+
       <Nav />
 
       <div className="tea-line tea-page-padding" />
