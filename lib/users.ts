@@ -1,5 +1,5 @@
-import { DEFAULT_SHOPS } from "./default-shops";
 import { getDb } from "./db";
+import { DEFAULT_SHOPS } from "./default-shops";
 import { getPublicAvatarUrl } from "./r2";
 import { BobaShop, PublicUser, ShopDocument } from "./types";
 
@@ -141,10 +141,7 @@ export async function getPublicUser(
     }
 
     for (const shopRow of shopRows.results) {
-      const doc = buildShopDocument(
-        shopRow,
-        datesByShop.get(shopRow.id) ?? [],
-      );
+      const doc = buildShopDocument(shopRow, datesByShop.get(shopRow.id) ?? []);
       shops.push(toPublicShop(doc));
     }
   }
@@ -196,9 +193,7 @@ export async function incrementShop(
   const dateKey = todayIsoDateKey();
 
   await db.batch([
-    db
-      .prepare("UPDATE shops SET total = total + 1 WHERE id = ?")
-      .bind(shopId),
+    db.prepare("UPDATE shops SET total = total + 1 WHERE id = ?").bind(shopId),
     db
       .prepare(
         `INSERT INTO shop_dates (shop_id, date_key, count) VALUES (?, ?, 1)
@@ -235,24 +230,18 @@ export async function undoShopIncrement(
   const dateKey = todayIsoDateKey();
 
   const dateRow = await db
-    .prepare(
-      "SELECT count FROM shop_dates WHERE shop_id = ? AND date_key = ?",
-    )
+    .prepare("SELECT count FROM shop_dates WHERE shop_id = ? AND date_key = ?")
     .bind(shopId, dateKey)
     .first<{ count: number }>();
 
   const statements = [
-    db
-      .prepare("UPDATE shops SET total = total - 1 WHERE id = ?")
-      .bind(shopId),
+    db.prepare("UPDATE shops SET total = total - 1 WHERE id = ?").bind(shopId),
   ];
 
   if (dateRow && dateRow.count <= 1) {
     statements.push(
       db
-        .prepare(
-          "DELETE FROM shop_dates WHERE shop_id = ? AND date_key = ?",
-        )
+        .prepare("DELETE FROM shop_dates WHERE shop_id = ? AND date_key = ?")
         .bind(shopId, dateKey),
     );
   } else if (dateRow) {

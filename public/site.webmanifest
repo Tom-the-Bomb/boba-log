@@ -1,6 +1,6 @@
 {
-  "name": "Boba Tracker App",
-  "short_name": "Boba Tracker",
+  "name": "Boba Log App",
+  "short_name": "Boba Log",
   "description": "A web app to track your boba tea consumption and show you insights about your habits.",
   "start_url": "/",
   "display": "standalone",

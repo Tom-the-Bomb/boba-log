@@ -21,7 +21,7 @@ export const metadata: Metadata = {
         url: SOCIAL_IMAGE_URL,
         width: 512,
         height: 512,
-        alt: "Boba Tracker app icon",
+        alt: "Boba Log app icon",
       },
     ],
   },
@@ -37,7 +37,7 @@ export default function Home() {
         <div className="flex items-center gap-3">
           <TeaLeafMark />
           <span className="tea-text-primary text-sm font-medium tracking-[0.2em] uppercase">
-            Boba Tracker
+            Boba Log
           </span>
         </div>
         <nav className="flex items-center gap-3" aria-label="Primary">
@@ -75,7 +75,7 @@ export default function Home() {
               Get Started
             </Link>
             <Link
-              href="https://github.com/Tom-the-Bomb/boba-tracker"
+              href="https://github.com/Tom-the-Bomb/boba-log"
               target="_blank"
               className="group tea-text-muted tea-hover-text-primary flex items-center gap-2 text-xs tracking-[0.15em] uppercase transition-colors duration-300"
             >

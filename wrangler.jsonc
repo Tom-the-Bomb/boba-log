@@ -1,7 +1,7 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
 	"main": ".open-next/worker.js",
-	"name": "boba-tracker",
+	"name": "boba-log",
 	"compatibility_date": "2026-02-14",
 	"compatibility_flags": [
 		"nodejs_compat"
@@ -13,10 +13,10 @@
 	"keep_vars": true,
 	"d1_databases": [
 		{
-			"binding": "DB",
-			"database_name": "boba-tracker-db",
-			"database_id": "60abf44b-c41d-4128-9c45-27138798ed70",
+			"binding": "boba_log",
+			"database_name": "boba-log",
+			"database_id": "57e1ae51-d7a1-4129-8ae8-cc4a64952f1b",
 			"remote": true
 		}
-	]
+	],
 }

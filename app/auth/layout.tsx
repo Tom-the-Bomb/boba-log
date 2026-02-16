@@ -22,7 +22,7 @@ export const metadata: Metadata = {
         url: SOCIAL_IMAGE_URL,
         width: 512,
         height: 512,
-        alt: "Boba Tracker app icon",
+        alt: "Boba Log app icon",
       },
     ],
   },

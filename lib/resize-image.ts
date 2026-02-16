@@ -15,6 +15,9 @@ export async function resizeImageToWebP(file: File): Promise<File> {
   ctx.drawImage(bitmap, sx, sy, sw, sh, 0, 0, SIZE, SIZE);
   bitmap.close();
 
-  const blob = await canvas.convertToBlob({ type: "image/webp", quality: 0.82 });
+  const blob = await canvas.convertToBlob({
+    type: "image/webp",
+    quality: 0.82,
+  });
   return new File([blob], "avatar.webp", { type: "image/webp" });
 }

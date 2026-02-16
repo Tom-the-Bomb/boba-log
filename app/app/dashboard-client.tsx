@@ -1,11 +1,11 @@
 "use client";
 
 import { toDateInputValue } from "@/lib/date";
-import { resizeImageToWebP } from "@/lib/resize-image";
 import {
   DEFAULT_SHOPS,
   type DefaultShopPresetOption,
 } from "@/lib/default-shops";
+import { resizeImageToWebP } from "@/lib/resize-image";
 import { BobaShop } from "@/lib/types";
 import {
   BarElement,
@@ -261,7 +261,10 @@ export default function DashboardClient() {
         method: "POST",
         headers: { Authorization: `Bearer ${user.token}` },
       });
-      const data = (await response.json()) as { error?: string; shop?: BobaShop };
+      const data = (await response.json()) as {
+        error?: string;
+        shop?: BobaShop;
+      };
       if (!response.ok) {
         throw new Error(data.error ?? "Could not increment.");
       }
@@ -289,7 +292,10 @@ export default function DashboardClient() {
         method: "POST",
         headers: { Authorization: `Bearer ${user.token}` },
       });
-      const data = (await response.json()) as { error?: string; shop?: BobaShop };
+      const data = (await response.json()) as {
+        error?: string;
+        shop?: BobaShop;
+      };
       if (!response.ok) {
         throw new Error(data.error ?? "Could not undo.");
       }
@@ -352,7 +358,10 @@ export default function DashboardClient() {
         body: formData,
       });
 
-      const data = (await response.json()) as { error?: string; shop?: BobaShop };
+      const data = (await response.json()) as {
+        error?: string;
+        shop?: BobaShop;
+      };
       if (!response.ok) {
         throw new Error(data.error ?? "Could not create shop.");
       }
@@ -406,7 +415,9 @@ export default function DashboardClient() {
             onStartChange={setStartDate}
             onEndChange={setEndDate}
             minDate={
-              user ? toDateInputValue(new Date(user.createdAt * 1000)) : startDate
+              user
+                ? toDateInputValue(new Date(user.createdAt * 1000))
+                : startDate
             }
             maxDate={toDateInputValue(new Date())}
           />

@@ -35,7 +35,10 @@ export default function AuthPage() {
         body: JSON.stringify({ mode, username, password }),
       });
 
-      const data = (await response.json()) as { error?: string; token?: string };
+      const data = (await response.json()) as {
+        error?: string;
+        token?: string;
+      };
       if (!response.ok) {
         setError(data.error ?? "Authentication failed.");
         return;
@@ -58,7 +61,7 @@ export default function AuthPage() {
         <section className="w-full max-w-sm" aria-label="Authentication">
           <div className="mb-10">
             <p className="tea-text-accent text-xs tracking-[0.3em] uppercase">
-              {mode === "login" ? "Welcome back" : "Join Boba Tracker"}
+              {mode === "login" ? "Welcome back" : "Join Boba Log"}
             </p>
             <h1 className="font-display tea-text-primary mt-3 text-4xl font-medium tracking-tight">
               {mode === "login" ? "Sign in" : "Create account"}
@@ -147,7 +150,7 @@ export default function AuthPage() {
       <div className="tea-line tea-line-bottom tea-page-padding-sm" />
       <footer className="tea-page-padding-sm flex items-center justify-between py-6">
         <p className="tea-text-muted text-[10px] tracking-[0.25em] uppercase">
-          Boba Tracker
+          Boba Log
         </p>
         <Link href="/" className="tea-link text-[10px]">
           &larr; Home

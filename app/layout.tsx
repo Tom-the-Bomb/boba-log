@@ -6,8 +6,8 @@ import { ThemeProvider } from "./providers/theme-provider";
 import UserProvider from "./providers/user-provider";
 
 const SITE_URL = "https://boba.tomthebomb.dev";
-const SITE_NAME = "Boba Tracker";
-const DEFAULT_TITLE = "Boba Tracker | Track Your Bubble Tea Habits";
+const SITE_NAME = "Boba Log";
+const DEFAULT_TITLE = "Boba Log | Track Your Bubble Tea Habits";
 const DEFAULT_DESCRIPTION =
   "Track your favorite boba shops, log every drink, and visualize your tea habits over time.";
 const SOCIAL_IMAGE_URL = `${SITE_URL}/icon-512.png`;
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
         url: SOCIAL_IMAGE_URL,
         width: 512,
         height: 512,
-        alt: "Boba Tracker app icon",
+        alt: "Boba Log app icon",
       },
     ],
   },
