@@ -2,10 +2,24 @@
 	"$schema": "./node_modules/wrangler/config-schema.json",
 	"main": ".open-next/worker.js",
 	"name": "boba-log",
-	"compatibility_date": "2026-02-14",
+	"compatibility_date": "2026-02-16",
 	"compatibility_flags": [
 		"nodejs_compat"
 	],
+	"routes": [
+		{
+			"pattern": "boba.tomthebomb.dev",
+			"zone_name": "tomthebomb.dev",
+			"custom_domain": true
+		}
+	],
+	"preview_urls": false,
+	"observability": {
+		"enabled": true,
+		"logs": {
+			"enabled": true
+		}
+	},
 	"assets": {
 		"directory": ".open-next/assets",
 		"binding": "ASSETS"

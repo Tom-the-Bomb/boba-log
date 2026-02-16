@@ -2,7 +2,7 @@
 
 import type { DefaultShopPresetOption } from "@/lib/default-shops";
 import Image from "next/image";
-import type { ChangeEvent, FormEvent } from "react";
+import type { ChangeEvent, SubmitEventHandler } from "react";
 import DefaultShopsSection from "./default-shops-section";
 
 interface AddShopModalProps {
@@ -12,7 +12,7 @@ interface AddShopModalProps {
   presets: readonly DefaultShopPresetOption[];
   isSubmitting: boolean;
   onClose: () => void;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onSubmit: SubmitEventHandler<HTMLFormElement>;
   onPresetSelect: (preset: DefaultShopPresetOption) => void;
   onShopNameChange: (value: string) => void;
   onAvatarChange: (event: ChangeEvent<HTMLInputElement>) => void;

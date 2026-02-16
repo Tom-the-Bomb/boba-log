@@ -16,7 +16,7 @@ import {
   Tooltip,
 } from "chart.js";
 import { useRouter } from "next/navigation";
-import type { ChangeEvent, FormEvent } from "react";
+import type { ChangeEvent, SubmitEventHandler } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Bar } from "react-chartjs-2";
 import AddShopModal from "../components/add-shop-modal";
@@ -335,7 +335,9 @@ export default function DashboardClient() {
     }
   }
 
-  async function handleAddShop(event: FormEvent<HTMLFormElement>) {
+  async function handleAddShop(
+    event: Parameters<SubmitEventHandler<HTMLFormElement>>[0],
+  ) {
     if (!user) return;
     event.preventDefault();
     if (!newShopName.trim() || !newShopAvatarPreview) return;

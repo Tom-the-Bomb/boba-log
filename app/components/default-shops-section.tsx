@@ -1,6 +1,7 @@
 "use client";
 
 import type { DefaultShopPresetOption } from "@/lib/default-shops";
+import { ChevronDown } from "lucide-react";
 import { useLayoutEffect, useRef, useState } from "react";
 import DefaultShopPresetCard from "./default-shop-preset-card";
 
@@ -89,20 +90,11 @@ export default function DefaultShopsSection({
           className="tea-link mt-2 inline-flex items-center gap-1 py-1.5 text-[10px]"
         >
           {isPresetsExpanded ? "Show less" : "Show more"}
-          <svg
-            viewBox="0 0 20 20"
-            fill="none"
+          <ChevronDown
             aria-hidden="true"
             className={`h-3 w-3 transition-transform ${isPresetsExpanded ? "rotate-180" : ""}`}
-          >
-            <path
-              d="M5 8l5 5 5-5"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+            strokeWidth={1.5}
+          />
         </button>
       )}
     </div>

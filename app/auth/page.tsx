@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { FormEvent } from "react";
+import type { SubmitEventHandler } from "react";
 import { useEffect, useState } from "react";
 import { useUser } from "../providers/user-provider";
 
@@ -23,7 +23,9 @@ export default function AuthPage() {
     }
   }, [isLoadingUser, router, user]);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(
+    event: Parameters<SubmitEventHandler<HTMLFormElement>>[0],
+  ) {
     event.preventDefault();
     setIsSubmitting(true);
     setError("");
