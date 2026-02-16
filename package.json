@@ -9,6 +9,7 @@
     "preview": "opennextjs-cloudflare build -- --webpack && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build -- --turbopack && opennextjs-cloudflare deploy -- --keep-vars",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "assets:normalize-default-shops": "node scripts/normalize-default-shops.mjs",
     "lint": "eslint . && prettier --check . && tsc --noEmit",
     "lint:fix": "eslint --fix . && prettier --write . && tsc --noEmit",
     "format": "prettier --write .",

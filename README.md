@@ -107,6 +107,17 @@ erDiagram
   }
 ```
 
+## Default Shop Avatars
+
+Normalize all images in `public/default-shops` to square `256x256` WebP assets:
+
+```bash
+bun run assets:normalize-default-shops
+```
+
+Supported source formats: `.jpg`, `.jpeg`, `.png`, `.webp`, `.avif`, `.tiff`.
+Non-WebP source files are replaced with generated `.webp` outputs.
+
 ## Deployment
 
 ```bash
@@ -119,6 +130,7 @@ bun run deploy
 - `bun run build` — Production build
 - `bun run preview` — OpenNext Cloudflare preview
 - `bun run deploy` — OpenNext Cloudflare deploy
+- `bun run assets:normalize-default-shops` — Normalize `public/default-shops` images to `256x256` WebP
 - `bun run lint` — ESLint + Prettier check + TypeScript no-emit
 - `bun run lint:fix` — ESLint fix + Prettier write + TypeScript no-emit
 - `bun run format` — Prettier write
