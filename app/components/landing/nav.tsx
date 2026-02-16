@@ -1,3 +1,4 @@
+import { SITE_NAME } from "@/lib/site";
 import Link from "next/link";
 import TeaLeafMark from "../icons/tea-leaf-mark";
 import ThemeToggle from "../theme-toggle";
@@ -8,7 +9,7 @@ export default function Nav() {
       <div className="flex items-center gap-3">
         <TeaLeafMark />
         <span className="tea-text-primary text-sm font-medium tracking-[0.2em] uppercase">
-          Boba Log
+          {SITE_NAME}
         </span>
       </div>
       <nav className="flex items-center gap-3" aria-label="Primary">

@@ -1,3 +1,4 @@
+import { SITE_NAME } from "@/lib/site";
 import ThemeToggle from "../theme-toggle";
 
 interface HeaderProps {
@@ -10,7 +11,7 @@ export default function Header({ username, onLogout }: HeaderProps) {
     <header className="tea-page-padding tea-border-subtle flex items-center justify-between border-b py-6">
       <div>
         <h1 className="font-display tea-text-primary text-2xl font-medium tracking-tight">
-          Boba Log
+          {SITE_NAME}
         </h1>
         <p className="tea-text-muted tea-caps-10 mt-0.5">{username}</p>
       </div>

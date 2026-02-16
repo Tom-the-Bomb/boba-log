@@ -1,5 +1,6 @@
 "use client";
 
+import { SITE_NAME } from "@/lib/site";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { SubmitEventHandler } from "react";
@@ -63,7 +64,7 @@ export default function AuthPage() {
         <section className="w-full max-w-sm" aria-label="Authentication">
           <div className="mb-10">
             <p className="tea-text-accent text-xs tracking-[0.3em] uppercase">
-              {mode === "login" ? "Welcome back" : "Join Boba Log"}
+              {mode === "login" ? "Welcome back" : `Join ${SITE_NAME}`}
             </p>
             <h1 className="font-display tea-text-primary mt-3 text-4xl font-medium tracking-tight">
               {mode === "login" ? "Sign in" : "Create account"}
@@ -151,7 +152,7 @@ export default function AuthPage() {
 
       <div className="tea-line tea-line-bottom tea-page-padding-sm" />
       <footer className="tea-page-padding-sm flex items-center justify-between py-6">
-        <p className="tea-text-muted tea-caps-10-wide">Boba Log</p>
+        <p className="tea-text-muted tea-caps-10-wide">{SITE_NAME}</p>
         <Link href="/" className="tea-link text-[10px]">
           &larr; Home
         </Link>

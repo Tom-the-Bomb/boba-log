@@ -1,6 +1,5 @@
+import { SITE_URL } from "@/lib/site";
 import type { MetadataRoute } from "next";
-
-const SITE_URL = "https://boba.tomthebomb.dev";
 
 export default function robots(): MetadataRoute.Robots {
   return {

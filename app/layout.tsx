@@ -1,3 +1,12 @@
+import {
+  APP_ICON_ALT,
+  AUTHOR_NAME,
+  DEFAULT_SEO_DESCRIPTION,
+  DEFAULT_SEO_TITLE,
+  SITE_NAME,
+  SITE_URL,
+  SOCIAL_IMAGE_URL,
+} from "@/lib/site";
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Sora } from "next/font/google";
 import type { ReactNode } from "react";
@@ -5,13 +14,6 @@ import "./globals.css";
 import { ThemeProvider } from "./providers/theme-provider";
 import UserProvider from "./providers/user-provider";
 
-const SITE_URL = "https://boba.tomthebomb.dev";
-const SITE_NAME = "Boba Log";
-const AUTHOR_NAME = "Tom the Bomb";
-const DEFAULT_TITLE = "Boba Log | Track Your Bubble Tea Habits";
-const DEFAULT_DESCRIPTION =
-  "Track your favorite boba shops, log every drink, and visualize your tea habits over time.";
-const SOCIAL_IMAGE_URL = `${SITE_URL}/icon-512.png`;
 const PRIMARY_TEA_LEAF_COLOR = "#7B8B6F";
 
 const bricolage = Bricolage_Grotesque({
@@ -27,10 +29,10 @@ const sora = Sora({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: DEFAULT_TITLE,
+    default: DEFAULT_SEO_TITLE,
     template: `%s | ${SITE_NAME}`,
   },
-  description: DEFAULT_DESCRIPTION,
+  description: DEFAULT_SEO_DESCRIPTION,
   applicationName: SITE_NAME,
   authors: [{ name: AUTHOR_NAME, url: SITE_URL }],
   creator: AUTHOR_NAME,
@@ -41,21 +43,21 @@ export const metadata: Metadata = {
     type: "website",
     url: SITE_URL,
     siteName: SITE_NAME,
-    title: DEFAULT_TITLE,
-    description: DEFAULT_DESCRIPTION,
+    title: DEFAULT_SEO_TITLE,
+    description: DEFAULT_SEO_DESCRIPTION,
     images: [
       {
         url: SOCIAL_IMAGE_URL,
         width: 512,
         height: 512,
-        alt: "Boba Log app icon",
+        alt: APP_ICON_ALT,
       },
     ],
   },
   twitter: {
     card: "summary",
-    title: DEFAULT_TITLE,
-    description: DEFAULT_DESCRIPTION,
+    title: DEFAULT_SEO_TITLE,
+    description: DEFAULT_SEO_DESCRIPTION,
     images: [SOCIAL_IMAGE_URL],
   },
   robots: {
