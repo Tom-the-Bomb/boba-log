@@ -271,6 +271,40 @@ h6,
   background: var(--tea-mist);
 }
 
+.tea-caps-10 {
+  @apply text-[10px] uppercase;
+  letter-spacing: 0.2em;
+}
+
+.tea-caps-10-wide {
+  @apply text-[10px] uppercase;
+  letter-spacing: 0.25em;
+}
+
+.tea-form-label {
+  @apply mb-1.5 block text-[10px] uppercase;
+  letter-spacing: 0.2em;
+}
+
+.tea-auth-form-label {
+  @apply mb-1.5 block text-xs uppercase;
+  letter-spacing: 0.15em;
+}
+
+.tea-input-line {
+  @apply w-full border-b bg-transparent py-2.5 text-sm outline-none;
+}
+
+.tea-auth-tab {
+  @apply pb-3 text-xs uppercase transition-colors duration-200;
+  letter-spacing: 0.2em;
+}
+
+.tea-mini-tab {
+  @apply text-[10px] uppercase transition-colors duration-200;
+  letter-spacing: 0.2em;
+}
+
 .tea-page-padding {
   padding-left: 1.25rem;
   padding-right: 1.25rem;

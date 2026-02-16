@@ -12,9 +12,7 @@ export default function Header({ username, onLogout }: HeaderProps) {
         <h1 className="font-display tea-text-primary text-2xl font-medium tracking-tight">
           Boba Log
         </h1>
-        <p className="tea-text-muted mt-0.5 text-[10px] tracking-[0.2em] uppercase">
-          {username}
-        </p>
+        <p className="tea-text-muted tea-caps-10 mt-0.5">{username}</p>
       </div>
       <div className="flex items-center gap-3">
         <ThemeToggle />

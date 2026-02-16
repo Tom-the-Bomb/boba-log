@@ -74,7 +74,7 @@ export default function AuthPage() {
             <button
               type="button"
               onClick={() => setMode("login")}
-              className={`pb-3 text-xs tracking-[0.2em] uppercase transition-colors duration-200 ${
+              className={`tea-auth-tab ${
                 mode === "login"
                   ? "tea-border-strong tea-text-primary border-b-2"
                   : "tea-text-muted tea-hover-text-primary"
@@ -85,7 +85,7 @@ export default function AuthPage() {
             <button
               type="button"
               onClick={() => setMode("signup")}
-              className={`pb-3 text-xs tracking-[0.2em] uppercase transition-colors duration-200 ${
+              className={`tea-auth-tab ${
                 mode === "signup"
                   ? "tea-border-strong tea-text-primary border-b-2"
                   : "tea-text-muted tea-hover-text-primary"
@@ -99,7 +99,7 @@ export default function AuthPage() {
             <div>
               <label
                 htmlFor="auth-username"
-                className="tea-text-muted mb-1.5 block text-xs tracking-[0.15em] uppercase"
+                className="tea-text-muted tea-auth-form-label"
               >
                 Username
               </label>
@@ -107,7 +107,7 @@ export default function AuthPage() {
                 id="auth-username"
                 value={username}
                 onChange={(event) => setUsername(event.target.value)}
-                className="tea-text-primary tea-border-accent-focus tea-border-subtle w-full border-b bg-transparent py-2.5 text-sm transition-colors outline-none"
+                className="tea-text-primary tea-border-accent-focus tea-border-subtle tea-input-line transition-colors"
                 required
                 minLength={3}
               />
@@ -115,7 +115,7 @@ export default function AuthPage() {
             <div>
               <label
                 htmlFor="auth-password"
-                className="tea-text-muted mb-1.5 block text-xs tracking-[0.15em] uppercase"
+                className="tea-text-muted tea-auth-form-label"
               >
                 Password
               </label>
@@ -124,7 +124,7 @@ export default function AuthPage() {
                 type="password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                className="tea-text-primary tea-border-accent-focus tea-border-subtle w-full border-b bg-transparent py-2.5 text-sm transition-colors outline-none"
+                className="tea-text-primary tea-border-accent-focus tea-border-subtle tea-input-line transition-colors"
                 required
                 minLength={6}
               />
@@ -151,9 +151,7 @@ export default function AuthPage() {
 
       <div className="tea-line tea-line-bottom tea-page-padding-sm" />
       <footer className="tea-page-padding-sm flex items-center justify-between py-6">
-        <p className="tea-text-muted text-[10px] tracking-[0.25em] uppercase">
-          Boba Log
-        </p>
+        <p className="tea-text-muted tea-caps-10-wide">Boba Log</p>
         <Link href="/" className="tea-link text-[10px]">
           &larr; Home
         </Link>

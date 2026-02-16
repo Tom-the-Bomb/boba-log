@@ -188,7 +188,7 @@ export default function DateRangeSlider({
             key={preset.label}
             type="button"
             onClick={preset.apply}
-            className="tea-border-accent-hover tea-text-muted tea-hover-text-primary border-b border-transparent pb-0.5 text-[10px] tracking-[0.2em] uppercase transition-colors duration-200"
+            className="tea-mini-tab tea-border-accent-hover tea-text-muted tea-hover-text-primary border-b border-transparent pb-0.5"
           >
             {preset.label}
           </button>

@@ -31,7 +31,7 @@ export default function TrendsChart({
             <button
               key={value}
               onClick={() => onGranularityChange(value)}
-              className={`pb-2 text-[10px] tracking-[0.2em] uppercase transition-colors duration-200 ${
+              className={`tea-mini-tab pb-2 ${
                 granularity === value
                   ? "tea-border-strong tea-text-primary border-b-2"
                   : "tea-text-muted tea-hover-text-primary"

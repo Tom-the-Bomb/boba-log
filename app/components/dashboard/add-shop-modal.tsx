@@ -54,7 +54,7 @@ export default function AddShopModal({
           <div>
             <label
               htmlFor="modal-shop-name"
-              className="tea-text-muted mb-1.5 block text-[10px] tracking-[0.2em] uppercase"
+              className="tea-text-muted tea-form-label"
             >
               Shop name
             </label>
@@ -62,7 +62,7 @@ export default function AddShopModal({
               id="modal-shop-name"
               value={shopName}
               onChange={(event) => onShopNameChange(event.target.value)}
-              className="tea-text-primary tea-border-accent-focus tea-border-subtle w-full border-b bg-transparent py-2.5 text-sm outline-none"
+              className="tea-text-primary tea-border-accent-focus tea-border-subtle tea-input-line"
               required
             />
           </div>
@@ -70,7 +70,7 @@ export default function AddShopModal({
           <div>
             <label
               htmlFor="modal-avatar"
-              className="tea-text-muted mb-1.5 block text-[10px] tracking-[0.2em] uppercase"
+              className="tea-text-muted tea-form-label"
             >
               Avatar image
             </label>
@@ -85,9 +85,7 @@ export default function AddShopModal({
 
           {avatar && (
             <div className="pt-2">
-              <p className="tea-text-muted mb-2 text-[10px] tracking-[0.2em] uppercase">
-                Preview
-              </p>
+              <p className="tea-text-muted tea-caps-10 mb-2">Preview</p>
               <Image
                 src={avatar}
                 alt="Avatar preview"
