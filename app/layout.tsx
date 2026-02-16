@@ -7,6 +7,7 @@ import UserProvider from "./providers/user-provider";
 
 const SITE_URL = "https://boba.tomthebomb.dev";
 const SITE_NAME = "Boba Log";
+const AUTHOR_NAME = "Tom the Bomb";
 const DEFAULT_TITLE = "Boba Log | Track Your Bubble Tea Habits";
 const DEFAULT_DESCRIPTION =
   "Track your favorite boba shops, log every drink, and visualize your tea habits over time.";
@@ -31,6 +32,8 @@ export const metadata: Metadata = {
   },
   description: DEFAULT_DESCRIPTION,
   applicationName: SITE_NAME,
+  authors: [{ name: AUTHOR_NAME, url: SITE_URL }],
+  creator: AUTHOR_NAME,
   alternates: {
     canonical: "/",
   },
@@ -50,7 +53,7 @@ export const metadata: Metadata = {
     ],
   },
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title: DEFAULT_TITLE,
     description: DEFAULT_DESCRIPTION,
     images: [SOCIAL_IMAGE_URL],

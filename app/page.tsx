@@ -4,10 +4,13 @@ import Hero from "./components/landing/hero";
 import Nav from "./components/landing/nav";
 
 const SITE_URL = "https://boba.tomthebomb.dev";
+const SITE_NAME = "Boba Log";
 const SOCIAL_IMAGE_URL = `${SITE_URL}/icon-512.png`;
 
 export const metadata: Metadata = {
-  title: "Home",
+  title: {
+    absolute: SITE_NAME,
+  },
   description:
     "Track your tea ritual with boba shop logging, drink totals, and simple trend insights.",
   alternates: {
