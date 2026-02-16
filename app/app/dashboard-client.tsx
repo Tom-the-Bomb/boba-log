@@ -26,6 +26,7 @@ import {
 import { useRouter } from "next/navigation";
 import type { ChangeEvent, SubmitEventHandler } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import AddShopModal from "../components/dashboard/add-shop-modal";
 import ByShopChart from "../components/dashboard/by-shop-chart";
 import DateRangeSlider from "../components/dashboard/date-range-slider";
@@ -46,7 +47,7 @@ export default function DashboardClient() {
   const { user, isLoadingUser, logout: clearAuth, setUserShops } = useUser();
   const { isDark } = useTheme();
   const shops = user?.shops ?? EMPTY_SHOPS;
-  const [error, setError] = useState("");
+  const [modalError, setModalError] = useState("");
   const [undoQueueMap, setUndoQueueMap] = useState<Record<string, number>>({});
   const [pendingIncrementMap, setPendingIncrementMap] = useState<
     Record<string, boolean>
@@ -167,7 +168,7 @@ export default function DashboardClient() {
         [shopId]: (current[shopId] ?? 0) + 1,
       }));
     } catch {
-      setError("Could not increment drink count.");
+      toast.error("Could not increment drink count.");
     } finally {
       setPendingIncrementMap((current) => ({ ...current, [shopId]: false }));
     }
@@ -188,17 +189,13 @@ export default function DashboardClient() {
         [shopId]: Math.max((current[shopId] ?? 0) - 1, 0),
       }));
     } catch {
-      setError("Could not undo drink count.");
+      toast.error("Could not undo drink count.");
     }
   }
 
   async function onAvatarChange(event: ChangeEvent<HTMLInputElement>) {
     const avatarError = await handleAvatarInputChange(event);
-    if (avatarError) {
-      setError(avatarError);
-    } else {
-      setError("");
-    }
+    setModalError(avatarError ?? "");
   }
 
   async function handleAddShop(
@@ -214,7 +211,7 @@ export default function DashboardClient() {
     }
 
     setIsAddingShop(true);
-    setError("");
+    setModalError("");
 
     try {
       const formData = new FormData();
@@ -243,7 +240,7 @@ export default function DashboardClient() {
       setIsModalOpen(false);
       resetDraft();
     } catch {
-      setError("Could not add boba shop.");
+      setModalError("Could not add boba shop.");
     } finally {
       setIsAddingShop(false);
     }
@@ -251,7 +248,7 @@ export default function DashboardClient() {
 
   function onPresetSelect(preset: DefaultShopPresetOption) {
     selectPreset(preset);
-    setError("");
+    setModalError("");
   }
 
   function logout() {
@@ -325,12 +322,6 @@ export default function DashboardClient() {
           granularity={granularity}
           onGranularityChange={setGranularity}
         />
-
-        {error && !isModalOpen && (
-          <p className="mb-8 text-center text-xs tracking-wide text-red-600">
-            {error}
-          </p>
-        )}
       </main>
 
       <Footer />
@@ -341,10 +332,10 @@ export default function DashboardClient() {
         avatar={avatarPreview}
         presets={DEFAULT_SHOPS}
         isSubmitting={isAddingShop}
-        error={error}
+        error={modalError}
         onClose={() => {
           setIsModalOpen(false);
-          setError("");
+          setModalError("");
         }}
         onSubmit={handleAddShop}
         onPresetSelect={onPresetSelect}

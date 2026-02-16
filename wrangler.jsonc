@@ -29,7 +29,14 @@
 		{
 			"binding": "DB",
 			"database_name": "boba-log",
-			"database_id": "57e1ae51-d7a1-4129-8ae8-cc4a64952f1b",
+			"database_id": "f4e53a5a-59d6-4a48-add4-cf41e2192f78",
+			"remote": true
+		}
+	],
+	"r2_buckets": [
+		{
+			"bucket_name": "boba-log",
+			"binding": "R2",
 			"remote": true
 		}
 	],

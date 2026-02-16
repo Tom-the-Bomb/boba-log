@@ -7,8 +7,6 @@ export async function processAndUploadAvatar({
   file: File;
   shopId: number;
 }) {
-  const arrayBuffer = await file.arrayBuffer();
-  const body = Buffer.from(arrayBuffer);
-
+  const body = await file.arrayBuffer();
   await uploadAvatarToR2({ shopId, body });
 }

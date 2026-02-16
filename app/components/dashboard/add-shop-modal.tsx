@@ -101,11 +101,7 @@ export default function AddShopModal({
             </div>
           )}
 
-          {error && (
-            <p className="tea-form-error pt-2 text-center">
-              {error}
-            </p>
-          )}
+          {error && <p className="tea-form-error pt-2 text-center">{error}</p>}
 
           <div className="flex items-center justify-end gap-5 pt-6">
             <button type="button" onClick={onClose} className="tea-link">

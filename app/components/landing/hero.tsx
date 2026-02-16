@@ -3,7 +3,7 @@ import TeaCupMark from "../icons/tea-cup-mark";
 
 export default function Hero() {
   return (
-    <main className="tea-page-padding flex flex-1 flex-col items-start justify-center py-12 sm:py-20">
+    <main className="tea-page-padding relative flex flex-1 flex-col items-start justify-center py-12 sm:py-20">
       <div className="w-full max-w-3xl">
         <h3 className="reveal reveal-d1 tea-text-accent text-xs tracking-[0.35em] uppercase">
           Track &middot; Discover &middot; Savor
@@ -40,7 +40,7 @@ export default function Hero() {
         </div>
       </div>
 
-      <div className="reveal reveal-d5 pointer-events-none absolute right-6 bottom-14 sm:right-10 sm:bottom-18 lg:right-12 lg:bottom-24 xl:right-24">
+      <div className="reveal reveal-d5 pointer-events-none absolute right-6 bottom-1 sm:bottom-4 sm:right-10 lg:right-12 xl:right-24">
         <div className="origin-bottom-right scale-[0.7] sm:scale-[0.85] lg:scale-100">
           <TeaCupMark />
         </div>

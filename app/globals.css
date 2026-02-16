@@ -303,12 +303,12 @@ h3:not(.font-display) {
 }
 
 .tea-input-error {
-  border-color: var(--tea-gold);
+  border-color: var(--color-red-600);
 }
 
 .tea-form-error {
   @apply mt-2 text-xs tracking-wide;
-  color: var(--tea-gold);
+  color: var(--color-red-600);
 }
 
 .tea-auth-tab {

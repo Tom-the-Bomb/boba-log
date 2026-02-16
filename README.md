@@ -12,6 +12,7 @@ Boba Log is a Next.js app for tracking tea shop visits and drink totals, deploye
 - **Database:** Cloudflare D1 (SQLite)
 - **Object Storage:** Cloudflare R2
 - **Package Manager:** Bun
+- **Auth:** JWT (PBKDF2 algorithm) + localStorage
 
 ### Libraries
 
@@ -37,10 +38,6 @@ Create a `.env` file in the project root:
 
 ```env
 JWT_SECRET=your-jwt-secret
-R2_ACCOUNT_ID=your-cloudflare-account-id
-R2_ACCESS_KEY=your-r2-access-key
-R2_SECRET_ACCESS_KEY=your-r2-secret-key
-R2_BUCKET_NAME=your-r2-bucket-name
 ```
 
 ## Development
@@ -88,6 +85,24 @@ bun wrangler d1 execute boba-log --remote --file=schema.sql
   />
 </p>
 <!-- markdownlint-enable MD033 -->
+
+## Object Storage (R2)
+
+This project uses the `R2` binding from `wrangler.jsonc` with bucket name `boba-log` for storing shop avatar images.
+
+### Create bucket
+
+Create the R2 bucket:
+
+```bash
+bun wrangler r2 bucket create boba-log
+```
+
+### Public access
+
+Enable public access for the bucket through the Cloudflare dashboard under **R2 > boba-log > Settings > Public access**. Connect a custom domain or use the `r2.dev` subdomain so avatar images can be served directly.
+
+Avatars are uploaded as `{shopId}.webp` and served from the configured public URL.
 
 ## Default Shop Avatars
 

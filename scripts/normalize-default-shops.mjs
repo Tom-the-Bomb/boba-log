@@ -56,12 +56,12 @@ async function listSupportedImageFiles() {
 
 async function normalizeImage(fileName) {
   const sourcePath = path.join(INPUT_DIR, fileName);
-  const { name: baseName, ext } = path.parse(fileName);
+  const { name: baseName } = path.parse(fileName);
   const outputName = `${baseName}.webp`;
   const outputPath = path.join(INPUT_DIR, outputName);
-  const sourceIsWebp = ext.toLowerCase() === ".webp";
 
-  const normalizedBuffer = await sharp(sourcePath)
+  const sourceBuffer = await withFileLockRetry(() => fs.readFile(sourcePath));
+  const normalizedBuffer = await sharp(sourceBuffer)
     .resize(OUTPUT_SIZE, OUTPUT_SIZE, {
       fit: "cover",
       position: "centre",
@@ -69,11 +69,10 @@ async function normalizeImage(fileName) {
     .webp({ quality: WEBP_QUALITY })
     .toBuffer();
 
-  await withFileLockRetry(() => fs.writeFile(outputPath, normalizedBuffer));
-
-  if (!sourceIsWebp) {
-    await withFileLockRetry(() => fs.rm(sourcePath, { force: true }));
-  }
+  const tmpPath = `${outputPath}.tmp`;
+  await withFileLockRetry(() => fs.writeFile(tmpPath, normalizedBuffer));
+  await withFileLockRetry(() => fs.rm(sourcePath, { force: true }));
+  await withFileLockRetry(() => fs.rename(tmpPath, outputPath));
 
   return { source: fileName, output: outputName };
 }

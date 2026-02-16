@@ -10,6 +10,7 @@ import {
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Sora } from "next/font/google";
 import type { ReactNode } from "react";
+import { Toaster } from "sonner";
 import "./globals.css";
 import { ThemeProvider } from "./providers/theme-provider";
 import UserProvider from "./providers/user-provider";
@@ -98,6 +99,7 @@ export default function RootLayout({
       <body className={`${bricolage.variable} ${sora.variable} antialiased`}>
         <ThemeProvider>
           <UserProvider>{children}</UserProvider>
+          <Toaster position="bottom-center" />
         </ThemeProvider>
       </body>
     </html>
