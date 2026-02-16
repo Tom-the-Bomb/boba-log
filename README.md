@@ -81,31 +81,7 @@ bun wrangler d1 execute boba-log --remote --file=schema.sql
 
 ### Schema
 
-```mermaid
-erDiagram
-  users ||--o{ shops : "owns"
-  shops ||--o{ shop_dates : "has"
-
-  users {
-    INTEGER id PK
-    TEXT username UK "NOT NULL"
-    TEXT hashed_password "NOT NULL"
-    INTEGER created_at "NOT NULL, epoch seconds"
-  }
-
-  shops {
-    INTEGER id PK
-    TEXT username FK "NOT NULL, CASCADE"
-    TEXT name "NOT NULL"
-    INTEGER total "NOT NULL, DEFAULT 0"
-  }
-
-  shop_dates {
-    INTEGER shop_id PK,FK "NOT NULL, CASCADE"
-    TEXT date_key PK "NOT NULL, ISO 8601"
-    INTEGER count "NOT NULL, DEFAULT 0"
-  }
-```
+![schema](https://raw.githubusercontent.com/Tom-the-Bomb/boba-log/refs/heads/main/schema-mermaid.png)
 
 ## Default Shop Avatars
 
