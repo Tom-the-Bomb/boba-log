@@ -18,7 +18,7 @@ interface ShopRow {
 
 interface DateRow {
   shop_id: number;
-  date_key: string;
+  date_key: number;
   count: number;
 }
 
@@ -190,12 +190,11 @@ export async function addShop(
   return await toPublicShop(doc);
 }
 
-function todayIsoDateKey() {
+function todayDateKey(): number {
   const now = new Date();
-  const utcMidnight = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+  return Math.floor(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) / 1000,
   );
-  return utcMidnight.toISOString();
 }
 
 export async function incrementShop(
@@ -213,7 +212,7 @@ export async function incrementShop(
     return null;
   }
 
-  const dateKey = todayIsoDateKey();
+  const dateKey = todayDateKey();
 
   await db.batch([
     db.prepare("UPDATE shops SET total = total + 1 WHERE id = ?").bind(shopId),
@@ -252,7 +251,7 @@ export async function undoShopIncrement(
     return getShopAsPublic(db, shopId);
   }
 
-  const dateKey = todayIsoDateKey();
+  const dateKey = todayDateKey();
 
   const dateRow = await db
     .prepare("SELECT count FROM shop_dates WHERE shop_id = ? AND date_key = ?")

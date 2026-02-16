@@ -18,6 +18,6 @@ erDiagram
 
   shop_dates {
     INTEGER shop_id PK,FK "NOT NULL, CASCADE"
-    TEXT date_key PK "NOT NULL, ISO 8601"
+    INTEGER date_key PK "NOT NULL, epoch seconds"
     INTEGER count "NOT NULL, DEFAULT 0"
   }

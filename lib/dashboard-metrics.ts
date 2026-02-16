@@ -63,8 +63,8 @@ export function getShopCountForRange(
     return shop.total;
   }
 
-  return Object.entries(shop.dates).reduce((sum, [isoDate, count]) => {
-    const point = new Date(isoDate);
+  return Object.entries(shop.dates).reduce((sum, [epochStr, count]) => {
+    const point = new Date(Number(epochStr) * 1000);
     return point >= bounds.start && point <= bounds.end ? sum + count : sum;
   }, 0);
 }
@@ -108,8 +108,8 @@ export function buildTrendsChartData(
   const bounds = getDateBounds(startDate, endDate);
 
   for (const shop of shops) {
-    for (const [isoDate, count] of Object.entries(shop.dates)) {
-      const point = new Date(isoDate);
+    for (const [epochStr, count] of Object.entries(shop.dates)) {
+      const point = new Date(Number(epochStr) * 1000);
 
       if (bounds && (point < bounds.start || point > bounds.end)) {
         continue;

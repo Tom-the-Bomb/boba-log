@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS shops (
 
 CREATE TABLE IF NOT EXISTS shop_dates (
   shop_id INTEGER NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
-  date_key TEXT NOT NULL,
+  date_key INTEGER NOT NULL,
   count INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY (shop_id, date_key)
 );
