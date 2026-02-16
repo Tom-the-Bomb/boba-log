@@ -81,7 +81,12 @@ bun wrangler d1 execute boba-log --remote --file=schema.sql
 
 ### Schema
 
-![schema](https://raw.githubusercontent.com/Tom-the-Bomb/boba-log/refs/heads/main/schema-mermaid.png)
+<!-- markdownlint-disable-next-line MD033 -->
+<img
+  src="https://raw.githubusercontent.com/Tom-the-Bomb/boba-log/refs/heads/main/schema-mermaid.png"
+  alt="schema"
+  width="600"
+/>
 
 ## Default Shop Avatars
 
