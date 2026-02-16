@@ -35,13 +35,13 @@ export default function AuthPage() {
         body: JSON.stringify({ mode, username, password }),
       });
 
-      const data = await response.json();
+      const data = (await response.json()) as { error?: string; token?: string };
       if (!response.ok) {
         setError(data.error ?? "Authentication failed.");
         return;
       }
 
-      await login(data.token);
+      await login(data.token!);
       router.push("/app");
     } catch {
       setError("Could not connect to server.");

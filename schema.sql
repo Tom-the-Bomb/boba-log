@@ -1,0 +1,22 @@
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY,
+  username TEXT NOT NULL UNIQUE,
+  hashed_password TEXT NOT NULL,
+  created_at INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS shops (
+  id INTEGER PRIMARY KEY,
+  username TEXT NOT NULL REFERENCES users(username) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  total INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS shop_dates (
+  shop_id INTEGER NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
+  date_key TEXT NOT NULL,
+  count INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (shop_id, date_key)
+);
+
+CREATE INDEX IF NOT EXISTS idx_shops_username ON shops(username);

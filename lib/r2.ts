@@ -12,24 +12,19 @@ const r2Client = new S3Client({
 });
 
 export interface UploadAvatarInput {
-  userId: string;
-  shopName: string;
+  shopId: number;
   body: Buffer;
 }
 
-export function getPublicAvatarUrlFromKey(userId: string, shopName: string) {
-  return `https://pub-6f87896bfc764c28b490965d4a30c76d.r2.dev/${userId}/${encodeURIComponent(shopName)}.webp`;
+export function getPublicAvatarUrl(shopId: number) {
+  return `https://pub-6f87896bfc764c28b490965d4a30c76d.r2.dev/${shopId}.webp`;
 }
 
-export async function uploadAvatarToR2({
-  userId,
-  shopName,
-  body,
-}: UploadAvatarInput) {
+export async function uploadAvatarToR2({ shopId, body }: UploadAvatarInput) {
   await r2Client.send(
     new PutObjectCommand({
       Bucket: bucketName,
-      Key: `${userId}/${encodeURIComponent(shopName)}.webp`,
+      Key: `${shopId}.webp`,
       Body: body,
       ContentType: "image/webp",
       CacheControl: "public, max-age=31536000, immutable",

@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   try {
-    const username = getUsernameFromRequest(request);
+    const username = await getUsernameFromRequest(request);
     if (!username) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

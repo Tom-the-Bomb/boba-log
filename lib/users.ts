@@ -1,12 +1,28 @@
-import { randomUUID } from "crypto";
-import { WithId } from "mongodb";
 import { DEFAULT_SHOPS } from "./default-shops";
-import { getUsersCollection } from "./mongodb";
-import { getPublicAvatarUrlFromKey } from "./r2";
-import { BobaShop, PublicUser, ShopDocument, UserDocument } from "./types";
+import { getDb } from "./db";
+import { getPublicAvatarUrl } from "./r2";
+import { BobaShop, PublicUser, ShopDocument } from "./types";
 
-function toPublicShop(userId: string, shop: ShopDocument): BobaShop {
-  const shopAvatarKey = shop.name.trim() || "shop";
+interface UserRow {
+  id: number;
+  username: string;
+  hashed_password: string;
+  created_at: number;
+}
+
+interface ShopRow {
+  id: number;
+  name: string;
+  total: number;
+}
+
+interface DateRow {
+  shop_id: number;
+  date_key: string;
+  count: number;
+}
+
+function toPublicShop(shop: ShopDocument): BobaShop {
   const defaultAvatar =
     DEFAULT_SHOPS.find(
       (defaultShop) =>
@@ -15,71 +31,145 @@ function toPublicShop(userId: string, shop: ShopDocument): BobaShop {
     )?.avatar ?? null;
   return {
     ...shop,
-    avatar: defaultAvatar ?? getPublicAvatarUrlFromKey(userId, shopAvatarKey),
+    avatar: defaultAvatar ?? getPublicAvatarUrl(shop.id),
   };
 }
 
-function toPublicUser(user: WithId<UserDocument>): PublicUser {
-  const userId = user._id.toString();
+function buildShopDocument(
+  shopRow: ShopRow,
+  dateRows: DateRow[],
+): ShopDocument {
+  const dates: Record<string, number> = {};
+  for (const row of dateRows) {
+    dates[row.date_key] = row.count;
+  }
   return {
-    username: user.username,
-    created_at: user.created_at,
-    shops: user.shops.map((shop) => toPublicShop(userId, shop)),
+    id: shopRow.id,
+    name: shopRow.name,
+    total: shopRow.total,
+    dates,
   };
+}
+
+async function getShopAsPublic(
+  db: D1Database,
+  shopId: number,
+): Promise<BobaShop | null> {
+  const shopRow = await db
+    .prepare("SELECT id, name, total FROM shops WHERE id = ?")
+    .bind(shopId)
+    .first<ShopRow>();
+
+  if (!shopRow) return null;
+
+  const dateRows = await db
+    .prepare(
+      "SELECT shop_id, date_key, count FROM shop_dates WHERE shop_id = ?",
+    )
+    .bind(shopId)
+    .all<DateRow>();
+
+  const doc = buildShopDocument(shopRow, dateRows.results);
+  return toPublicShop(doc);
 }
 
 export async function getUserByUsername(username: string) {
-  const users = await getUsersCollection();
-  return users.findOne({ username }) as Promise<WithId<UserDocument> | null>;
+  const db = await getDb();
+  return db
+    .prepare(
+      "SELECT id, username, hashed_password, created_at FROM users WHERE username = ?",
+    )
+    .bind(username)
+    .first<UserRow>();
 }
 
-export async function createUser(username: string, hashedPassword: string) {
-  const users = await getUsersCollection();
-  const createdAt = new Date().toISOString();
+export async function createUser(
+  username: string,
+  hashedPassword: string,
+): Promise<PublicUser> {
+  const db = await getDb();
+  const createdAt = Math.floor(Date.now() / 1000);
 
-  await users.insertOne({
+  await db
+    .prepare(
+      "INSERT INTO users (username, hashed_password, created_at) VALUES (?, ?, ?)",
+    )
+    .bind(username, hashedPassword, createdAt)
+    .run();
+
+  return {
     username,
-    hashed_password: hashedPassword,
     created_at: createdAt,
     shops: [],
-  });
-
-  const user = (await users.findOne({
-    username,
-  })) as WithId<UserDocument> | null;
-  if (!user) {
-    throw new Error("Could not create user.");
-  }
-
-  return toPublicUser(user);
-}
-
-export async function getPublicUser(username: string) {
-  const user = await getUserByUsername(username);
-  if (!user) return null;
-  return toPublicUser(user);
-}
-
-export async function addShop(username: string, name: string) {
-  const users = await getUsersCollection();
-  const user = (await users.findOne({
-    username,
-  })) as WithId<UserDocument> | null;
-  if (!user) {
-    throw new Error("User not found.");
-  }
-
-  const newShop: ShopDocument = {
-    id: randomUUID(),
-    name,
-    total: 0,
-    dates: {},
   };
+}
 
-  const updatedShops = [...user.shops, newShop];
-  await users.updateOne({ username }, { $set: { shops: updatedShops } });
+export async function getPublicUser(
+  username: string,
+): Promise<PublicUser | null> {
+  const db = await getDb();
 
-  return toPublicShop(user._id.toString(), newShop);
+  const user = await db
+    .prepare("SELECT username, created_at FROM users WHERE username = ?")
+    .bind(username)
+    .first<{ username: string; created_at: number }>();
+
+  if (!user) return null;
+
+  const shopRows = await db
+    .prepare("SELECT id, name, total FROM shops WHERE username = ?")
+    .bind(username)
+    .all<ShopRow>();
+
+  const shops: BobaShop[] = [];
+  if (shopRows.results.length > 0) {
+    const dateRows = await db
+      .prepare(
+        `SELECT sd.shop_id, sd.date_key, sd.count
+         FROM shop_dates sd
+         JOIN shops s ON sd.shop_id = s.id
+         WHERE s.username = ?`,
+      )
+      .bind(username)
+      .all<DateRow>();
+
+    const datesByShop = new Map<number, DateRow[]>();
+    for (const row of dateRows.results) {
+      const arr = datesByShop.get(row.shop_id) ?? [];
+      arr.push(row);
+      datesByShop.set(row.shop_id, arr);
+    }
+
+    for (const shopRow of shopRows.results) {
+      const doc = buildShopDocument(
+        shopRow,
+        datesByShop.get(shopRow.id) ?? [],
+      );
+      shops.push(toPublicShop(doc));
+    }
+  }
+
+  return {
+    username: user.username,
+    created_at: user.created_at,
+    shops,
+  };
+}
+
+export async function addShop(
+  username: string,
+  name: string,
+): Promise<BobaShop> {
+  const db = await getDb();
+
+  const result = await db
+    .prepare("INSERT INTO shops (username, name, total) VALUES (?, ?, 0)")
+    .bind(username, name)
+    .run();
+
+  const shopId = result.meta.last_row_id as number;
+  const doc: ShopDocument = { id: shopId, name, total: 0, dates: {} };
+  return toPublicShop(doc);
 }
 
 function todayIsoDateKey() {
@@ -90,65 +180,92 @@ function todayIsoDateKey() {
   return utcMidnight.toISOString();
 }
 
-export async function incrementShop(username: string, shopId: string) {
-  const users = await getUsersCollection();
-  const user = (await users.findOne({
-    username,
-  })) as WithId<UserDocument> | null;
-  if (!user) {
-    throw new Error("User not found.");
-  }
+export async function incrementShop(
+  username: string,
+  shopId: number,
+): Promise<BobaShop | null> {
+  const db = await getDb();
+
+  const owns = await db
+    .prepare("SELECT 1 FROM shops WHERE id = ? AND username = ?")
+    .bind(shopId, username)
+    .first();
+
+  if (!owns) return null;
 
   const dateKey = todayIsoDateKey();
-  const updatedShops = user.shops.map((shop) => {
-    if (shop.id !== shopId) return shop;
-    return {
-      ...shop,
-      total: shop.total + 1,
-      dates: {
-        ...shop.dates,
-        [dateKey]: (shop.dates[dateKey] ?? 0) + 1,
-      },
-    };
-  });
 
-  await users.updateOne({ username }, { $set: { shops: updatedShops } });
+  await db.batch([
+    db
+      .prepare("UPDATE shops SET total = total + 1 WHERE id = ?")
+      .bind(shopId),
+    db
+      .prepare(
+        `INSERT INTO shop_dates (shop_id, date_key, count) VALUES (?, ?, 1)
+         ON CONFLICT (shop_id, date_key) DO UPDATE SET count = count + 1`,
+      )
+      .bind(shopId, dateKey),
+  ]);
 
-  const shop = updatedShops.find((item) => item.id === shopId);
-  return shop ? toPublicShop(user._id.toString(), shop) : null;
+  return getShopAsPublic(db, shopId);
 }
 
-export async function undoShopIncrement(username: string, shopId: string) {
-  const users = await getUsersCollection();
-  const user = (await users.findOne({
-    username,
-  })) as WithId<UserDocument> | null;
-  if (!user) {
-    throw new Error("User not found.");
+export async function undoShopIncrement(
+  username: string,
+  shopId: number,
+): Promise<BobaShop | null> {
+  const db = await getDb();
+
+  const owns = await db
+    .prepare("SELECT 1 FROM shops WHERE id = ? AND username = ?")
+    .bind(shopId, username)
+    .first();
+
+  if (!owns) return null;
+
+  const shop = await db
+    .prepare("SELECT total FROM shops WHERE id = ?")
+    .bind(shopId)
+    .first<{ total: number }>();
+
+  if (!shop || shop.total <= 0) {
+    return getShopAsPublic(db, shopId);
   }
 
   const dateKey = todayIsoDateKey();
-  const updatedShops = user.shops.map((shop) => {
-    if (shop.id !== shopId) return shop;
-    if (shop.total <= 0) return shop;
 
-    const todayCount = shop.dates[dateKey] ?? 0;
-    const updatedDates = { ...shop.dates };
-    if (todayCount <= 1) {
-      delete updatedDates[dateKey];
-    } else {
-      updatedDates[dateKey] = todayCount - 1;
-    }
+  const dateRow = await db
+    .prepare(
+      "SELECT count FROM shop_dates WHERE shop_id = ? AND date_key = ?",
+    )
+    .bind(shopId, dateKey)
+    .first<{ count: number }>();
 
-    return {
-      ...shop,
-      total: shop.total - 1,
-      dates: updatedDates,
-    };
-  });
+  const statements = [
+    db
+      .prepare("UPDATE shops SET total = total - 1 WHERE id = ?")
+      .bind(shopId),
+  ];
 
-  await users.updateOne({ username }, { $set: { shops: updatedShops } });
+  if (dateRow && dateRow.count <= 1) {
+    statements.push(
+      db
+        .prepare(
+          "DELETE FROM shop_dates WHERE shop_id = ? AND date_key = ?",
+        )
+        .bind(shopId, dateKey),
+    );
+  } else if (dateRow) {
+    statements.push(
+      db
+        .prepare(
+          "UPDATE shop_dates SET count = count - 1 WHERE shop_id = ? AND date_key = ?",
+        )
+        .bind(shopId, dateKey),
+    );
+  }
 
-  const shop = updatedShops.find((item) => item.id === shopId);
-  return shop ? toPublicShop(user._id.toString(), shop) : null;
+  await db.batch(statements);
+
+  return getShopAsPublic(db, shopId);
 }

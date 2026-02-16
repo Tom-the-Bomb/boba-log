@@ -1,6 +1,7 @@
 "use client";
 
 import { toDateInputValue } from "@/lib/date";
+import { resizeImageToWebP } from "@/lib/resize-image";
 import {
   DEFAULT_SHOPS,
   type DefaultShopPresetOption,
@@ -69,7 +70,7 @@ export default function DashboardClient() {
   useEffect(() => {
     if (!user) return;
     if (!startDate) {
-      setStartDate(toDateInputValue(new Date(user.createdAt)));
+      setStartDate(toDateInputValue(new Date(user.createdAt * 1000)));
     }
     if (!endDate) {
       setEndDate(toDateInputValue(new Date()));
@@ -249,7 +250,7 @@ export default function DashboardClient() {
     [isDark],
   );
 
-  async function addDrink(shopId: string) {
+  async function addDrink(shopId: number) {
     if (!user) return;
     if (pendingIncrementMap[shopId]) return;
 
@@ -260,13 +261,13 @@ export default function DashboardClient() {
         method: "POST",
         headers: { Authorization: `Bearer ${user.token}` },
       });
-      const data = await response.json();
+      const data = (await response.json()) as { error?: string; shop?: BobaShop };
       if (!response.ok) {
         throw new Error(data.error ?? "Could not increment.");
       }
 
       setUserShops((current) =>
-        current.map((shop) => (shop.id === shopId ? data.shop : shop)),
+        current.map((shop) => (shop.id === shopId ? data.shop! : shop)),
       );
       setUndoQueueMap((current) => ({
         ...current,
@@ -279,7 +280,7 @@ export default function DashboardClient() {
     }
   }
 
-  async function undoDrink(shopId: string) {
+  async function undoDrink(shopId: number) {
     if (!user) return;
     if ((undoQueueMap[shopId] ?? 0) <= 0) return;
 
@@ -288,13 +289,13 @@ export default function DashboardClient() {
         method: "POST",
         headers: { Authorization: `Bearer ${user.token}` },
       });
-      const data = await response.json();
+      const data = (await response.json()) as { error?: string; shop?: BobaShop };
       if (!response.ok) {
         throw new Error(data.error ?? "Could not undo.");
       }
 
       setUserShops((current) =>
-        current.map((shop) => (shop.id === shopId ? data.shop : shop)),
+        current.map((shop) => (shop.id === shopId ? data.shop! : shop)),
       );
       setUndoQueueMap((current) => ({
         ...current,
@@ -315,11 +316,12 @@ export default function DashboardClient() {
     }
 
     try {
+      const resized = await resizeImageToWebP(file);
       if (newShopAvatarPreview) {
         URL.revokeObjectURL(newShopAvatarPreview);
       }
-      const nextPreview = URL.createObjectURL(file);
-      setNewShopAvatarFile(file);
+      const nextPreview = URL.createObjectURL(resized);
+      setNewShopAvatarFile(resized);
       setNewShopAvatarPreview(nextPreview);
       setError("");
     } catch {
@@ -350,7 +352,7 @@ export default function DashboardClient() {
         body: formData,
       });
 
-      const data = await response.json();
+      const data = (await response.json()) as { error?: string; shop?: BobaShop };
       if (!response.ok) {
         throw new Error(data.error ?? "Could not create shop.");
       }
@@ -404,7 +406,7 @@ export default function DashboardClient() {
             onStartChange={setStartDate}
             onEndChange={setEndDate}
             minDate={
-              user ? toDateInputValue(new Date(user.createdAt)) : startDate
+              user ? toDateInputValue(new Date(user.createdAt * 1000)) : startDate
             }
             maxDate={toDateInputValue(new Date())}
           />

@@ -1,14 +1,22 @@
 {
-  "$schema": "./node_modules/wrangler/config-schema.json",
-  "main": ".open-next/worker.js",
-  "name": "boba-tracker",
-  "compatibility_date": "2026-02-14",
-  "compatibility_flags": [
-    "nodejs_compat"
-  ],
-  "assets": {
-    "directory": ".open-next/assets",
-    "binding": "ASSETS"
-  },
-  "keep_vars": true,
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"main": ".open-next/worker.js",
+	"name": "boba-tracker",
+	"compatibility_date": "2026-02-14",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"assets": {
+		"directory": ".open-next/assets",
+		"binding": "ASSETS"
+	},
+	"keep_vars": true,
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "boba-tracker-db",
+			"database_id": "60abf44b-c41d-4128-9c45-27138798ed70",
+			"remote": true
+		}
+	]
 }

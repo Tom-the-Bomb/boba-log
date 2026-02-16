@@ -16,7 +16,7 @@ const AUTH_STORAGE_KEY = "boba_jwt";
 interface PublicUserResponse {
   user: {
     username: string;
-    created_at: string;
+    created_at: number;
     shops: BobaShop[];
   };
 }
@@ -24,7 +24,7 @@ interface PublicUserResponse {
 interface UserSession {
   token: string;
   username: string;
-  createdAt: string;
+  createdAt: number;
   shops: BobaShop[];
   login: (nextToken: string) => Promise<void>;
   logout: () => void;
@@ -51,7 +51,7 @@ export default function UserProvider({ children }: { children: ReactNode }) {
     return window.localStorage.getItem(AUTH_STORAGE_KEY);
   });
   const [username, setUsername] = useState<string | null>(null);
-  const [createdAt, setCreatedAt] = useState<string | null>(null);
+  const [createdAt, setCreatedAt] = useState<number | null>(null);
   const [shops, setShops] = useState<BobaShop[]>([]);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
 

@@ -6,8 +6,8 @@ interface DashboardShopsSectionProps {
   getShopCountForRange: (shop: BobaShop) => number;
   undoQueueMap: Record<string, number>;
   pendingIncrementMap: Record<string, boolean>;
-  onAddDrink: (shopId: string) => void;
-  onUndoDrink: (shopId: string) => void;
+  onAddDrink: (shopId: number) => void;
+  onUndoDrink: (shopId: number) => void;
   onOpenAddModal: () => void;
 }
 

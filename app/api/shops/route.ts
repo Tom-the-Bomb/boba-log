@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    const username = getUsernameFromRequest(request);
+    const username = await getUsernameFromRequest(request);
     if (!username) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -38,12 +38,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const shop = await addShop(username, name);
+
     if (hasUploadedAvatar) {
       try {
         await processAndUploadAvatar({
           file: avatarFile,
-          userId: user._id.toString(),
-          shopName: name,
+          shopId: shop.id,
         });
       } catch {
         return NextResponse.json(
@@ -53,7 +54,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const shop = await addShop(username, name);
     return NextResponse.json({ shop });
   } catch {
     return NextResponse.json(

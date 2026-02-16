@@ -7,8 +7,8 @@ interface ShopCardProps {
   canUndo: boolean;
   undoCount?: number;
   isIncrementPending?: boolean;
-  onAddDrink: (shopId: string) => void;
-  onUndo: (shopId: string) => void;
+  onAddDrink: (shopId: number) => void;
+  onUndo: (shopId: number) => void;
 }
 
 export default function ShopCard({

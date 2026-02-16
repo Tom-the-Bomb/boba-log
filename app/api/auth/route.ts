@@ -1,10 +1,10 @@
 import { comparePassword, hashPassword, signToken } from "@/lib/auth";
-import { createUser, getUserByUsername } from "@/lib/users";
+import { createUser, getPublicUser, getUserByUsername } from "@/lib/users";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const body = (await request.json()) as Record<string, unknown>;
     const username = String(body.username ?? "")
       .trim()
       .toLowerCase();
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
 
       const hashedPassword = await hashPassword(password);
       const user = await createUser(username, hashedPassword);
-      const token = signToken({ username: user.username });
+      const token = await signToken({ username: user.username });
       return NextResponse.json({ token, user });
     }
 
@@ -46,15 +46,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid password." }, { status: 401 });
     }
 
-    const token = signToken({ username: existing.username });
-    return NextResponse.json({
-      token,
-      user: {
-        username: existing.username,
-        created_at: existing.created_at,
-        shops: existing.shops,
-      },
-    });
+    const token = await signToken({ username: existing.username });
+    const user = await getPublicUser(existing.username);
+    return NextResponse.json({ token, user });
   } catch (err) {
     console.error("Auth error:", err);
     return NextResponse.json(
