@@ -2,7 +2,6 @@ import defaultShops from "@/public/default-shops/presets.json";
 
 export interface DefaultShopPresetOption {
   name: string;
-  slug: string;
   avatar: string;
 }
 
