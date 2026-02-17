@@ -13,7 +13,8 @@
     "lint": "eslint . && prettier --check . && tsc --noEmit",
     "lint:fix": "eslint --fix . && prettier --write . && tsc --noEmit",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "prepare": "husky"
   },
   "dependencies": {
     "@tsndr/cloudflare-worker-jwt": "^3.2.1",
@@ -35,6 +36,8 @@
     "eslint-config-next": "16.1.6",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "prettier": "^3.8.1",
     "prettier-plugin-organize-imports": "^4.3.0",
     "prettier-plugin-tailwindcss": "^0.7.2",
@@ -48,5 +51,11 @@
   ],
   "trustedDependencies": [
     "unrs-resolver"
-  ]
+  ],
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
+  }
 }
