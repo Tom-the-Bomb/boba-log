@@ -1,5 +1,5 @@
-import { getUsernameFromRequest } from "@/lib/request-auth";
-import { incrementShop } from "@/lib/users";
+import { getUsernameFromRequest } from "@/lib/api/request-auth";
+import { incrementShop } from "@/lib/api/users";
 import { NextRequest, NextResponse } from "next/server";
 
 type Params = { params: Promise<{ shopId: string }> };

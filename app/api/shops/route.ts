@@ -1,7 +1,7 @@
-import { processAndUploadAvatar } from "@/lib/avatar";
-import { getPublicAvatarUrl } from "@/lib/r2";
-import { getUsernameFromRequest } from "@/lib/request-auth";
-import { addShop, getUserByUsername } from "@/lib/users";
+import { processAndUploadAvatar } from "@/lib/api/avatar";
+import { getPublicAvatarUrl } from "@/lib/api/r2";
+import { getUsernameFromRequest } from "@/lib/api/request-auth";
+import { addShop, getUserByUsername } from "@/lib/api/users";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {

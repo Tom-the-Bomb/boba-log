@@ -1,5 +1,5 @@
-import { getUsernameFromRequest } from "@/lib/request-auth";
-import { getPublicUser } from "@/lib/users";
+import { getUsernameFromRequest } from "@/lib/api/request-auth";
+import { getPublicUser } from "@/lib/api/users";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {

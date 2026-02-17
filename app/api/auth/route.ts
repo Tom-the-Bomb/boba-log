@@ -1,5 +1,5 @@
-import { comparePassword, hashPassword, signToken } from "@/lib/auth";
-import { createUser, getPublicUser, getUserByUsername } from "@/lib/users";
+import { comparePassword, hashPassword, signToken } from "@/lib/api/auth";
+import { createUser, getPublicUser, getUserByUsername } from "@/lib/api/users";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {

@@ -1,7 +1,7 @@
+import { DEFAULT_SHOPS } from "../default-shops";
+import { BobaShop, PublicUser, ShopDocument } from "../types";
 import { getDb } from "./db";
-import { DEFAULT_SHOPS } from "./default-shops";
 import { checkPublicAvatarExists, getPublicAvatarUrl } from "./r2";
-import { BobaShop, PublicUser, ShopDocument } from "./types";
 
 interface UserRow {
   id: number;
