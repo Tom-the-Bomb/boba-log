@@ -11,7 +11,7 @@ interface ByShopChartProps {
 export default function ByShopChart({ data, options }: ByShopChartProps) {
   return (
     <section className="mb-20">
-      <h2 className="font-display tea-text-primary mb-8 text-xl font-medium tracking-tight">
+      <h2 className="tea-text-primary mb-8 font-display text-xl font-medium tracking-tight">
         By shop
       </h2>
       <div className="h-72 w-full">

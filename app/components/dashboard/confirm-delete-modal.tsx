@@ -1,16 +1,50 @@
+"use client";
+
+import type { BobaShop } from "@/lib/types";
+import { useState } from "react";
+import { toast } from "sonner";
+import { useUser } from "../../providers/user-provider";
+
 interface ConfirmDeleteModalProps {
-  shopName: string;
-  isDeleting: boolean;
-  onConfirm: () => void;
+  shop: BobaShop;
   onClose: () => void;
+  onDeleted: (shopId: number) => void;
 }
 
 export default function ConfirmDeleteModal({
-  shopName,
-  isDeleting,
-  onConfirm,
+  shop,
   onClose,
+  onDeleted,
 }: ConfirmDeleteModalProps) {
+  const { user } = useUser();
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  async function handleConfirm() {
+    if (!user) {
+      return;
+    }
+
+    setIsDeleting(true);
+
+    try {
+      const response = await fetch(`/api/shops/${shop.id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${user.token}` },
+      });
+
+      if (!response.ok) {
+        throw new Error("Could not delete shop.");
+      }
+
+      onDeleted(shop.id);
+      onClose();
+    } catch {
+      toast.error("Could not delete shop.");
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <button
@@ -21,13 +55,13 @@ export default function ConfirmDeleteModal({
       />
 
       <div className="tea-surface tea-border-subtle relative z-10 w-full max-w-sm border px-10 py-10">
-        <h3 className="font-display tea-text-primary text-2xl font-medium tracking-tight">
+        <h3 className="tea-text-primary font-display text-2xl font-medium tracking-tight">
           Delete shop
         </h3>
         <p className="tea-text-muted mt-4 text-sm leading-relaxed">
           Are you sure you want to delete{" "}
-          <span className="tea-text-primary font-medium">{shopName}</span>? This
-          will remove all its drink history.
+          <span className="tea-text-primary font-medium">{shop.name}</span>?
+          This will remove all its drink history.
         </p>
 
         <div className="flex items-center justify-end gap-5 pt-8">
@@ -41,9 +75,9 @@ export default function ConfirmDeleteModal({
           </button>
           <button
             type="button"
-            onClick={onConfirm}
+            onClick={handleConfirm}
             disabled={isDeleting}
-            className="bg-red-600 px-6 py-3 text-xs tracking-[0.15em] uppercase text-white transition-colors hover:bg-red-700 disabled:opacity-40"
+            className="bg-red-600 px-6 py-3 text-xs tracking-[0.15em] text-white uppercase transition-colors hover:bg-red-700 disabled:opacity-40"
           >
             {isDeleting ? "Deleting..." : "Delete"}
           </button>

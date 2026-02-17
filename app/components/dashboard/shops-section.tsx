@@ -48,7 +48,7 @@ export default function ShopsSection({
           className="tea-border-accent-hover tea-border-subtle flex h-44 w-full max-w-60 items-center justify-center border border-dashed"
           aria-label="Add shop"
         >
-          <span className="font-display tea-text-accent text-4xl font-medium opacity-80">
+          <span className="tea-text-accent font-display text-4xl font-medium opacity-80">
             +
           </span>
         </button>

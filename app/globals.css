@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --tea-white: #fafaf7;
   --tea-mist: #eeeae4;
@@ -40,8 +42,15 @@
   --color-tea-faint: #b5afa5;
 }
 
+html {
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   margin: 0;
+  height: 100%;
+  overflow-y: auto;
   background: var(--tea-white);
   color: var(--tea-charcoal);
   font-family: var(--font-sora), "Sora", sans-serif;
@@ -156,14 +165,14 @@ h3:not(.font-display) {
   background: var(--tea-charcoal);
   color: var(--tea-white);
   letter-spacing: 0.14em;
-  transition:
-    background 0.3s,
-    transform 0.3s;
 }
 
 .tea-cta:hover {
   background: var(--tea-sage);
   transform: translateY(-2px);
+  transition:
+    background 0.3s,
+    transform 0.3s;
 }
 
 .tea-grid-bg {
@@ -267,6 +276,10 @@ h3:not(.font-display) {
   border-color: var(--tea-sage);
 }
 
+.dark .tea-color-stone {
+  color: var(--tea-stone);
+}
+
 .tea-ring-subtle {
   --tw-ring-color: var(--tea-stone);
 }
@@ -300,6 +313,11 @@ h3:not(.font-display) {
 
 .tea-input-line {
   @apply w-full border-b bg-transparent py-2.5 text-sm outline-none;
+}
+
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
 }
 
 .tea-input-error {

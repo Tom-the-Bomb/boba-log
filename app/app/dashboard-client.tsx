@@ -4,16 +4,10 @@ import { buildDashboardChartOptions } from "@/lib/dashboard-chart-options";
 import {
   buildByShopChartData,
   buildShopCounts,
-  buildTrendsChartData,
   getShopCountForRange,
   getTotalCount,
-  type Granularity,
 } from "@/lib/dashboard-metrics";
 import { toDateInputValue } from "@/lib/date";
-import {
-  DEFAULT_SHOPS,
-  type DefaultShopPresetOption,
-} from "@/lib/default-shops";
 import { BobaShop } from "@/lib/types";
 import {
   BarElement,
@@ -24,7 +18,6 @@ import {
   Tooltip,
 } from "chart.js";
 import { useRouter } from "next/navigation";
-import type { ChangeEvent, SubmitEventHandler } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import AddShopModal from "../components/dashboard/add-shop-modal";
@@ -35,7 +28,6 @@ import Footer from "../components/dashboard/footer";
 import Header from "../components/dashboard/header";
 import ShopsSection from "../components/dashboard/shops-section";
 import TrendsChart from "../components/dashboard/trends-chart";
-import useShopDraft from "../hooks/use-shop-draft";
 import { useTheme } from "../providers/theme-provider";
 import { useUser } from "../providers/user-provider";
 
@@ -45,11 +37,10 @@ const EMPTY_SHOPS: readonly BobaShop[] = [];
 
 export default function DashboardClient() {
   const router = useRouter();
-  const { user, isLoadingUser, logout: clearAuth, setUserShops } = useUser();
+  const { user, isLoadingUser, setUserShops } = useUser();
   const { isDark } = useTheme();
   const shops = user?.shops ?? EMPTY_SHOPS;
-  const [modalError, setModalError] = useState("");
-  const [nameError, setNameError] = useState("");
+
   const [undoQueueMap, setUndoQueueMap] = useState<Record<string, number>>({});
   const [pendingIncrementMap, setPendingIncrementMap] = useState<
     Record<string, boolean>
@@ -57,21 +48,9 @@ export default function DashboardClient() {
 
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [granularity, setGranularity] = useState<Granularity>("year");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isAddingShop, setIsAddingShop] = useState(false);
   const [deletingShop, setDeletingShop] = useState<BobaShop | null>(null);
-  const [isDeletingShop, setIsDeletingShop] = useState(false);
-  const {
-    shopName,
-    setShopName,
-    avatarFile,
-    avatarPreview,
-    handleAvatarInputChange,
-    selectPreset,
-    resetDraft,
-  } = useShopDraft();
 
   useEffect(() => {
     if (!isLoadingUser && !user) {
@@ -108,11 +87,6 @@ export default function DashboardClient() {
   const byShopChartData = useMemo(
     () => buildByShopChartData(shopCounts),
     [shopCounts],
-  );
-
-  const trendsChartData = useMemo(
-    () => buildTrendsChartData(shops, startDate, endDate, granularity),
-    [shops, startDate, endDate, granularity],
   );
 
   const chartOptions = useMemo(
@@ -204,101 +178,9 @@ export default function DashboardClient() {
     }
   }
 
-  async function confirmDeleteShop() {
-    if (!user || !deletingShop) {
-      return;
-    }
-
-    setIsDeletingShop(true);
-
-    try {
-      const response = await fetch(`/api/shops/${deletingShop.id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${user.token}` },
-      });
-
-      if (!response.ok) {
-        throw new Error("Could not delete shop.");
-      }
-
-      setUserShops((current) =>
-        current.filter((shop) => shop.id !== deletingShop.id),
-      );
-      setDeletingShop(null);
-    } catch {
-      toast.error("Could not delete shop.");
-    } finally {
-      setIsDeletingShop(false);
-    }
-  }
-
-  async function onAvatarChange(event: ChangeEvent<HTMLInputElement>) {
-    const avatarError = await handleAvatarInputChange(event);
-    setModalError(avatarError ?? "");
-  }
-
-  async function handleAddShop(
-    event: Parameters<SubmitEventHandler<HTMLFormElement>>[0],
-  ) {
-    if (!user) {
-      return;
-    }
-    event.preventDefault();
-    const trimmedShopName = shopName.trim();
-    if (!trimmedShopName) {
-      setNameError("Shop name is required.");
-      return;
-    }
-
-    setIsAddingShop(true);
-    setModalError("");
-
-    try {
-      const formData = new FormData();
-      formData.append("name", trimmedShopName);
-      if (avatarFile) {
-        formData.append("avatar", avatarFile);
-      }
-
-      const response = await fetch("/api/shops", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-        body: formData,
-      });
-
-      const data = (await response.json()) as {
-        error?: string;
-        shop?: BobaShop;
-      };
-      if (!response.ok) {
-        throw new Error(data.error ?? "Could not create shop.");
-      }
-
-      setUserShops((current) => [...current, data.shop as BobaShop]);
-      setIsModalOpen(false);
-      resetDraft();
-    } catch {
-      setModalError("Could not add boba shop.");
-    } finally {
-      setIsAddingShop(false);
-    }
-  }
-
-  function onPresetSelect(preset: DefaultShopPresetOption) {
-    selectPreset(preset);
-    setModalError("");
-  }
-
-  function logout() {
-    clearAuth();
-    router.push("/auth");
-  }
-
   if (isLoadingUser) {
     return (
-      <div className="bg-tea-white flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-tea-white">
         <p className="tea-text-muted text-sm tracking-[0.2em] uppercase">
           Loading...
         </p>
@@ -308,7 +190,7 @@ export default function DashboardClient() {
 
   return (
     <div className="tea-grid-bg min-h-screen">
-      <Header username={user?.username ?? ""} onLogout={logout} />
+      <Header />
 
       <main className="mx-auto w-full max-w-5xl px-10 py-16 sm:px-16 lg:px-24">
         <section className="mb-20">
@@ -330,7 +212,7 @@ export default function DashboardClient() {
           <p className="tea-text-accent text-xs tracking-[0.3em] uppercase">
             Total drinks
           </p>
-          <p className="font-display tea-text-primary mt-3 text-8xl font-medium tracking-tight sm:text-9xl">
+          <p className="tea-text-primary mt-3 font-display text-8xl font-medium tracking-tight sm:text-9xl">
             {totalCount}
           </p>
         </section>
@@ -353,10 +235,10 @@ export default function DashboardClient() {
         <ByShopChart data={byShopChartData} options={chartOptions} />
 
         <TrendsChart
-          data={trendsChartData}
+          shops={shops}
+          startDate={startDate}
+          endDate={endDate}
           options={chartOptions}
-          granularity={granularity}
-          onGranularityChange={setGranularity}
         />
       </main>
 
@@ -364,35 +246,23 @@ export default function DashboardClient() {
 
       {deletingShop && (
         <ConfirmDeleteModal
-          shopName={deletingShop.name}
-          isDeleting={isDeletingShop}
-          onConfirm={confirmDeleteShop}
+          shop={deletingShop}
           onClose={() => setDeletingShop(null)}
+          onDeleted={(shopId) => {
+            setUserShops((current) =>
+              current.filter((shop) => shop.id !== shopId),
+            );
+            setDeletingShop(null);
+          }}
         />
       )}
 
       <AddShopModal
         isOpen={isModalOpen}
-        shopName={shopName}
-        nameError={nameError}
-        avatar={avatarPreview}
-        presets={DEFAULT_SHOPS}
-        isSubmitting={isAddingShop}
-        error={modalError}
-        onClose={() => {
-          setIsModalOpen(false);
-          setModalError("");
-          setNameError("");
+        onClose={() => setIsModalOpen(false)}
+        onShopAdded={(shop) => {
+          setUserShops((current) => [...current, shop]);
         }}
-        onSubmit={handleAddShop}
-        onPresetSelect={onPresetSelect}
-        onShopNameChange={(value) => {
-          setShopName(value);
-          if (nameError) {
-            setNameError("");
-          }
-        }}
-        onAvatarChange={onAvatarChange}
       />
     </div>
   );

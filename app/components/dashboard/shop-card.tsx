@@ -29,14 +29,14 @@ export default function ShopCard({
         isIncrementPending ? "opacity-60" : "opacity-100"
       }`}
     >
-      <div className="relative transition-scale duration-200 group-hover:scale-[1.02]">
+      <div className="transition-scale relative duration-200 group-hover:scale-[1.02]">
         <button
           type="button"
           onClick={(e) => {
             e.stopPropagation();
             onDelete(shop.id);
           }}
-          className="tea-text-muted hover:text-red-500! absolute -top-2 -right-2 z-10 rounded-full p-1 opacity-0 transition-colors group-hover:opacity-100"
+          className="tea-text-muted absolute -top-2 -right-2 z-10 rounded-full p-1 opacity-0 transition-colors group-hover:opacity-100 hover:text-red-500!"
           aria-label={`Delete ${shop.name}`}
         >
           <Trash2 size={14} />
@@ -60,7 +60,7 @@ export default function ShopCard({
             <h3 className="tea-text-primary mt-3 text-xs font-medium tracking-widest uppercase">
               {shop.name}
             </h3>
-            <p className="font-display tea-text-accent mt-2 text-5xl font-medium tracking-tight">
+            <p className="tea-text-accent mt-2 font-display text-5xl font-medium tracking-tight">
               {count}
             </p>
           </div>
