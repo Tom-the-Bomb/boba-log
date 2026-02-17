@@ -109,7 +109,7 @@ Avatars are uploaded as `{shopId}.webp` and served from the configured public UR
 Normalize all images in `public/default-shops` to square `256x256` WebP assets:
 
 ```bash
-bun run assets:normalize-default-shops
+bun run assets:process
 ```
 
 Supported source formats: `.jpg`, `.jpeg`, `.png`, `.webp`, `.avif`, `.tiff`.
@@ -127,7 +127,7 @@ bun run deploy
 - `bun run build` — Production build
 - `bun run preview` — OpenNext Cloudflare preview
 - `bun run deploy` — OpenNext Cloudflare deploy
-- `bun run assets:normalize-default-shops` — Normalize `public/default-shops` images to `256x256` WebP
+- `bun run assets:process` — Normalize `public/default-shops` images to `256x256` WebP
 - `bun run lint` — ESLint + Prettier check + TypeScript no-emit
 - `bun run lint:fix` — ESLint fix + Prettier write + TypeScript no-emit
 - `bun run format` — Prettier write
