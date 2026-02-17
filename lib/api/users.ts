@@ -227,6 +227,29 @@ export async function incrementShop(
   return getShopAsPublic(db, shopId);
 }
 
+export async function deleteShop(
+  username: string,
+  shopId: number,
+): Promise<boolean> {
+  const db = getDb();
+
+  const owns = await db
+    .prepare("SELECT 1 FROM shops WHERE id = ? AND username = ?")
+    .bind(shopId, username)
+    .first();
+
+  if (!owns) {
+    return false;
+  }
+
+  await db.batch([
+    db.prepare("DELETE FROM shop_dates WHERE shop_id = ?").bind(shopId),
+    db.prepare("DELETE FROM shops WHERE id = ?").bind(shopId),
+  ]);
+
+  return true;
+}
+
 export async function undoShopIncrement(
   username: string,
   shopId: number,

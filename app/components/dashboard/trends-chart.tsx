@@ -6,7 +6,6 @@ import type { ChartData, ChartOptions } from "chart.js";
 import { Bar } from "react-chartjs-2";
 
 interface TrendsChartProps {
-  hasShops: boolean;
   data: ChartData<"bar">;
   options: ChartOptions<"bar">;
   granularity: Granularity;
@@ -14,7 +13,6 @@ interface TrendsChartProps {
 }
 
 export default function TrendsChart({
-  hasShops,
   data,
   options,
   granularity,
@@ -42,13 +40,9 @@ export default function TrendsChart({
           ))}
         </div>
       </div>
-      {hasShops ? (
-        <div className="h-72 w-full">
-          <Bar data={data} options={options} />
-        </div>
-      ) : (
-        <p className="tea-text-secondary text-sm">No data yet.</p>
-      )}
+      <div className="h-72 w-full">
+        <Bar data={data} options={options} />
+      </div>
     </section>
   );
 }

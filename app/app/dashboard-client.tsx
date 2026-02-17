@@ -193,6 +193,27 @@ export default function DashboardClient() {
     }
   }
 
+  async function deleteShop(shopId: number) {
+    if (!user) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/shops/${shopId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${user.token}` },
+      });
+
+      if (!response.ok) {
+        throw new Error("Could not delete shop.");
+      }
+
+      setUserShops((current) => current.filter((shop) => shop.id !== shopId));
+    } catch {
+      toast.error("Could not delete shop.");
+    }
+  }
+
   async function onAvatarChange(event: ChangeEvent<HTMLInputElement>) {
     const avatarError = await handleAvatarInputChange(event);
     setModalError(avatarError ?? "");
@@ -304,19 +325,15 @@ export default function DashboardClient() {
           pendingIncrementMap={pendingIncrementMap}
           onAddDrink={addDrink}
           onUndoDrink={undoDrink}
+          onDeleteShop={deleteShop}
           onOpenAddModal={() => setIsModalOpen(true)}
         />
 
         <div className="tea-line mb-20" />
 
-        <ByShopChart
-          hasShops={shops.length > 0}
-          data={byShopChartData}
-          options={chartOptions}
-        />
+        <ByShopChart data={byShopChartData} options={chartOptions} />
 
         <TrendsChart
-          hasShops={shops.length > 0}
           data={trendsChartData}
           options={chartOptions}
           granularity={granularity}

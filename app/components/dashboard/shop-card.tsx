@@ -1,4 +1,5 @@
 import { BobaShop } from "@/lib/types";
+import { Trash2 } from "lucide-react";
 import Image from "next/image";
 
 interface ShopCardProps {
@@ -9,6 +10,7 @@ interface ShopCardProps {
   isIncrementPending?: boolean;
   onAddDrink: (shopId: number) => void;
   onUndo: (shopId: number) => void;
+  onDelete: (shopId: number) => void;
 }
 
 export default function ShopCard({
@@ -19,13 +21,25 @@ export default function ShopCard({
   isIncrementPending = false,
   onAddDrink,
   onUndo,
+  onDelete,
 }: ShopCardProps) {
   return (
     <article
-      className={`group w-full max-w-60 transition-opacity duration-150 ${
+      className={`group relative w-full max-w-60 transition-opacity duration-150 ${
         isIncrementPending ? "opacity-60" : "opacity-100"
       }`}
     >
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete(shop.id);
+        }}
+        className="tea-text-muted hover:tea-text-primary absolute -top-2 -right-2 z-10 rounded-full p-1 opacity-0 transition-opacity group-hover:opacity-100"
+        aria-label={`Delete ${shop.name}`}
+      >
+        <Trash2 size={14} />
+      </button>
       <button
         type="button"
         onClick={() => onAddDrink(shop.id)}

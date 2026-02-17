@@ -8,6 +8,7 @@ interface ShopsSectionProps {
   pendingIncrementMap: Record<string, boolean>;
   onAddDrink: (shopId: number) => void;
   onUndoDrink: (shopId: number) => void;
+  onDeleteShop: (shopId: number) => void;
   onOpenAddModal: () => void;
 }
 
@@ -18,6 +19,7 @@ export default function ShopsSection({
   pendingIncrementMap,
   onAddDrink,
   onUndoDrink,
+  onDeleteShop,
   onOpenAddModal,
 }: ShopsSectionProps) {
   return (
@@ -36,6 +38,7 @@ export default function ShopsSection({
             isIncrementPending={Boolean(pendingIncrementMap[shop.id])}
             onAddDrink={onAddDrink}
             onUndo={onUndoDrink}
+            onDelete={onDeleteShop}
           />
         ))}
 
