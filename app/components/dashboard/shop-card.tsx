@@ -29,41 +29,43 @@ export default function ShopCard({
         isIncrementPending ? "opacity-60" : "opacity-100"
       }`}
     >
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete(shop.id);
-        }}
-        className="tea-text-muted hover:tea-text-primary absolute -top-2 -right-2 z-10 rounded-full p-1 opacity-0 transition-opacity group-hover:opacity-100"
-        aria-label={`Delete ${shop.name}`}
-      >
-        <Trash2 size={14} />
-      </button>
-      <button
-        type="button"
-        onClick={() => onAddDrink(shop.id)}
-        disabled={isIncrementPending}
-        className="w-full text-center transition-transform duration-200 hover:scale-[1.02]"
-        aria-label={`Add drink for ${shop.name}`}
-      >
-        <div className="flex flex-col items-center">
-          <Image
-            src={shop.avatar ?? "/default-shop-avatar.webp"}
-            alt={shop.name}
-            width={56}
-            height={56}
-            className="tea-ring-subtle h-14 w-14 rounded-full object-cover ring-1"
-            unoptimized
-          />
-          <h3 className="tea-text-primary mt-3 text-xs font-medium tracking-widest uppercase">
-            {shop.name}
-          </h3>
-          <p className="font-display tea-text-accent mt-2 text-5xl font-medium tracking-tight">
-            {count}
-          </p>
-        </div>
-      </button>
+      <div className="relative transition-scale duration-200 group-hover:scale-[1.02]">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(shop.id);
+          }}
+          className="tea-text-muted hover:text-red-500! absolute -top-2 -right-2 z-10 rounded-full p-1 opacity-0 transition-colors group-hover:opacity-100"
+          aria-label={`Delete ${shop.name}`}
+        >
+          <Trash2 size={14} />
+        </button>
+        <button
+          type="button"
+          onClick={() => onAddDrink(shop.id)}
+          disabled={isIncrementPending}
+          className="w-full text-center"
+          aria-label={`Add drink for ${shop.name}`}
+        >
+          <div className="flex flex-col items-center">
+            <Image
+              src={shop.avatar ?? "/default-shop-avatar.webp"}
+              alt={shop.name}
+              width={56}
+              height={56}
+              className="tea-ring-subtle h-14 w-14 rounded-full object-cover ring-1"
+              unoptimized
+            />
+            <h3 className="tea-text-primary mt-3 text-xs font-medium tracking-widest uppercase">
+              {shop.name}
+            </h3>
+            <p className="font-display tea-text-accent mt-2 text-5xl font-medium tracking-tight">
+              {count}
+            </p>
+          </div>
+        </button>
+      </div>
       <div className="mt-3 text-center">
         <button
           type="button"

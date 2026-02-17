@@ -29,6 +29,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import AddShopModal from "../components/dashboard/add-shop-modal";
 import ByShopChart from "../components/dashboard/by-shop-chart";
+import ConfirmDeleteModal from "../components/dashboard/confirm-delete-modal";
 import DateRangeSlider from "../components/dashboard/date-range-slider";
 import Footer from "../components/dashboard/footer";
 import Header from "../components/dashboard/header";
@@ -48,6 +49,7 @@ export default function DashboardClient() {
   const { isDark } = useTheme();
   const shops = user?.shops ?? EMPTY_SHOPS;
   const [modalError, setModalError] = useState("");
+  const [nameError, setNameError] = useState("");
   const [undoQueueMap, setUndoQueueMap] = useState<Record<string, number>>({});
   const [pendingIncrementMap, setPendingIncrementMap] = useState<
     Record<string, boolean>
@@ -59,6 +61,8 @@ export default function DashboardClient() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAddingShop, setIsAddingShop] = useState(false);
+  const [deletingShop, setDeletingShop] = useState<BobaShop | null>(null);
+  const [isDeletingShop, setIsDeletingShop] = useState(false);
   const {
     shopName,
     setShopName,
@@ -193,13 +197,22 @@ export default function DashboardClient() {
     }
   }
 
-  async function deleteShop(shopId: number) {
-    if (!user) {
+  function requestDeleteShop(shopId: number) {
+    const shop = shops.find((s) => s.id === shopId);
+    if (shop) {
+      setDeletingShop(shop);
+    }
+  }
+
+  async function confirmDeleteShop() {
+    if (!user || !deletingShop) {
       return;
     }
 
+    setIsDeletingShop(true);
+
     try {
-      const response = await fetch(`/api/shops/${shopId}`, {
+      const response = await fetch(`/api/shops/${deletingShop.id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${user.token}` },
       });
@@ -208,9 +221,14 @@ export default function DashboardClient() {
         throw new Error("Could not delete shop.");
       }
 
-      setUserShops((current) => current.filter((shop) => shop.id !== shopId));
+      setUserShops((current) =>
+        current.filter((shop) => shop.id !== deletingShop.id),
+      );
+      setDeletingShop(null);
     } catch {
       toast.error("Could not delete shop.");
+    } finally {
+      setIsDeletingShop(false);
     }
   }
 
@@ -228,6 +246,7 @@ export default function DashboardClient() {
     event.preventDefault();
     const trimmedShopName = shopName.trim();
     if (!trimmedShopName) {
+      setNameError("Shop name is required.");
       return;
     }
 
@@ -325,7 +344,7 @@ export default function DashboardClient() {
           pendingIncrementMap={pendingIncrementMap}
           onAddDrink={addDrink}
           onUndoDrink={undoDrink}
-          onDeleteShop={deleteShop}
+          onDeleteShop={requestDeleteShop}
           onOpenAddModal={() => setIsModalOpen(true)}
         />
 
@@ -343,9 +362,19 @@ export default function DashboardClient() {
 
       <Footer />
 
+      {deletingShop && (
+        <ConfirmDeleteModal
+          shopName={deletingShop.name}
+          isDeleting={isDeletingShop}
+          onConfirm={confirmDeleteShop}
+          onClose={() => setDeletingShop(null)}
+        />
+      )}
+
       <AddShopModal
         isOpen={isModalOpen}
         shopName={shopName}
+        nameError={nameError}
         avatar={avatarPreview}
         presets={DEFAULT_SHOPS}
         isSubmitting={isAddingShop}
@@ -353,10 +382,16 @@ export default function DashboardClient() {
         onClose={() => {
           setIsModalOpen(false);
           setModalError("");
+          setNameError("");
         }}
         onSubmit={handleAddShop}
         onPresetSelect={onPresetSelect}
-        onShopNameChange={setShopName}
+        onShopNameChange={(value) => {
+          setShopName(value);
+          if (nameError) {
+            setNameError("");
+          }
+        }}
         onAvatarChange={onAvatarChange}
       />
     </div>

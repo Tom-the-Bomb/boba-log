@@ -8,6 +8,7 @@ import DefaultShopsSection from "./default-shops-section";
 interface AddShopModalProps {
   isOpen: boolean;
   shopName: string;
+  nameError: string;
   avatar: string;
   presets: readonly DefaultShopPresetOption[];
   isSubmitting: boolean;
@@ -22,6 +23,7 @@ interface AddShopModalProps {
 export default function AddShopModal({
   isOpen,
   shopName,
+  nameError,
   avatar,
   presets,
   isSubmitting,
@@ -49,7 +51,7 @@ export default function AddShopModal({
         <h3 className="font-display tea-text-primary text-2xl font-medium tracking-tight">
           Add shop
         </h3>
-        <form className="mt-8 space-y-6" onSubmit={onSubmit}>
+        <form className="mt-8 space-y-6" onSubmit={onSubmit} noValidate>
           <DefaultShopsSection
             presets={presets}
             onPresetSelect={onPresetSelect}
@@ -66,9 +68,20 @@ export default function AddShopModal({
               id="modal-shop-name"
               value={shopName}
               onChange={(event) => onShopNameChange(event.target.value)}
-              className="tea-text-primary tea-border-accent-focus tea-border-subtle tea-input-line"
-              required
+              className={`tea-text-primary tea-border-accent-focus tea-border-subtle tea-input-line transition-colors ${
+                nameError ? "tea-input-error" : ""
+              }`}
+              aria-describedby={nameError ? "modal-shop-name-error" : undefined}
             />
+            {nameError && (
+              <p
+                id="modal-shop-name-error"
+                className="tea-form-error"
+                role="alert"
+              >
+                {nameError}
+              </p>
+            )}
           </div>
 
           <div>
