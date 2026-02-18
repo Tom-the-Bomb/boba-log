@@ -62,7 +62,6 @@ export default function ShopCard({
               width={56}
               height={56}
               className="tea-ring-subtle h-14 w-14 rounded-full object-cover ring-1"
-              unoptimized
             />
             <h3 className="tea-text-primary mt-3 text-xs font-medium tracking-widest uppercase">
               {translatedShopName}

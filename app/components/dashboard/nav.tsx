@@ -27,8 +27,8 @@ export default function Nav() {
         </p>
       </div>
       <div className="flex items-center gap-3">
-        <ThemeToggle />
         <LanguageToggle />
+        <ThemeToggle />
         <button type="button" onClick={handleLogout} className="tea-link px-2">
           {t("logout")}
         </button>

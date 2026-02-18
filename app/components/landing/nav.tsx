@@ -19,8 +19,8 @@ export default function Nav() {
         </span>
       </div>
       <nav className="flex items-center md:gap-2" aria-label="Primary">
-        <ThemeToggle />
         <LanguageToggle />
+        <ThemeToggle />
         <Link href="/auth" className="tea-link px-2">
           {t("signIn")}
         </Link>

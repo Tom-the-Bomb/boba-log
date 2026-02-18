@@ -29,7 +29,6 @@ export default function DefaultShopPresetCard({
         width={22}
         height={22}
         className="h-5.5 w-5.5 rounded-full object-cover"
-        unoptimized
       />
       <span className="tea-text-primary text-xs whitespace-nowrap">
         {presetName}

@@ -213,7 +213,6 @@ export default function AddShopModal({
                 width={64}
                 height={64}
                 className="tea-ring-subtle h-16 w-16 rounded-full object-cover ring-1"
-                unoptimized
               />
             </div>
           )}
