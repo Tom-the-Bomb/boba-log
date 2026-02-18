@@ -1,4 +1,4 @@
-# [Boba Log](https://boba.tomthebomb.dev)
+# [Boba Log](https://boba.tomthebomb)
 
 Boba Log is a Next.js app for tracking tea shop visits and drink totals, deployed to Cloudflare Workers.
 
@@ -13,6 +13,7 @@ Boba Log is a Next.js app for tracking tea shop visits and drink totals, deploye
 - **Object Storage:** Cloudflare R2
 - **Package Manager:** Bun
 - **Auth:** JWT (PBKDF2 algorithm) + localStorage
+- **Localization:** Mandarin + English with i18next and [simplelocalize.io](https://simplelocalize.io)
 
 ### Libraries
 
@@ -34,7 +35,7 @@ bun install
 
 ### Environment
 
-Create a `.dev.vars` file in the project root:
+Create a `.env` file in the project root:
 
 ```env
 JWT_SECRET=your-jwt-secret
@@ -66,7 +67,7 @@ bun run i18n:download        # download translations
 
 ### `bun dev`
 
-Runs the Next.js dev server with hot reload and local Cloudflare bindings (D1, R2). This is the recommended way to develop — bindings are local emulations so changes are fast and don't touch production data.
+Runs the Next.js dev server with hot reload and local Cloudflare bindings (D1, R2). This is the recommended way to develop, bindings are local emulations so changes are fast and don't touch production data.
 
 ```bash
 bun dev
