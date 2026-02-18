@@ -13,7 +13,7 @@ Boba Log is a Next.js app for tracking tea shop visits and drink totals, deploye
 - **Object Storage:** Cloudflare R2
 - **Package Manager:** Bun
 - **Auth:** JWT (PBKDF2 algorithm) + localStorage
-- **Localization:** Mandarin + English with i18next and [simplelocalize.io](https://simplelocalize.io)
+- **Localization:** Chinese (simplified) + English with i18next and [simplelocalize.io](https://simplelocalize.io)
 
 ### Libraries
 
@@ -83,7 +83,7 @@ bun preview
 
 ## Database (D1)
 
-This project uses the `boba_log` D1 binding from `wrangler.jsonc` with database name `boba-log`.
+This project uses the `D1` D1 binding from `wrangler.jsonc` with database name `boba-log`.
 
 ### Create database
 
@@ -113,7 +113,7 @@ bun wrangler d1 execute boba-log --remote --file=schema.sql
 
 ## Object Storage (R2)
 
-This project uses the `R2` binding from `wrangler.jsonc` with bucket name `boba-log` for storing shop avatar images.
+This project uses the `R2` R2 binding from `wrangler.jsonc` with bucket name `boba-log` for storing shop avatar images.
 
 ### Create bucket
 
