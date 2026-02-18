@@ -55,7 +55,7 @@ export default function DashboardClient() {
   const [deletingShop, setDeletingShop] = useState<BobaShop | null>(null);
 
   useEffect(() => {
-    if (!isLoadingUser && !user) {
+    if (!isLoadingUser && !user && window.location.pathname !== "/auth") {
       router.replace("/auth");
     }
   }, [isLoadingUser, router, user]);
