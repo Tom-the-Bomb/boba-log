@@ -1,13 +1,15 @@
 "use client";
 
-import { SITE_NAME } from "@/lib/site";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { useUser } from "../../providers/user-provider";
+import LanguageToggle from "../language-toggle";
 import ThemeToggle from "../theme-toggle";
 
-export default function Header() {
+export default function Nav() {
   const router = useRouter();
   const { user, logout: clearAuth } = useUser();
+  const { t } = useTranslation("common");
 
   function handleLogout() {
     clearAuth();
@@ -18,7 +20,7 @@ export default function Header() {
     <header className="tea-page-padding tea-border-subtle flex items-center justify-between border-b py-6">
       <div>
         <h1 className="tea-text-primary font-display text-2xl font-medium tracking-tight">
-          {SITE_NAME}
+          {t("siteName")}
         </h1>
         <p className="tea-text-muted tea-caps-10 mt-0.5">
           {user?.username ?? ""}
@@ -26,8 +28,9 @@ export default function Header() {
       </div>
       <div className="flex items-center gap-3">
         <ThemeToggle />
-        <button type="button" onClick={handleLogout} className="tea-link">
-          Logout
+        <LanguageToggle />
+        <button type="button" onClick={handleLogout} className="tea-link px-2">
+          {t("logout")}
         </button>
       </div>
     </header>

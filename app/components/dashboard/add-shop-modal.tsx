@@ -2,9 +2,11 @@
 
 import { DEFAULT_SHOPS } from "@/lib/default-shops";
 import { BobaShop } from "@/lib/types";
+import { X } from "lucide-react";
 import Image from "next/image";
 import type { ChangeEvent, FormEvent } from "react";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import useShopDraft from "../../hooks/use-shop-draft";
 import { useUser } from "../../providers/user-provider";
 import DefaultShopsSection from "./default-shops-section";
@@ -21,6 +23,8 @@ export default function AddShopModal({
   onShopAdded,
 }: AddShopModalProps) {
   const { user } = useUser();
+  const { t } = useTranslation("dashboard");
+  const { t: tc } = useTranslation("common");
   const {
     shopName,
     setShopName,
@@ -28,9 +32,11 @@ export default function AddShopModal({
     avatarPreview,
     handleAvatarInputChange,
     selectPreset,
+    clearAvatar,
     resetDraft,
   } = useShopDraft();
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [nameError, setNameError] = useState("");
@@ -41,6 +47,7 @@ export default function AddShopModal({
 
   function handleClose() {
     onClose();
+    resetDraft();
     setError("");
     setNameError("");
   }
@@ -52,7 +59,12 @@ export default function AddShopModal({
     event.preventDefault();
     const trimmedShopName = shopName.trim();
     if (!trimmedShopName) {
-      setNameError("Shop name is required.");
+      setNameError(t("shopNameRequired"));
+      return;
+    }
+
+    if (trimmedShopName.length > 100) {
+      setNameError(t("shopNameTooLong"));
       return;
     }
 
@@ -79,7 +91,7 @@ export default function AddShopModal({
         shop?: BobaShop;
       };
       if (!response.ok) {
-        throw new Error(data.error ?? "Could not create shop.");
+        throw new Error(data.error ?? t("couldNotCreateShop"));
       }
 
       onShopAdded(data.shop as BobaShop);
@@ -88,7 +100,7 @@ export default function AddShopModal({
       setError("");
       setNameError("");
     } catch {
-      setError("Could not add boba shop.");
+      setError(t("couldNotAddShop"));
     } finally {
       setIsSubmitting(false);
     }
@@ -105,12 +117,12 @@ export default function AddShopModal({
         type="button"
         className="absolute inset-0 bg-black/45 backdrop-blur-[1px] dark:bg-black/60"
         onClick={handleClose}
-        aria-label="Close modal"
+        aria-label={tc("closeModal")}
       />
 
       <div className="tea-surface tea-border-subtle relative z-10 w-full max-w-md border px-10 py-10">
         <h3 className="tea-text-primary font-display text-2xl font-medium tracking-tight">
-          Add shop
+          {t("addShopLabel")}
         </h3>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit} noValidate>
           <DefaultShopsSection
@@ -126,7 +138,7 @@ export default function AddShopModal({
               htmlFor="modal-shop-name"
               className="tea-text-muted tea-form-label"
             >
-              Shop name
+              {t("shopName")}
             </label>
             <input
               id="modal-shop-name"
@@ -158,23 +170,46 @@ export default function AddShopModal({
               htmlFor="modal-avatar"
               className="tea-text-muted tea-form-label"
             >
-              Avatar image
+              {t("avatarImage")}
             </label>
             <input
+              ref={fileInputRef}
               id="modal-avatar"
               type="file"
               accept="image/*"
               onChange={handleAvatarChange}
-              className="tea-text-muted file:tea-surface-muted file:tea-text-primary w-full text-sm file:mr-4 file:border-0 file:py-2 file:text-xs file:tracking-wider file:uppercase"
+              className="hidden"
             />
+            <div className="flex w-full items-center text-sm">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="tea-text-muted mr-4 bg-transparent py-2 text-xs tracking-wider uppercase"
+              >
+                {t("chooseFile")}
+              </button>
+              <span className="tea-text-muted truncate">
+                {avatarFile ? avatarFile.name : t("noFileChosen")}
+              </span>
+              {avatarFile && (
+                <button
+                  type="button"
+                  onClick={clearAvatar}
+                  className="tea-text-muted ml-2 shrink-0 hover:text-red-500"
+                  aria-label={t("removeAvatar")}
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
           </div>
 
           {avatarPreview && (
             <div className="pt-2">
-              <p className="tea-text-muted tea-caps-10 mb-2">Preview</p>
+              <p className="tea-text-muted tea-caps-10 mb-2">{t("preview")}</p>
               <Image
                 src={avatarPreview}
-                alt="Avatar preview"
+                alt={t("avatarPreviewAlt")}
                 width={64}
                 height={64}
                 className="tea-ring-subtle h-16 w-16 rounded-full object-cover ring-1"
@@ -187,14 +222,14 @@ export default function AddShopModal({
 
           <div className="flex items-center justify-end gap-5 pt-6">
             <button type="button" onClick={handleClose} className="tea-link">
-              Cancel
+              {tc("cancel")}
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
               className="tea-cta px-6 py-3 text-xs tracking-[0.15em] uppercase disabled:opacity-40"
             >
-              {isSubmitting ? "Adding..." : "Add shop"}
+              {isSubmitting ? t("adding") : t("addShopLabel")}
             </button>
           </div>
         </form>

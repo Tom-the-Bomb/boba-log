@@ -1,11 +1,11 @@
 "use client";
 
-import { SITE_NAME } from "@/lib/site";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { SubmitEventHandler } from "react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useUser } from "../providers/user-provider";
 
 type AuthMode = "login" | "signup";
@@ -13,6 +13,8 @@ type AuthMode = "login" | "signup";
 export default function AuthPage() {
   const router = useRouter();
   const { user, isLoadingUser, login } = useUser();
+  const { t } = useTranslation("auth");
+  const { t: tc } = useTranslation("common");
   const [mode, setMode] = useState<AuthMode>("login");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -25,20 +27,20 @@ export default function AuthPage() {
   function validateUsername(value: string) {
     const normalized = value.trim();
     if (!normalized) {
-      return "Username is required.";
+      return t("usernameRequired");
     }
     if (mode === "signup" && normalized.length < 3) {
-      return "Username must be at least 3 characters.";
+      return t("usernameMinLength");
     }
     return "";
   }
 
   function validatePassword(value: string) {
     if (!value) {
-      return "Password is required.";
+      return t("passwordRequired");
     }
     if (mode === "signup" && value.length < 6) {
-      return "Password must be at least 6 characters.";
+      return t("passwordMinLength");
     }
     return "";
   }
@@ -79,14 +81,14 @@ export default function AuthPage() {
         token?: string;
       };
       if (!response.ok) {
-        setError(data.error ?? "Authentication failed.");
+        setError(data.error ?? t("authFailed"));
         return;
       }
 
       await login(data.token!);
       router.push("/app");
     } catch {
-      setError("Could not connect to server.");
+      setError(t("connectionError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -100,10 +102,12 @@ export default function AuthPage() {
         <section className="w-full max-w-sm" aria-label="Authentication">
           <div className="mb-10">
             <p className="tea-text-accent text-xs tracking-[0.3em] uppercase">
-              {mode === "login" ? "Welcome back" : `Join ${SITE_NAME}`}
+              {mode === "login"
+                ? t("welcomeBack")
+                : t("joinSite", { siteName: tc("siteName") })}
             </p>
             <h1 className="tea-text-primary mt-3 font-display text-4xl font-medium tracking-tight">
-              {mode === "login" ? "Sign in" : "Create account"}
+              {mode === "login" ? t("signInTitle") : t("createAccountTitle")}
             </h1>
           </div>
 
@@ -117,7 +121,7 @@ export default function AuthPage() {
                   : "tea-text-muted tea-hover-text-primary"
               }`}
             >
-              Login
+              {t("loginTab")}
             </button>
             <button
               type="button"
@@ -128,7 +132,7 @@ export default function AuthPage() {
                   : "tea-text-muted tea-hover-text-primary"
               }`}
             >
-              Signup
+              {t("signupTab")}
             </button>
           </div>
 
@@ -138,7 +142,7 @@ export default function AuthPage() {
                 htmlFor="auth-username"
                 className="tea-text-muted tea-auth-form-label"
               >
-                Username
+                {t("username")}
               </label>
               <input
                 id="auth-username"
@@ -171,7 +175,7 @@ export default function AuthPage() {
                 htmlFor="auth-password"
                 className="tea-text-muted tea-auth-form-label"
               >
-                Password
+                {t("password")}
               </label>
               <div className="relative">
                 <input
@@ -195,7 +199,9 @@ export default function AuthPage() {
                   type="button"
                   onClick={() => setShowPassword((s) => !s)}
                   className="tea-text-muted tea-hover-text-primary absolute right-0 bottom-2.5 p-1 transition-colors"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-label={
+                    showPassword ? t("hidePassword") : t("showPassword")
+                  }
                 >
                   {password &&
                     (showPassword ? (
@@ -228,10 +234,10 @@ export default function AuthPage() {
               className="tea-cta mt-4 w-full py-3.5 text-xs tracking-[0.2em] uppercase disabled:opacity-50"
             >
               {isSubmitting
-                ? "Please wait..."
+                ? t("pleaseWait")
                 : mode === "login"
-                  ? "Sign In"
-                  : "Create Account"}
+                  ? t("signInButton")
+                  : t("createAccountButton")}
             </button>
           </form>
         </section>
@@ -239,9 +245,9 @@ export default function AuthPage() {
 
       <div className="tea-line tea-line-bottom tea-page-padding-sm" />
       <footer className="tea-page-padding-sm flex items-center justify-between py-6">
-        <p className="tea-text-muted tea-caps-10-wide">{SITE_NAME}</p>
+        <p className="tea-text-muted tea-caps-10-wide">{tc("siteName")}</p>
         <Link href="/" className="tea-link text-[10px]">
-          &larr; Home
+          &larr; {tc("home")}
         </Link>
       </footer>
     </div>

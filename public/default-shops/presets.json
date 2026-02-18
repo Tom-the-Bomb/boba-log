@@ -1,40 +1,49 @@
 [
   {
-    "name": "Chagee",
+    "en": "Chagee",
+    "zh": "霸王茶姬",
     "avatar": "/default-shops/chagee.webp"
   },
   {
-    "name": "Chapanda",
+    "en": "Chapanda",
+    "zh": "茶百道",
     "avatar": "/default-shops/chapanda.webp"
   },
   {
-    "name": "Chatime",
+    "en": "Chatime",
+    "zh": "日出茶太",
     "avatar": "/default-shops/chatime.webp"
   },
-  { "name": "Coco", "avatar": "/default-shops/coco.webp" },
+  { "en": "Coco", "zh": "都可茶飲", "avatar": "/default-shops/coco.webp" },
   {
-    "name": "Gong Cha",
+    "en": "Gong Cha",
+    "zh": "貢茶",
     "avatar": "/default-shops/gong-cha.webp"
   },
   {
-    "name": "Heytea",
+    "en": "Heytea",
+    "zh": "喜茶",
     "avatar": "/default-shops/heytea.webp"
   },
   {
-    "name": "Molly Tea",
+    "en": "Molly Tea",
+    "zh": "茉莉奶白",
     "avatar": "/default-shops/molly-tea.webp"
   },
-  { "name": "Naixue", "avatar": "/default-shops/naixue.webp" },
+  { "en": "Naixue", "zh": "奈雪的茶", "avatar": "/default-shops/naixue.webp" },
   {
-    "name": "The Alley",
+    "en": "The Alley",
+    "zh": "鹿角巷",
     "avatar": "/default-shops/the-alley.webp"
   },
   {
-    "name": "Auntea Jenny",
+    "en": "Auntea Jenny",
+    "zh": "沪上阿姨",
     "avatar": "/default-shops/auntea-jenny.webp"
   },
   {
-    "name": "Charlie's Tea",
+    "en": "Charlie's Tea",
+    "zh": "茶理宜世",
     "avatar": "/default-shops/charlies-tea.webp"
   }
 ]

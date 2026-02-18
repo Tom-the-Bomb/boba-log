@@ -17,7 +17,7 @@ const avatarExistsCache = new Map<
 >();
 
 export function getPublicAvatarUrl(shopId: number) {
-  return `https://boba-log-avatars.tomthebomb.dev/${shopId}.webp`;
+  return `/api/avatars/${shopId}`;
 }
 
 export async function checkPublicAvatarExists(shopId: number) {
@@ -28,11 +28,9 @@ export async function checkPublicAvatarExists(shopId: number) {
   }
 
   try {
-    const response = await fetch(getPublicAvatarUrl(shopId), {
-      method: "HEAD",
-      cache: "no-store",
-    });
-    const exists = response.ok;
+    const r2 = getR2();
+    const obj = await r2.head(`${shopId}.webp`);
+    const exists = obj !== null;
     avatarExistsCache.set(shopId, {
       exists,
       expiresAt: now + AVATAR_EXISTS_CACHE_TTL_MS,
@@ -61,4 +59,10 @@ export async function uploadAvatarToR2({ shopId, body }: UploadAvatarInput) {
     exists: true,
     expiresAt: Date.now() + AVATAR_EXISTS_CACHE_TTL_MS,
   });
+}
+
+export async function deleteAvatarFromR2(shopId: number) {
+  const r2 = getR2();
+  await r2.delete(`${shopId}.webp`);
+  avatarExistsCache.delete(shopId);
 }

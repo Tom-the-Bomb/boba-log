@@ -1,4 +1,4 @@
-import { DEFAULT_SHOPS } from "../default-shops";
+import { findDefaultShop } from "../default-shops";
 import { BobaShop, PublicUser, ShopDocument } from "../types";
 import { getDb } from "./db";
 import { checkPublicAvatarExists, getPublicAvatarUrl } from "./r2";
@@ -23,26 +23,18 @@ interface DateRow {
 }
 
 async function toPublicShop(shop: ShopDocument): Promise<BobaShop> {
-  const defaultAvatar =
-    DEFAULT_SHOPS.find(
-      (defaultShop) =>
-        defaultShop.name.trim().toLowerCase() ===
-        shop.name.trim().toLowerCase(),
-    )?.avatar ?? null;
-
-  if (defaultAvatar) {
-    return {
-      ...shop,
-      avatar: defaultAvatar,
-    };
-  }
-
-  const r2AvatarUrl = getPublicAvatarUrl(shop.id);
   const hasR2Avatar = await checkPublicAvatarExists(shop.id);
+
+  let avatar: string | null = null;
+  if (hasR2Avatar) {
+    avatar = getPublicAvatarUrl(shop.id);
+  } else {
+    avatar = findDefaultShop(shop.name)?.avatar ?? null;
+  }
 
   return {
     ...shop,
-    avatar: hasR2Avatar ? r2AvatarUrl : null,
+    avatar,
   };
 }
 

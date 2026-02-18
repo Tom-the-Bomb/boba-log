@@ -19,13 +19,14 @@ import {
 } from "chart.js";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import AddShopModal from "../components/dashboard/add-shop-modal";
 import ByShopChart from "../components/dashboard/by-shop-chart";
 import ConfirmDeleteModal from "../components/dashboard/confirm-delete-modal";
 import DateRangeSlider from "../components/dashboard/date-range-slider";
 import Footer from "../components/dashboard/footer";
-import Header from "../components/dashboard/header";
+import Nav from "../components/dashboard/nav";
 import ShopsSection from "../components/dashboard/shops-section";
 import TrendsChart from "../components/dashboard/trends-chart";
 import { useTheme } from "../providers/theme-provider";
@@ -39,6 +40,7 @@ export default function DashboardClient() {
   const router = useRouter();
   const { user, isLoadingUser, setUserShops } = useUser();
   const { isDark } = useTheme();
+  const translator = useTranslation("dashboard");
   const shops = user?.shops ?? EMPTY_SHOPS;
 
   const [undoQueueMap, setUndoQueueMap] = useState<Record<string, number>>({});
@@ -85,8 +87,8 @@ export default function DashboardClient() {
   const totalCount = useMemo(() => getTotalCount(shopCounts), [shopCounts]);
 
   const byShopChartData = useMemo(
-    () => buildByShopChartData(shopCounts),
-    [shopCounts],
+    () => buildByShopChartData(translator, shopCounts),
+    [shopCounts, translator],
   );
 
   const chartOptions = useMemo(
@@ -146,7 +148,7 @@ export default function DashboardClient() {
         [shopId]: (current[shopId] ?? 0) + 1,
       }));
     } catch {
-      toast.error("Could not increment drink count.");
+      toast.error(translator.t("couldNotIncrement"));
     } finally {
       setPendingIncrementMap((current) => ({ ...current, [shopId]: false }));
     }
@@ -167,7 +169,7 @@ export default function DashboardClient() {
         [shopId]: Math.max((current[shopId] ?? 0) - 1, 0),
       }));
     } catch {
-      toast.error("Could not undo drink count.");
+      toast.error(translator.t("couldNotUndo"));
     }
   }
 
@@ -182,7 +184,7 @@ export default function DashboardClient() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-tea-white">
         <p className="tea-text-muted text-sm tracking-[0.2em] uppercase">
-          Loading...
+          {translator.t("loading")}
         </p>
       </div>
     );
@@ -190,7 +192,7 @@ export default function DashboardClient() {
 
   return (
     <div className="tea-grid-bg min-h-screen">
-      <Header />
+      <Nav />
 
       <main className="mx-auto w-full max-w-5xl px-10 py-16 sm:px-16 lg:px-24">
         <section className="mb-20">
@@ -210,7 +212,7 @@ export default function DashboardClient() {
 
         <section className="mb-20 text-center">
           <p className="tea-text-accent text-xs tracking-[0.3em] uppercase">
-            Total drinks
+            {translator.t("totalDrinks")}
           </p>
           <p className="tea-text-primary mt-3 font-display text-8xl font-medium tracking-tight sm:text-9xl">
             {totalCount}

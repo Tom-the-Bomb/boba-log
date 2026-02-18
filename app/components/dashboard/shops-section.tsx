@@ -1,4 +1,7 @@
+"use client";
+
 import type { BobaShop } from "@/lib/types";
+import { useTranslation } from "react-i18next";
 import ShopCard from "./shop-card";
 
 interface ShopsSectionProps {
@@ -22,10 +25,12 @@ export default function ShopsSection({
   onDeleteShop,
   onOpenAddModal,
 }: ShopsSectionProps) {
+  const { t } = useTranslation("dashboard");
+
   return (
     <section className="mb-20">
       <p className="tea-text-accent mb-10 text-xs tracking-[0.3em] uppercase">
-        Your shops
+        {t("yourShops")}
       </p>
       <div className="flex flex-wrap justify-center gap-10 lg:justify-start">
         {shops.map((shop) => (
@@ -46,7 +51,7 @@ export default function ShopsSection({
           type="button"
           onClick={onOpenAddModal}
           className="tea-border-accent-hover tea-border-subtle flex h-44 w-full max-w-60 items-center justify-center border border-dashed"
-          aria-label="Add shop"
+          aria-label={t("addShopLabel")}
         >
           <span className="tea-text-accent font-display text-4xl font-medium opacity-80">
             +

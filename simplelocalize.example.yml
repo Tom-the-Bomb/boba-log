@@ -1,0 +1,50 @@
+# Need help with the configuration? Contact us: contact@simplelocalize.io
+
+# Common, required configuration
+apiKey: PROJECT_API_KEY
+
+##############################################################################################
+# 'simplelocalize upload' ## Learn more: https://simplelocalize.io/docs/general/file-formats/
+##############################################################################################
+
+# Input path for source translations.
+# Placeholders:
+# - {lang} - language key (optional)
+# - {ns} - namespace (optional)
+# Examples:
+# - ./translations_{lang}.json
+# - ./translations_en/{ns}.json
+# Use '--dryRun' parameter to see which files will be uploaded without actually uploading them.
+uploadPath: ./i18n/messages/{ns}.json
+
+# Specify language key for uploaded translations. Language key must match the language key used in SimpleLocalize.
+uploadLanguageKey: en
+
+# Input format for translations: https://simplelocalize.io/docs/general/file-formats/
+uploadFormat: multi-language-json
+
+#####################################################################################################
+# 'simplelocalize download' ## Learn more: https://simplelocalize.io/docs/cli/download-translations/
+#####################################################################################################
+
+# Output path for downloaded translations.
+# Placeholders:
+# - {lang} - language key (optional)
+# - {ns} - namespace (optional)
+# Examples:
+# - ./translations_{lang}.json
+# - ./translations_{lang}/{ns}.json
+downloadPath: ./i18n/messages/{ns}.json
+
+# Specify language keys which you want to download, by default all languages are downloaded.
+# downloadLanguageKeys: ['pl', 'es']
+
+# Output format for translations: https://simplelocalize.io/docs/general/file-formats/
+downloadFormat: multi-language-json
+
+#########################################
+# 'simplelocalize auto-translate' ## Learn more: https://simplelocalize.io/docs/cli/other-commands/#auto-translate-project
+#########################################
+
+# Specify language keys which you want to auto-translate, leave empty to auto-translate all languages.
+# autoTranslateLanguageKeys: ['en', 'de']

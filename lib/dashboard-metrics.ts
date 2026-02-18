@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+import { translateShopName } from "./default-shops";
 import type { BobaShop } from "./types";
 
 export type Granularity = "year" | "month" | "weekday";
@@ -8,29 +10,11 @@ export const GRANULARITY_OPTIONS: readonly Granularity[] = [
   "weekday",
 ];
 
-const WEEKDAY_LABELS = [
-  "Sun",
-  "Mon",
-  "Tue",
-  "Wed",
-  "Thu",
-  "Fri",
-  "Sat",
-] as const;
-const MONTH_LABELS = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-] as const;
+export const GRANULARITY_KEYS: Record<Granularity, string> = {
+  year: "granularityYear",
+  month: "granularityMonth",
+  weekday: "granularityWeekday",
+};
 
 interface ShopCountItem {
   shop: BobaShop;
@@ -84,12 +68,17 @@ export function getTotalCount(shopCounts: ShopCountItem[]): number {
   return shopCounts.reduce((sum, item) => sum + item.count, 0);
 }
 
-export function buildByShopChartData(shopCounts: ShopCountItem[]) {
+export function buildByShopChartData(
+  { t, i18n }: ReturnType<typeof useTranslation>,
+  shopCounts: ShopCountItem[],
+) {
   return {
-    labels: shopCounts.map(({ shop }) => shop.name),
+    labels: shopCounts.map(({ shop }) =>
+      translateShopName(shop.name, i18n.language),
+    ),
     datasets: [
       {
-        label: "Drinks",
+        label: t("drinks"),
         data: shopCounts.map(({ count }) => count),
         backgroundColor: "rgba(123, 139, 111, 0.6)",
         borderRadius: 4,
@@ -99,6 +88,7 @@ export function buildByShopChartData(shopCounts: ShopCountItem[]) {
 }
 
 export function buildTrendsChartData(
+  t: ReturnType<typeof useTranslation>["t"],
   shops: readonly BobaShop[],
   startDate: string,
   endDate: string,
@@ -119,9 +109,9 @@ export function buildTrendsChartData(
       if (granularity === "year") {
         key = String(point.getUTCFullYear());
       } else if (granularity === "month") {
-        key = MONTH_LABELS[point.getUTCMonth()];
+        key = t(`monthLabels[${point.getUTCMonth()}]`);
       } else {
-        key = WEEKDAY_LABELS[point.getUTCDay()];
+        key = t(`weekdays[${point.getUTCDay()}]`);
       }
 
       bucketMap[key] = (bucketMap[key] ?? 0) + count;
@@ -130,9 +120,9 @@ export function buildTrendsChartData(
 
   let labels: readonly string[];
   if (granularity === "month") {
-    labels = MONTH_LABELS;
+    labels = Array.from({ length: 12 }, (_, i) => t(`monthLabels[${i}]`));
   } else if (granularity === "weekday") {
-    labels = WEEKDAY_LABELS;
+    labels = Array.from({ length: 7 }, (_, i) => t(`weekdays[${i}]`));
   } else {
     const currentYear = String(new Date().getUTCFullYear());
     const yearLabels = new Set(Object.keys(bucketMap));
@@ -144,7 +134,9 @@ export function buildTrendsChartData(
     labels: labels as string[],
     datasets: [
       {
-        label: `Boba per ${granularity}`,
+        label: t("bobaPerGranularity", {
+          granularity: t(GRANULARITY_KEYS[granularity]),
+        }),
         data: labels.map((label) => bucketMap[label] ?? 0),
         backgroundColor: "rgba(196, 169, 106, 0.6)",
         borderRadius: 4,

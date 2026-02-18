@@ -3,6 +3,7 @@
 import type { DefaultShopPresetOption } from "@/lib/default-shops";
 import { ChevronDown } from "lucide-react";
 import { useLayoutEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import DefaultShopPresetCard from "./default-shop-preset-card";
 
 interface DefaultShopsSectionProps {
@@ -14,6 +15,7 @@ export default function DefaultShopsSection({
   presets,
   onPresetSelect,
 }: DefaultShopsSectionProps) {
+  const { t } = useTranslation("dashboard");
   const presetsContainerRef = useRef<HTMLDivElement | null>(null);
   const [hasMeasured, setHasMeasured] = useState(false);
   const [isPresetsCollapsible, setIsPresetsCollapsible] = useState(false);
@@ -68,7 +70,7 @@ export default function DefaultShopsSection({
 
   return (
     <div>
-      <p className="tea-text-muted tea-caps-10 mb-2 block">Presets</p>
+      <p className="tea-text-muted tea-caps-10 mb-2 block">{t("presets")}</p>
       <div
         className={`overflow-hidden ${
           hasMeasured ? "transition-[max-height] duration-200" : ""
@@ -77,7 +79,7 @@ export default function DefaultShopsSection({
         <div ref={presetsContainerRef} className="flex flex-wrap gap-2">
           {presets.map((preset) => (
             <DefaultShopPresetCard
-              key={preset.name}
+              key={preset.en}
               preset={preset}
               onSelect={onPresetSelect}
             />
@@ -90,7 +92,7 @@ export default function DefaultShopsSection({
           onClick={() => setIsPresetsExpanded((current) => !current)}
           className="tea-link mt-2 inline-flex items-center gap-1 py-1.5 text-[10px]!"
         >
-          {isPresetsExpanded ? "Show less" : "Show more"}
+          {isPresetsExpanded ? t("showLess") : t("showMore")}
           <ChevronDown
             aria-hidden="true"
             className={`h-3 w-3 transition-transform ${isPresetsExpanded ? "rotate-180" : ""}`}

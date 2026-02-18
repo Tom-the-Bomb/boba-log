@@ -1,0 +1,22 @@
+{
+  "en": {
+    "cancel": "Cancel",
+    "closeModal": "Close modal",
+    "footerTagline": "For tea lovers",
+    "home": "Home",
+    "logout": "Logout",
+    "siteName": "Boba Log",
+    "switchToDark": "Switch to dark mode",
+    "switchToLight": "Switch to light mode"
+  },
+  "zh": {
+    "cancel": "取消",
+    "closeModal": "关闭窗口",
+    "footerTagline": "献给爱茶的人",
+    "home": "首页",
+    "logout": "登出",
+    "siteName": "Boba Log",
+    "switchToDark": "切换到深色模式",
+    "switchToLight": "切换到浅色模式"
+  }
+}

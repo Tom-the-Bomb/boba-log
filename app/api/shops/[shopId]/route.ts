@@ -1,3 +1,4 @@
+import { deleteAvatarFromR2 } from "@/lib/api/r2";
 import { getUsernameFromRequest } from "@/lib/api/request-auth";
 import { deleteShop } from "@/lib/api/users";
 import { NextRequest, NextResponse } from "next/server";
@@ -12,10 +13,12 @@ export async function DELETE(request: NextRequest, { params }: Params) {
     }
 
     const { shopId } = await params;
-    const deleted = await deleteShop(username, Number(shopId));
+    const shopIdNum = Number(shopId);
+    const deleted = await deleteShop(username, shopIdNum);
     if (!deleted) {
       return NextResponse.json({ error: "Shop not found" }, { status: 404 });
     }
+    await deleteAvatarFromR2(shopIdNum);
 
     return NextResponse.json({ success: true });
   } catch {

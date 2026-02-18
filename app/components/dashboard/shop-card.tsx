@@ -1,6 +1,10 @@
+"use client";
+
+import { translateShopName } from "@/lib/default-shops";
 import { BobaShop } from "@/lib/types";
 import { Trash2 } from "lucide-react";
 import Image from "next/image";
+import { useTranslation } from "react-i18next";
 
 interface ShopCardProps {
   shop: BobaShop;
@@ -23,6 +27,9 @@ export default function ShopCard({
   onUndo,
   onDelete,
 }: ShopCardProps) {
+  const { t, i18n } = useTranslation("dashboard");
+  const translatedShopName = translateShopName(shop.name, i18n.language);
+
   return (
     <article
       className={`group relative w-full max-w-60 transition-opacity duration-150 ${
@@ -37,7 +44,7 @@ export default function ShopCard({
             onDelete(shop.id);
           }}
           className="tea-text-muted absolute -top-2 -right-2 z-10 rounded-full p-1 opacity-0 transition-colors group-hover:opacity-100 hover:text-red-500!"
-          aria-label={`Delete ${shop.name}`}
+          aria-label={t("deleteShopAria", { name: translatedShopName })}
         >
           <Trash2 size={14} />
         </button>
@@ -46,19 +53,19 @@ export default function ShopCard({
           onClick={() => onAddDrink(shop.id)}
           disabled={isIncrementPending}
           className="w-full text-center"
-          aria-label={`Add drink for ${shop.name}`}
+          aria-label={t("addDrinkAria", { name: translatedShopName })}
         >
           <div className="flex flex-col items-center">
             <Image
               src={shop.avatar ?? "/default-shop-avatar.webp"}
-              alt={shop.name}
+              alt={translatedShopName}
               width={56}
               height={56}
               className="tea-ring-subtle h-14 w-14 rounded-full object-cover ring-1"
               unoptimized
             />
             <h3 className="tea-text-primary mt-3 text-xs font-medium tracking-widest uppercase">
-              {shop.name}
+              {translatedShopName}
             </h3>
             <p className="tea-text-accent mt-2 font-display text-5xl font-medium tracking-tight">
               {count}
@@ -73,7 +80,7 @@ export default function ShopCard({
           disabled={!canUndo || isIncrementPending}
           className="tea-text-muted tea-hover-text-accent-enabled text-[10px] tracking-[0.15em] uppercase transition-colors disabled:pointer-events-none disabled:opacity-30"
         >
-          {undoCount > 0 ? `Undo (${undoCount})` : "Undo"}
+          {undoCount > 0 ? t("undoWithCount", { count: undoCount }) : t("undo")}
         </button>
       </div>
     </article>

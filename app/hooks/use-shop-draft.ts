@@ -3,7 +3,8 @@
 import type { DefaultShopPresetOption } from "@/lib/default-shops";
 import { resizeImageToWebP } from "@/lib/resize-image";
 import type { ChangeEvent } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 function isImageMimeType(mimeType: string) {
   return mimeType.toLowerCase().startsWith("image/");
@@ -24,9 +25,11 @@ function revokeObjectUrlIfNeeded(url: string) {
 }
 
 export default function useShopDraft() {
+  const { i18n } = useTranslation();
   const [shopName, setShopName] = useState("");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState("");
+  const presetAbortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     return () => {
@@ -46,6 +49,9 @@ export default function useShopDraft() {
       return "Invalid avatar format. Please upload an image file.";
     }
 
+    presetAbortRef.current?.abort();
+    presetAbortRef.current = null;
+
     try {
       const resized = await resizeImageToWebP(file);
       revokeObjectUrlIfNeeded(avatarPreview);
@@ -58,11 +64,42 @@ export default function useShopDraft() {
     }
   }
 
-  function selectPreset(preset: DefaultShopPresetOption) {
+  async function selectPreset(preset: DefaultShopPresetOption) {
+    presetAbortRef.current?.abort();
+    const controller = new AbortController();
+    presetAbortRef.current = controller;
+
     revokeObjectUrlIfNeeded(avatarPreview);
-    setShopName(preset.name);
-    setAvatarFile(null);
+    setShopName(preset[i18n.language as keyof DefaultShopPresetOption]);
     setAvatarPreview(preset.avatar);
+
+    try {
+      const response = await fetch(preset.avatar, {
+        signal: controller.signal,
+      });
+      const blob = await response.blob();
+      if (controller.signal.aborted) {
+        return;
+      }
+      const file = new File(
+        [blob],
+        preset.avatar.split("/").pop() ?? "avatar.webp",
+        { type: "image/webp" },
+      );
+      setAvatarFile(file);
+    } catch {
+      if (!controller.signal.aborted) {
+        setAvatarFile(null);
+      }
+    }
+  }
+
+  function clearAvatar() {
+    presetAbortRef.current?.abort();
+    presetAbortRef.current = null;
+    revokeObjectUrlIfNeeded(avatarPreview);
+    setAvatarFile(null);
+    setAvatarPreview("");
   }
 
   function resetDraft() {
@@ -79,6 +116,7 @@ export default function useShopDraft() {
     avatarPreview,
     handleAvatarInputChange,
     selectPreset,
+    clearAvatar,
     resetDraft,
   };
 }

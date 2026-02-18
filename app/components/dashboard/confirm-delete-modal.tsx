@@ -1,7 +1,9 @@
 "use client";
 
+import { translateShopName } from "@/lib/default-shops";
 import type { BobaShop } from "@/lib/types";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { useUser } from "../../providers/user-provider";
 
@@ -17,6 +19,8 @@ export default function ConfirmDeleteModal({
   onDeleted,
 }: ConfirmDeleteModalProps) {
   const { user } = useUser();
+  const { t, i18n } = useTranslation("dashboard");
+  const { t: tc } = useTranslation("common");
   const [isDeleting, setIsDeleting] = useState(false);
 
   async function handleConfirm() {
@@ -33,13 +37,13 @@ export default function ConfirmDeleteModal({
       });
 
       if (!response.ok) {
-        throw new Error("Could not delete shop.");
+        throw new Error(t("couldNotDeleteShop"));
       }
 
       onDeleted(shop.id);
       onClose();
     } catch {
-      toast.error("Could not delete shop.");
+      toast.error(t("couldNotDeleteShop"));
     } finally {
       setIsDeleting(false);
     }
@@ -51,17 +55,19 @@ export default function ConfirmDeleteModal({
         type="button"
         className="absolute inset-0 bg-black/45 backdrop-blur-[1px] dark:bg-black/60"
         onClick={onClose}
-        aria-label="Close modal"
+        aria-label={tc("closeModal")}
       />
 
       <div className="tea-surface tea-border-subtle relative z-10 w-full max-w-sm border px-10 py-10">
         <h3 className="tea-text-primary font-display text-2xl font-medium tracking-tight">
-          Delete shop
+          {t("deleteShopTitle")}
         </h3>
         <p className="tea-text-muted mt-4 text-sm leading-relaxed">
-          Are you sure you want to delete{" "}
-          <span className="tea-text-primary font-medium">{shop.name}</span>?
-          This will remove all its drink history.
+          {t("deleteConfirmBefore")}
+          <span className="tea-text-primary font-medium">
+            {translateShopName(shop.name, i18n.language)}
+          </span>
+          {t("deleteConfirmAfter")}
         </p>
 
         <div className="flex items-center justify-end gap-5 pt-8">
@@ -71,7 +77,7 @@ export default function ConfirmDeleteModal({
             disabled={isDeleting}
             className="tea-link"
           >
-            Cancel
+            {tc("cancel")}
           </button>
           <button
             type="button"
@@ -79,7 +85,7 @@ export default function ConfirmDeleteModal({
             disabled={isDeleting}
             className="bg-red-600 px-6 py-3 text-xs tracking-[0.15em] text-white uppercase transition-colors hover:bg-red-700 disabled:opacity-40"
           >
-            {isDeleting ? "Deleting..." : "Delete"}
+            {isDeleting ? t("deleting") : t("delete")}
           </button>
         </div>
       </div>

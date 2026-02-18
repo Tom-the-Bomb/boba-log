@@ -19,5 +19,5 @@ export async function resizeImageToWebP(file: File): Promise<File> {
     type: "image/webp",
     quality: 0.82,
   });
-  return new File([blob], "avatar.webp", { type: "image/webp" });
+  return new File([blob], file.name, { type: "image/webp" });
 }

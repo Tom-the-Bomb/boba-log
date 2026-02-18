@@ -1,0 +1,20 @@
+{
+  "en": {
+    "getStarted": "Get Started",
+    "headingLine1": "Your tea,",
+    "headingLine2": "your ritual.",
+    "learnMore": "Learn more",
+    "signIn": "Sign In",
+    "subheading": "A quiet space to log your favorite tea shops, track every drink, and find the patterns in what you love.",
+    "tagline": "Track · Discover · Savor"
+  },
+  "zh": {
+    "getStarted": "立即开始",
+    "headingLine1": "你的茶，",
+    "headingLine2": "你的仪式。",
+    "learnMore": "了解更多",
+    "signIn": "登录",
+    "subheading": "一个安静的空间，记录你喜爱的茶店，追踪每一杯饮品，发现你所爱的规律。",
+    "tagline": "记录 · 发现 · 品味"
+  }
+}

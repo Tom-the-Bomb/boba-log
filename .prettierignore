@@ -7,3 +7,5 @@ node_modules
 .env
 bun.lock
 wrangler.jsonc
+i18n/messages
+simplelocalize.yml

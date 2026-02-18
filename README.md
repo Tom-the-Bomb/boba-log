@@ -34,27 +34,51 @@ bun install
 
 ### Environment
 
-Create a `.env` file in the project root:
+Create a `.dev.vars` file in the project root:
 
 ```env
 JWT_SECRET=your-jwt-secret
 ```
 
+### Local database
+
+Initialize the local D1 database for `bun dev`:
+
+```bash
+wrangler d1 execute boba-log --local --file=schema.sql
+```
+
+### SimpleLocalize (i18n)
+
+Translation files live in `i18n/messages/`. The `simplelocalize.yml` config is gitignored since it contains an API key. To set it up:
+
+1. Install the [SimpleLocalize CLI](https://simplelocalize.io/docs/cli/get-started/)
+2. Create a `simplelocalize.yml` with your API key and the upload/download paths pointing to `./i18n/messages/{ns}.json` (use `multi-language-json` format)
+3. Use the i18n scripts:
+
+```bash
+bun run i18n:upload          # dry run upload
+bun run i18n:upload:confirm  # upload to SimpleLocalize
+bun run i18n:download        # download translations
+```
+
 ## Development
 
-Use `bun run preview` as the primary way to test app behavior, APIs, and Cloudflare bindings (including D1).
+### `bun dev`
+
+Runs the Next.js dev server with hot reload and local Cloudflare bindings (D1, R2). This is the recommended way to develop — bindings are local emulations so changes are fast and don't touch production data.
 
 ```bash
-bun run preview
+bun dev
 ```
 
-Use `bun run dev` for fast local UI iteration only:
+### `bun preview`
+
+Builds the full Cloudflare Workers bundle and runs it locally via wrangler. Uses **remote** D1 and R2 bindings, so it hits your actual production data. Useful for final verification before deploying.
 
 ```bash
-bun run dev
+bun preview
 ```
-
-`bun run dev` is useful for frontend speed, but `bun run preview` is the more accurate test path before deploying.
 
 ## Database (D1)
 
@@ -98,11 +122,7 @@ Create the R2 bucket:
 bun wrangler r2 bucket create boba-log
 ```
 
-### Public access
-
-Enable public access for the bucket through the Cloudflare dashboard under **R2 > boba-log > Settings > Public access**. Connect a custom domain or use the `r2.dev` subdomain so avatar images can be served directly.
-
-Avatars are uploaded as `{shopId}.webp` and served from the configured public URL.
+Avatars are uploaded as `{shopId}.webp` and served via the `/api/avatars/[shopId]` API route, which reads directly from the R2 binding.
 
 ## Default Shop Avatars
 
@@ -123,11 +143,14 @@ bun run deploy
 
 ## Scripts
 
-- `bun run dev` — Next.js dev server
+- `bun run dev` — Next.js dev server with local Cloudflare bindings
 - `bun run build` — Production build
-- `bun run preview` — OpenNext Cloudflare preview
+- `bun run preview` — OpenNext Cloudflare preview with remote bindings
 - `bun run deploy` — OpenNext Cloudflare deploy
 - `bun run assets:process` — Normalize `public/default-shops` images to `256x256` WebP
+- `bun run i18n:upload` — Dry run upload translations to SimpleLocalize
+- `bun run i18n:upload:confirm` — Upload translations to SimpleLocalize
+- `bun run i18n:download` — Download translations from SimpleLocalize
 - `bun run lint` — ESLint + Prettier check + TypeScript no-emit
 - `bun run lint:fix` — ESLint fix + Prettier write + TypeScript no-emit
 - `bun run format` — Prettier write

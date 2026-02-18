@@ -9,6 +9,7 @@ import {
 } from "@/lib/date";
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface DateRangeSliderProps {
   startDate: string;
@@ -22,21 +23,6 @@ interface DateRangeSliderProps {
 type SelectionPhase = "idle" | "selecting-end";
 
 const DAY_MS = 86_400_000;
-const MONTH_NAMES = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-] as const;
-const WEEKDAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"] as const;
 
 export default function DateRangeSlider({
   startDate,
@@ -46,6 +32,8 @@ export default function DateRangeSlider({
   minDate,
   maxDate,
 }: DateRangeSliderProps) {
+  const { t } = useTranslation("dashboard");
+
   const [viewYear, setViewYear] = useState(() => new Date().getUTCFullYear());
   const [viewMonth, setViewMonth] = useState(() => new Date().getUTCMonth());
   const [phase, setPhase] = useState<SelectionPhase>("idle");
@@ -116,20 +104,20 @@ export default function DateRangeSlider({
 
   const presets = [
     {
-      label: "7 days",
+      label: t("preset7Days"),
       apply: () => applyPreset(new Date(maxDay.getTime() - 6 * DAY_MS), maxDay),
     },
     {
-      label: "30 days",
+      label: t("preset30Days"),
       apply: () =>
         applyPreset(new Date(maxDay.getTime() - 29 * DAY_MS), maxDay),
     },
     {
-      label: "This year",
+      label: t("presetThisYear"),
       apply: () =>
         applyPreset(new Date(Date.UTC(maxDay.getUTCFullYear(), 0, 1)), maxDay),
     },
-    { label: "All time", apply: () => applyPreset(minDay, maxDay) },
+    { label: t("presetAllTime"), apply: () => applyPreset(minDay, maxDay) },
   ];
 
   const getDayClasses = (day: string): string => {
@@ -238,7 +226,7 @@ export default function DateRangeSlider({
 
       {calendarOpen && phase === "selecting-end" && (
         <p className="tea-text-accent mt-2 text-center text-[10px] tracking-[0.15em]">
-          Select end date
+          {t("selectEndDate")}
         </p>
       )}
 
@@ -249,30 +237,30 @@ export default function DateRangeSlider({
               type="button"
               onClick={selectPrevMonth}
               className="tea-text-muted tea-hover-text-primary flex h-7 w-7 items-center justify-center transition-colors"
-              aria-label="Previous month"
+              aria-label={t("previousMonth")}
             >
               <ChevronLeft className="h-3.5 w-3.5" />
             </button>
             <span className="tea-text-primary text-xs font-medium tracking-widest">
-              {MONTH_NAMES[viewMonth]} {viewYear}
+              {t(`monthNames[${viewMonth}]`)} {viewYear}
             </span>
             <button
               type="button"
               onClick={selectNextMonth}
               className="tea-text-muted tea-hover-text-primary flex h-7 w-7 items-center justify-center transition-colors"
-              aria-label="Next month"
+              aria-label={t("nextMonth")}
             >
               <ChevronRight className="h-3.5 w-3.5" />
             </button>
           </div>
 
           <div className="grid grid-cols-7 gap-0">
-            {WEEKDAYS.map((weekday) => (
+            {Array.from({ length: 7 }).map((_, index) => (
               <div
-                key={weekday}
+                key={index}
                 className="tea-text-muted flex h-8 items-center justify-center text-[10px] tracking-widest uppercase"
               >
-                {weekday}
+                {t(`weekdays[${index}]`)}
               </div>
             ))}
           </div>
