@@ -46,7 +46,7 @@ export default function AuthPage() {
   }
 
   useEffect(() => {
-    if (!isLoadingUser && user) {
+    if (!isLoadingUser && user && window.location.pathname !== "/app") {
       router.replace("/app");
     }
   }, [isLoadingUser, router, user]);
