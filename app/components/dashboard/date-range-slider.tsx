@@ -216,9 +216,9 @@ export default function DateRangeSlider({
         }}
         className="tea-text-primary tea-hover-text-accent mx-auto mt-4 flex items-center gap-2 text-sm"
       >
-        <span className="font-medium">{formatShortDateUTC(startDate)}</span>
+        <span className="font-medium">{formatShortDateUTC(t, startDate)}</span>
         <span className="tea-text-muted">&ndash;</span>
-        <span className="font-medium">{formatShortDateUTC(endDate)}</span>
+        <span className="font-medium">{formatShortDateUTC(t, endDate)}</span>
         <ChevronDown
           className={`tea-text-muted h-3 w-3 transition-transform duration-200 ${calendarOpen ? "rotate-180" : ""}`}
         />
@@ -288,7 +288,7 @@ export default function DateRangeSlider({
                     }}
                     disabled={isDisabled}
                     className={getDayClasses(day)}
-                    aria-label={formatShortDateUTC(day)}
+                    aria-label={formatShortDateUTC(t, day)}
                   >
                     {parseDateStringUTC(day).getUTCDate()}
                   </button>

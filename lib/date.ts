@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 export function toDateInputValue(date: Date) {
   const year = date.getUTCFullYear();
   const month = String(date.getUTCMonth() + 1).padStart(2, "0");
@@ -16,23 +18,12 @@ export function toDateStringUTC(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-export function formatShortDateUTC(value: string): string {
+export function formatShortDateUTC(
+  t: ReturnType<typeof useTranslation>["t"],
+  value: string,
+): string {
   const date = parseDateStringUTC(value);
-  const shortMonths = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-  return `${shortMonths[date.getUTCMonth()]} ${date.getUTCDate()}, ${date.getUTCFullYear()}`;
+  return `${t(`monthLabels[${date.getUTCMonth()}]`)} ${date.getUTCDate()}, ${date.getUTCFullYear()}`;
 }
 
 export function sameDayISO(left: string, right: string): boolean {
