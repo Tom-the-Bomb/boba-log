@@ -1,5 +1,7 @@
 import jwt from "@tsndr/cloudflare-worker-jwt";
 
+export type AuthMode = "login" | "signup";
+
 const encoder = new TextEncoder();
 
 function getJwtSecret() {

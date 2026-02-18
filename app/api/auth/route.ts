@@ -1,4 +1,9 @@
-import { comparePassword, hashPassword, signToken } from "@/lib/api/auth";
+import {
+  AuthMode,
+  comparePassword,
+  hashPassword,
+  signToken,
+} from "@/lib/api/auth";
 import { createUser, getPublicUser, getUserByUsername } from "@/lib/api/users";
 import { NextResponse } from "next/server";
 
@@ -9,7 +14,7 @@ export async function POST(request: Request) {
       .trim()
       .toLowerCase();
     const password = String(body.password ?? "");
-    const mode = String(body.mode ?? "login") as "login" | "signup";
+    const mode = String(body.mode ?? "login") as AuthMode;
 
     if (!username || !password) {
       return NextResponse.json(

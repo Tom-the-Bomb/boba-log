@@ -1,5 +1,6 @@
 "use client";
 
+import { AuthMode } from "@/lib/api/auth";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -7,8 +8,6 @@ import type { SubmitEventHandler } from "react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useUser } from "../providers/user-provider";
-
-type AuthMode = "login" | "signup";
 
 export default function AuthPage() {
   const router = useRouter();
