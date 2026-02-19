@@ -12,7 +12,7 @@ Boba Log is a Next.js app for tracking tea shop visits and drink totals, deploye
 - **Database:** Cloudflare D1 (SQLite)
 - **Object Storage:** Cloudflare R2
 - **Package Manager:** Bun
-- **Auth:** JWT (PBKDF2 algorithm) + localStorage
+- **Auth:** JWT (100k iterations, SHA-256) via HttpOnly cookie (30-day expiry)
 - **Localization:** Chinese (simplified) + English with i18next and [simplelocalize.io](https://simplelocalize.io)
 
 ### Libraries

@@ -2,8 +2,7 @@ import { NextRequest } from "next/server";
 import { verifyToken } from "./auth";
 
 export async function getUsernameFromRequest(request: NextRequest) {
-  const authHeader = request.headers.get("authorization") ?? "";
-  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+  const token = request.cookies.get("boba_jwt")?.value ?? "";
 
   if (!token) {
     return null;

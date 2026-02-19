@@ -63,5 +63,12 @@
       "prettier --write",
       "eslint --fix"
     ]
+  },
+  "reactDoctor": {
+    "ignore": {
+      "files": [
+        "open-next.config.ts"
+      ]
+    }
   }
 }

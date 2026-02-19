@@ -31,7 +31,6 @@ export default function ConfirmDeleteModal({
     try {
       const response = await fetch(`/api/shops/${shop.id}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${user.token}` },
       });
 
       const data = (await response.json()) as { code?: string };

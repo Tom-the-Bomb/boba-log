@@ -60,7 +60,15 @@ export async function POST(request: Request) {
       const hashedPassword = await hashPassword(password);
       const user = await createUser(username, hashedPassword);
       const token = await signToken({ username: user.username });
-      return NextResponse.json({ token, user });
+      const response = NextResponse.json({ user });
+      response.cookies.set("boba_jwt", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 30,
+      });
+      return response;
     }
 
     if (!existing) {
@@ -86,7 +94,15 @@ export async function POST(request: Request) {
 
     const token = await signToken({ username: existing.username });
     const user = await getPublicUser(existing.username);
-    return NextResponse.json({ token, user });
+    const response = NextResponse.json({ user });
+    response.cookies.set("boba_jwt", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 30,
+    });
+    return response;
   } catch {
     return NextResponse.json(
       {

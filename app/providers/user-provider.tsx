@@ -11,8 +11,6 @@ import {
   useReducer,
 } from "react";
 
-const AUTH_STORAGE_KEY = "boba_jwt";
-
 interface PublicUserResponse {
   user: {
     username: string;
@@ -22,11 +20,10 @@ interface PublicUserResponse {
 }
 
 interface UserSession {
-  token: string;
   username: string;
   createdAt: number;
   shops: BobaShop[];
-  login: (nextToken: string) => Promise<void>;
+  login: () => Promise<void>;
   logout: () => void;
   refresh: () => Promise<void>;
   setShops: (updater: (current: BobaShop[]) => BobaShop[]) => void;
@@ -35,7 +32,7 @@ interface UserSession {
 interface UserContextValue {
   user: UserSession | null;
   isLoadingUser: boolean;
-  login: (nextToken: string) => Promise<void>;
+  login: () => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
   setUserShops: (updater: (current: BobaShop[]) => BobaShop[]) => void;
@@ -44,7 +41,6 @@ interface UserContextValue {
 const UserContext = createContext<UserContextValue | null>(null);
 
 interface UserState {
-  token: string | null;
   username: string | null;
   createdAt: number | null;
   shops: BobaShop[];
@@ -53,7 +49,6 @@ interface UserState {
 
 type UserAction =
   | { type: "loaded"; username: string; createdAt: number; shops: BobaShop[] }
-  | { type: "logged_in"; token: string }
   | { type: "logged_out" }
   | { type: "loading" }
   | { type: "done_loading" }
@@ -68,11 +63,8 @@ function userReducer(state: UserState, action: UserAction): UserState {
         createdAt: action.createdAt,
         shops: action.shops,
       };
-    case "logged_in":
-      return { ...state, token: action.token, isLoading: true };
     case "logged_out":
       return {
-        token: null,
         username: null,
         createdAt: null,
         shops: [],
@@ -87,31 +79,18 @@ function userReducer(state: UserState, action: UserAction): UserState {
   }
 }
 
-function getInitialState(): UserState {
-  return {
-    token:
-      typeof window === "undefined"
-        ? null
-        : localStorage.getItem(AUTH_STORAGE_KEY),
-    username: null,
-    createdAt: null,
-    shops: [],
-    isLoading: true,
-  };
-}
+const INITIAL_STATE: UserState = {
+  username: null,
+  createdAt: null,
+  shops: [],
+  isLoading: true,
+};
 
 export default function UserProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(userReducer, undefined, getInitialState);
+  const [state, dispatch] = useReducer(userReducer, INITIAL_STATE);
 
-  const logout = useCallback(() => {
-    localStorage.removeItem(AUTH_STORAGE_KEY);
-    dispatch({ type: "logged_out" });
-  }, []);
-
-  const loadUser = useCallback(async (nextToken: string) => {
-    const response = await fetch("/api/user", {
-      headers: { Authorization: `Bearer ${nextToken}` },
-    });
+  const loadUser = useCallback(async () => {
+    const response = await fetch("/api/user");
 
     if (!response.ok) {
       throw new Error("Could not load account.");
@@ -126,34 +105,34 @@ export default function UserProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const logout = useCallback(async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    dispatch({ type: "logged_out" });
+  }, []);
+
   const refreshUser = useCallback(async () => {
-    if (!state.token) {
+    if (!state.username) {
       return;
     }
     dispatch({ type: "loading" });
     try {
-      await loadUser(state.token);
+      await loadUser();
     } finally {
       dispatch({ type: "done_loading" });
     }
-  }, [loadUser, state.token]);
+  }, [loadUser, state.username]);
 
-  const login = useCallback(
-    async (nextToken: string) => {
-      localStorage.setItem(AUTH_STORAGE_KEY, nextToken);
-      dispatch({ type: "logged_in", token: nextToken });
-
-      try {
-        await loadUser(nextToken);
-      } catch {
-        logout();
-        throw new Error("Could not load account.");
-      } finally {
-        dispatch({ type: "done_loading" });
-      }
-    },
-    [loadUser, logout],
-  );
+  const login = useCallback(async () => {
+    dispatch({ type: "loading" });
+    try {
+      await loadUser();
+    } catch {
+      await logout();
+      throw new Error("Could not load account.");
+    } finally {
+      dispatch({ type: "done_loading" });
+    }
+  }, [loadUser, logout]);
 
   const setUserShops = useCallback(
     (updater: (current: BobaShop[]) => BobaShop[]) => {
@@ -164,31 +143,24 @@ export default function UserProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const hydrate = async () => {
-      if (!state.token) {
-        dispatch({ type: "done_loading" });
-        return;
-      }
-
-      dispatch({ type: "loading" });
       try {
-        await loadUser(state.token);
+        await loadUser();
       } catch {
-        logout();
+        // No valid cookie — user is not logged in
       } finally {
         dispatch({ type: "done_loading" });
       }
     };
 
     void hydrate();
-  }, [loadUser, logout, state.token]);
+  }, [loadUser]);
 
   const user = useMemo<UserSession | null>(() => {
-    if (!state.token || !state.username || !state.createdAt) {
+    if (!state.username || !state.createdAt) {
       return null;
     }
 
     return {
-      token: state.token,
       username: state.username,
       createdAt: state.createdAt,
       shops: state.shops,
@@ -198,7 +170,6 @@ export default function UserProvider({ children }: { children: ReactNode }) {
       setShops: setUserShops,
     };
   }, [
-    state.token,
     state.username,
     state.createdAt,
     state.shops,

@@ -87,7 +87,7 @@ const INITIAL_FORM_STATE: FormState = {
 
 export default function AuthPage() {
   const router = useRouter();
-  const { user, isLoadingUser, login } = useUser();
+  const { login } = useUser();
   const { isDark } = useTheme();
   const { t } = useTranslation("auth");
   const { t: tc } = useTranslation("common");
@@ -114,12 +114,6 @@ export default function AuthPage() {
     }
     return "";
   }
-
-  useEffect(() => {
-    if (!isLoadingUser && user && window.location.pathname !== "/app") {
-      router.replace("/app");
-    }
-  }, [isLoadingUser, router, user]);
 
   useEffect(() => {
     turnstileRef.current?.reset();
@@ -159,7 +153,6 @@ export default function AuthPage() {
       const data = (await response.json()) as {
         error?: string;
         code?: string;
-        token?: string;
       };
       if (!response.ok) {
         dispatch({
@@ -170,7 +163,7 @@ export default function AuthPage() {
         return;
       }
 
-      await login(data.token!);
+      await login();
       router.push("/app");
     } catch {
       dispatch({ type: "set_error", error: t("connectionError") });

@@ -81,9 +81,6 @@ export default function AddShopModal({ isOpen, onClose }: AddShopModalProps) {
 
       const response = await fetch("/api/shops", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
         body: formData,
       });
 

@@ -34,7 +34,6 @@ export default function ShopCard({
   async function requestShopUpdate(path: "increment" | "undo") {
     const response = await fetch(`/api/shops/${shop.id}/${path}`, {
       method: "POST",
-      headers: { Authorization: `Bearer ${user?.token}` },
     });
     const data = (await response.json()) as {
       code?: string;
