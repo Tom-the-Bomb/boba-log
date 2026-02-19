@@ -26,8 +26,8 @@ export default function Nav() {
         <ThemeToggle />
         <button
           type="button"
-          onClick={() => {
-            clearAuth();
+          onClick={async () => {
+            await clearAuth();
             router.push("/auth");
           }}
           className="tea-link px-2"

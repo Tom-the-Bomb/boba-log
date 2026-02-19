@@ -14,7 +14,6 @@ import { Toaster } from "sonner";
 import "./globals.css";
 import LocaleProvider from "./providers/locale-provider";
 import { ThemeProvider } from "./providers/theme-provider";
-import UserProvider from "./providers/user-provider";
 
 const PRIMARY_TEA_LEAF_COLOR = "#7B8B6F";
 
@@ -100,7 +99,7 @@ export default function RootLayout({
       <body className={`${bricolage.variable} ${sora.variable} antialiased`}>
         <LocaleProvider>
           <ThemeProvider>
-            <UserProvider>{children}</UserProvider>
+            {children}
             <Toaster position="bottom-center" />
           </ThemeProvider>
         </LocaleProvider>

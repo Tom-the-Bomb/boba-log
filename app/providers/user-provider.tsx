@@ -20,7 +20,7 @@ interface UserSession {
   createdAt: number;
   shops: BobaShop[];
   login: () => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   refresh: () => Promise<void>;
   setShops: (updater: (current: BobaShop[]) => BobaShop[]) => void;
 }
@@ -29,7 +29,7 @@ interface UserContextValue {
   user: UserSession | null;
   isLoadingUser: boolean;
   login: () => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   setUserShops: (updater: (current: BobaShop[]) => BobaShop[]) => void;
 }
