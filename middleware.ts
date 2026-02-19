@@ -26,12 +26,12 @@ export async function middleware(request: NextRequest) {
 
   const isLoggedIn = request.cookies.has("boba_jwt");
 
-  if (pathname === "/app" && !isLoggedIn) {
+  if (pathname === "/dashboard" && !isLoggedIn) {
     return NextResponse.redirect(new URL("/auth", request.url));
   }
 
   if (pathname === "/auth" && isLoggedIn) {
-    return NextResponse.redirect(new URL("/app", request.url));
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   return NextResponse.next();

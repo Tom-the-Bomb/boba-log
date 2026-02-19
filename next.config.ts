@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: "/app/:path*",
+        source: "/dashboard/:path*",
         headers: [
           {
             key: "X-Robots-Tag",

@@ -162,7 +162,7 @@ export default function AuthPage() {
       }
 
       await login();
-      router.push("/app");
+      router.push("/dashboard");
     } catch {
       dispatch({ type: "set_error", error: t("connectionError") });
     } finally {

@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: "Dashboard",
   description: "Private dashboard for tracking boba shop drinks and trends.",
   alternates: {
-    canonical: "/app",
+    canonical: "/dashboard",
   },
   robots: {
     index: false,
