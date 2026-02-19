@@ -33,6 +33,11 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Debug sitekey
+        run: echo "Key length=${#NEXT_PUBLIC_TURNSTILE_SITE_KEY}"
+        env:
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
+
       - name: Deploy using package script
         run: bun run deploy
         env:
