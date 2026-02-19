@@ -108,45 +108,42 @@ export default function DashboardClient() {
   );
 
   const requestShopUpdate = useCallback(
-    async (
-      shopId: number,
-      path: "increment" | "undo",
-      fallbackError: string,
-    ) => {
+    async (shopId: number, path: "increment" | "undo") => {
       const response = await fetch(`/api/shops/${shopId}/${path}`, {
         method: "POST",
         headers: { Authorization: `Bearer ${user?.token}` },
       });
       const data = (await response.json()) as {
-        error?: string;
+        code?: string;
         shop?: BobaShop;
       };
 
-      if (!response.ok || !data.shop) {
-        throw new Error(data.error ?? fallbackError);
+      if (response.ok && data.shop) {
+        applyShopUpdate(data.shop);
       }
 
-      applyShopUpdate(data.shop);
+      return data;
     },
     [applyShopUpdate, user?.token],
   );
 
   async function addDrink(shopId: number) {
-    if (!user) {
-      return;
-    }
-    if (pendingIncrementMap[shopId]) {
+    if (!user || pendingIncrementMap[shopId]) {
       return;
     }
 
     setPendingIncrementMap((current) => ({ ...current, [shopId]: true }));
 
     try {
-      await requestShopUpdate(shopId, "increment", "Could not increment.");
-      setUndoQueueMap((current) => ({
-        ...current,
-        [shopId]: (current[shopId] ?? 0) + 1,
-      }));
+      const { shop, code } = await requestShopUpdate(shopId, "increment");
+      if (shop) {
+        setUndoQueueMap((current) => ({
+          ...current,
+          [shopId]: (current[shopId] ?? 0) + 1,
+        }));
+      } else {
+        toast.error(translator.t(code ?? "couldNotIncrement"));
+      }
     } catch {
       toast.error(translator.t("couldNotIncrement"));
     } finally {
@@ -155,19 +152,20 @@ export default function DashboardClient() {
   }
 
   async function undoDrink(shopId: number) {
-    if (!user) {
-      return;
-    }
-    if ((undoQueueMap[shopId] ?? 0) <= 0) {
+    if (!user || (undoQueueMap[shopId] ?? 0) <= 0) {
       return;
     }
 
     try {
-      await requestShopUpdate(shopId, "undo", "Could not undo.");
-      setUndoQueueMap((current) => ({
-        ...current,
-        [shopId]: Math.max((current[shopId] ?? 0) - 1, 0),
-      }));
+      const { shop, code } = await requestShopUpdate(shopId, "undo");
+      if (shop) {
+        setUndoQueueMap((current) => ({
+          ...current,
+          [shopId]: Math.max((current[shopId] ?? 0) - 1, 0),
+        }));
+      } else {
+        toast.error(translator.t(code ?? "couldNotUndo"));
+      }
     } catch {
       toast.error(translator.t("couldNotUndo"));
     }

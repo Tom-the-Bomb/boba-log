@@ -87,11 +87,12 @@ export default function AddShopModal({
       });
 
       const data = (await response.json()) as {
-        error?: string;
+        code?: string;
         shop?: BobaShop;
       };
       if (!response.ok) {
-        throw new Error(data.error ?? t("couldNotCreateShop"));
+        setError(t(data.code ?? "couldNotAddShop"));
+        return;
       }
 
       onShopAdded(data.shop as BobaShop);

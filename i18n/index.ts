@@ -37,6 +37,7 @@ i18n.use(initReactI18next).init({
   lng: getSavedLocale(),
   fallbackLng: "en",
   defaultNS: "common",
+  fallbackNS: "common",
   interpolation: {
     escapeValue: false,
   },

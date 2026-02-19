@@ -36,8 +36,10 @@ export default function ConfirmDeleteModal({
         headers: { Authorization: `Bearer ${user.token}` },
       });
 
+      const data = (await response.json()) as { code?: string };
       if (!response.ok) {
-        throw new Error(t("couldNotDeleteShop"));
+        toast.error(t(data.code ?? "couldNotDeleteShop"));
+        return;
       }
 
       onDeleted(shop.id);

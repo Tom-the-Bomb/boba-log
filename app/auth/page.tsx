@@ -77,10 +77,11 @@ export default function AuthPage() {
 
       const data = (await response.json()) as {
         error?: string;
+        code?: string;
         token?: string;
       };
       if (!response.ok) {
-        setError(data.error ?? t("authFailed"));
+        setError(data.code ? t(data.code) : t("authFailed"));
         return;
       }
 

@@ -8,7 +8,10 @@ export async function POST(request: NextRequest) {
   try {
     const username = await getUsernameFromRequest(request);
     if (!username) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Unauthorized", code: "unauthorized" },
+        { status: 401 },
+      );
     }
 
     const formData = await request.formData();
@@ -17,7 +20,7 @@ export async function POST(request: NextRequest) {
 
     if (!name) {
       return NextResponse.json(
-        { error: "Shop name is required." },
+        { error: "Shop name is required.", code: "shopNameRequired" },
         { status: 400 },
       );
     }
@@ -26,7 +29,10 @@ export async function POST(request: NextRequest) {
 
     const user = await getUserByUsername(username);
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Unauthorized", code: "unauthorized" },
+        { status: 401 },
+      );
     }
 
     const shop = await addShop(username, name);
@@ -40,7 +46,10 @@ export async function POST(request: NextRequest) {
         shop.avatar = getPublicAvatarUrl(shop.id);
       } catch {
         return NextResponse.json(
-          { error: "Invalid avatar format. Use JPEG, PNG, or WebP." },
+          {
+            error: "Invalid avatar format. Use JPEG, PNG, or WebP.",
+            code: "invalidAvatarFormat",
+          },
           { status: 400 },
         );
       }
@@ -49,7 +58,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ shop });
   } catch {
     return NextResponse.json(
-      { error: "Something went wrong." },
+      {
+        error: "Something went wrong.",
+        code: "somethingWentWrong",
+      },
       { status: 500 },
     );
   }

@@ -18,7 +18,10 @@ export async function POST(request: Request) {
 
     if (!username || !password) {
       return NextResponse.json(
-        { error: "Username and password are required." },
+        {
+          error: "Username and password are required.",
+          code: "fieldsRequired",
+        },
         { status: 400 },
       );
     }
@@ -28,7 +31,10 @@ export async function POST(request: Request) {
     if (mode === "signup") {
       if (existing) {
         return NextResponse.json(
-          { error: "Account already exists. Please login." },
+          {
+            error: "Account already exists. Please login.",
+            code: "accountExists",
+          },
           { status: 409 },
         );
       }
@@ -41,14 +47,23 @@ export async function POST(request: Request) {
 
     if (!existing) {
       return NextResponse.json(
-        { error: "No account found. Please sign up." },
+        {
+          error: "No account found. Please sign up.",
+          code: "accountNotFound",
+        },
         { status: 404 },
       );
     }
 
     const matches = await comparePassword(password, existing.hashed_password);
     if (!matches) {
-      return NextResponse.json({ error: "Invalid password." }, { status: 401 });
+      return NextResponse.json(
+        {
+          error: "Invalid password.",
+          code: "invalidPassword",
+        },
+        { status: 401 },
+      );
     }
 
     const token = await signToken({ username: existing.username });
@@ -56,7 +71,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ token, user });
   } catch {
     return NextResponse.json(
-      { error: "Something went wrong." },
+      {
+        error: "Something went wrong.",
+        code: "somethingWentWrong",
+      },
       { status: 500 },
     );
   }

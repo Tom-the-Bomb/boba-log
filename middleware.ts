@@ -15,7 +15,10 @@ export async function middleware(request: NextRequest) {
     ].limit({ key: ip });
     if (!success) {
       return NextResponse.json(
-        { error: "Too many requests. Please try again later." },
+        {
+          error: "Too many requests. Please try again later.",
+          code: "tooManyRequests",
+        },
         { status: 429 },
       );
     }

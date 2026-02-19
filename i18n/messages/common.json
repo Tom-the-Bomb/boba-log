@@ -6,8 +6,11 @@
     "home": "Home",
     "logout": "Logout",
     "siteName": "Boba Log",
+    "somethingWentWrong": "Something went wrong.",
     "switchToDark": "Switch to dark mode",
-    "switchToLight": "Switch to light mode"
+    "switchToLight": "Switch to light mode",
+    "tooManyRequests": "Too many requests. Please try again later.",
+    "unauthorized": "Unauthorized"
   },
   "zh": {
     "cancel": "取消",
@@ -16,7 +19,10 @@
     "home": "首页",
     "logout": "登出",
     "siteName": "Boba Log",
+    "somethingWentWrong": "出了点问题。",
     "switchToDark": "切换到深色模式",
-    "switchToLight": "切换到浅色模式"
+    "switchToLight": "切换到浅色模式",
+    "tooManyRequests": "请求过多，请稍后再试。",
+    "unauthorized": "未授权"
   }
 }
