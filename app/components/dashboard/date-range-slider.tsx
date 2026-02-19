@@ -260,7 +260,7 @@ export default function DateRangeSlider({
                 key={index}
                 className="tea-text-muted flex h-8 items-center justify-center text-[10px] tracking-widest uppercase"
               >
-                {t(`weekdays[${index}]`)}
+                {t(`weekdayNames[${index}]`)}
               </div>
             ))}
           </div>

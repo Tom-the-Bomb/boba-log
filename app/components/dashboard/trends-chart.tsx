@@ -1,5 +1,6 @@
 "use client";
 
+import { buildDashboardChartOptions } from "@/lib/dashboard-chart-options";
 import {
   buildTrendsChartData,
   GRANULARITY_KEYS,
@@ -7,24 +8,23 @@ import {
   type Granularity,
 } from "@/lib/dashboard-metrics";
 import type { BobaShop } from "@/lib/types";
-import type { ChartOptions } from "chart.js";
 import { useMemo, useState } from "react";
 import { Bar } from "react-chartjs-2";
 import { useTranslation } from "react-i18next";
+import { useTheme } from "../../providers/theme-provider";
 
 interface TrendsChartProps {
   shops: readonly BobaShop[];
   startDate: string;
   endDate: string;
-  options: ChartOptions<"bar">;
 }
 
 export default function TrendsChart({
   shops,
   startDate,
   endDate,
-  options,
 }: TrendsChartProps) {
+  const { isDark } = useTheme();
   const { t } = useTranslation("dashboard");
   const [granularity, setGranularity] = useState<Granularity>("year");
 
@@ -32,6 +32,8 @@ export default function TrendsChart({
     () => buildTrendsChartData(t, shops, startDate, endDate, granularity),
     [shops, startDate, endDate, granularity, t],
   );
+
+  const options = useMemo(() => buildDashboardChartOptions(isDark), [isDark]);
 
   return (
     <section className="mb-20">

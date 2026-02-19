@@ -16,7 +16,7 @@ export const GRANULARITY_KEYS: Record<Granularity, string> = {
   weekday: "granularityWeekday",
 };
 
-interface ShopCountItem {
+export interface ShopCountItem {
   shop: BobaShop;
   count: number;
 }
@@ -111,7 +111,7 @@ export function buildTrendsChartData(
       } else if (granularity === "month") {
         key = t(`monthLabels[${point.getUTCMonth()}]`);
       } else {
-        key = t(`weekdays[${point.getUTCDay()}]`);
+        key = t(`weekdayNames[${point.getUTCDay()}]`);
       }
 
       bucketMap[key] = (bucketMap[key] ?? 0) + count;
@@ -122,7 +122,7 @@ export function buildTrendsChartData(
   if (granularity === "month") {
     labels = Array.from({ length: 12 }, (_, i) => t(`monthLabels[${i}]`));
   } else if (granularity === "weekday") {
-    labels = Array.from({ length: 7 }, (_, i) => t(`weekdays[${i}]`));
+    labels = Array.from({ length: 7 }, (_, i) => t(`weekdayNames[${i}]`));
   } else {
     const currentYear = String(new Date().getUTCFullYear());
     const yearLabels = new Set(Object.keys(bucketMap));
