@@ -39,6 +39,15 @@ Create a `.env` file in the project root:
 
 ```env
 JWT_SECRET=your-jwt-secret
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=your-turnstile-site-key
+TURNSTILE_SECRET_KEY=your-turnstile-secret-key
+```
+
+For local development, you can use [Cloudflare's test keys](https://developers.cloudflare.com/turnstile/troubleshooting/testing/) which always pass verification:
+
+```env
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA
+TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
 ```
 
 ### Local database
@@ -124,6 +133,23 @@ bun wrangler r2 bucket create boba-log
 ```
 
 Avatars are uploaded as `{shopId}.webp` and served via the `/api/avatars/[shopId]` API route, which reads directly from the R2 binding.
+
+## Turnstile (Bot Protection)
+
+[Cloudflare Turnstile](https://developers.cloudflare.com/turnstile/) is used to protect the auth and shop creation forms from bots.
+
+### Create widget
+
+1. Create a Turnstile widget in the [Cloudflare dashboard](https://dash.cloudflare.com/) under **Security > Turnstile**
+2. Set the domain to your production hostname and choose **Managed** mode
+3. Add the site key and secret key to your `.env` (see [Environment](#environment))
+4. For production, set the secret as a Workers secret:
+
+```bash
+bun wrangler secret put TURNSTILE_SECRET_KEY
+```
+
+The `NEXT_PUBLIC_TURNSTILE_SITE_KEY` must be available at build time since Next.js inlines `NEXT_PUBLIC_*` variables into the client bundle.
 
 ## Default Shop Avatars
 

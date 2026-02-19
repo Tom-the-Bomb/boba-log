@@ -10,6 +10,8 @@
     "switchToDark": "Switch to dark mode",
     "switchToLight": "Switch to light mode",
     "tooManyRequests": "Too many requests. Please try again later.",
+    "turnstileFailed": "Verification failed. Please try again.",
+    "turnstileRequired": "Please complete the verification.",
     "unauthorized": "Unauthorized"
   },
   "zh": {
@@ -23,6 +25,8 @@
     "switchToDark": "切换到深色模式",
     "switchToLight": "切换到浅色模式",
     "tooManyRequests": "请求过多，请稍后再试。",
+    "turnstileFailed": "验证失败，请重试。",
+    "turnstileRequired": "请完成验证。",
     "unauthorized": "未授权"
   }
 }

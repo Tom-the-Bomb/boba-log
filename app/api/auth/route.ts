@@ -4,6 +4,7 @@ import {
   hashPassword,
   signToken,
 } from "@/lib/api/auth";
+import { verifyTurnstileToken } from "@/lib/api/turnstile";
 import { createUser, getPublicUser, getUserByUsername } from "@/lib/api/users";
 import { NextResponse } from "next/server";
 
@@ -15,6 +16,23 @@ export async function POST(request: Request) {
       .toLowerCase();
     const password = String(body.password ?? "");
     const mode = String(body.mode ?? "login") as AuthMode;
+    const turnstileToken = String(body.turnstileToken ?? "");
+
+    if (!turnstileToken) {
+      return NextResponse.json(
+        { error: "Verification is required.", code: "turnstileRequired" },
+        { status: 400 },
+      );
+    }
+
+    const ip = request.headers.get("cf-connecting-ip");
+    const turnstileResult = await verifyTurnstileToken(turnstileToken, ip);
+    if (!turnstileResult.success) {
+      return NextResponse.json(
+        { error: "Verification failed.", code: "turnstileFailed" },
+        { status: 403 },
+      );
+    }
 
     if (!username || !password) {
       return NextResponse.json(

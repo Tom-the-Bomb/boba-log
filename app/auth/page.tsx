@@ -1,17 +1,20 @@
 "use client";
 
 import { AuthMode } from "@/lib/api/auth";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { SubmitEventHandler } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useTheme } from "../providers/theme-provider";
 import { useUser } from "../providers/user-provider";
 
 export default function AuthPage() {
   const router = useRouter();
   const { user, isLoadingUser, login } = useUser();
+  const { isDark } = useTheme();
   const { t } = useTranslation("auth");
   const { t: tc } = useTranslation("common");
   const [mode, setMode] = useState<AuthMode>("login");
@@ -22,6 +25,8 @@ export default function AuthPage() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const turnstileRef = useRef<TurnstileInstance>(null);
 
   function validateUsername(value: string) {
     const normalized = value.trim();
@@ -50,6 +55,11 @@ export default function AuthPage() {
     }
   }, [isLoadingUser, router, user]);
 
+  useEffect(() => {
+    setTurnstileToken("");
+    turnstileRef.current?.reset();
+  }, [mode]);
+
   async function handleSubmit(
     event: Parameters<SubmitEventHandler<HTMLFormElement>>[0],
   ) {
@@ -72,7 +82,7 @@ export default function AuthPage() {
       const response = await fetch("/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode, username, password }),
+        body: JSON.stringify({ mode, username, password, turnstileToken }),
       });
 
       const data = (await response.json()) as {
@@ -82,6 +92,8 @@ export default function AuthPage() {
       };
       if (!response.ok) {
         setError(data.code ? t(data.code) : t("authFailed"));
+        setTurnstileToken("");
+        turnstileRef.current?.reset();
         return;
       }
 
@@ -91,6 +103,8 @@ export default function AuthPage() {
       setError(t("connectionError"));
     } finally {
       setIsSubmitting(false);
+      setTurnstileToken("");
+      turnstileRef.current?.reset();
     }
   }
 
@@ -222,6 +236,17 @@ export default function AuthPage() {
               )}
             </div>
 
+            <div className="flex justify-center">
+              <Turnstile
+                ref={turnstileRef}
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                onSuccess={setTurnstileToken}
+                onError={() => setTurnstileToken("")}
+                onExpire={() => setTurnstileToken("")}
+                options={{ theme: isDark ? "dark" : "light", size: "normal" }}
+              />
+            </div>
+
             {error && (
               <p className="tea-form-error" role="alert">
                 {error}
@@ -230,7 +255,7 @@ export default function AuthPage() {
 
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !turnstileToken}
               className="tea-cta mt-4 w-full py-3.5 text-xs tracking-[0.2em] uppercase disabled:opacity-50"
             >
               {isSubmitting

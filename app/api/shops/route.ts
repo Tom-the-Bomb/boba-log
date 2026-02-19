@@ -1,6 +1,7 @@
 import { processAndUploadAvatar } from "@/lib/api/avatar";
 import { getPublicAvatarUrl } from "@/lib/api/r2";
 import { getUsernameFromRequest } from "@/lib/api/request-auth";
+import { verifyTurnstileToken } from "@/lib/api/turnstile";
 import { addShop, getUserByUsername } from "@/lib/api/users";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -15,6 +16,24 @@ export async function POST(request: NextRequest) {
     }
 
     const formData = await request.formData();
+    const turnstileToken = String(formData.get("turnstileToken") ?? "");
+
+    if (!turnstileToken) {
+      return NextResponse.json(
+        { error: "Verification is required.", code: "turnstileRequired" },
+        { status: 400 },
+      );
+    }
+
+    const ip = request.headers.get("cf-connecting-ip");
+    const turnstileResult = await verifyTurnstileToken(turnstileToken, ip);
+    if (!turnstileResult.success) {
+      return NextResponse.json(
+        { error: "Verification failed.", code: "turnstileFailed" },
+        { status: 403 },
+      );
+    }
+
     const name = String(formData.get("name") ?? "").trim();
     const avatarFile = formData.get("avatar");
 

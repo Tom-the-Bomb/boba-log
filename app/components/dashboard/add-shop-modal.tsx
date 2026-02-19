@@ -2,12 +2,14 @@
 
 import { findDefaultShop } from "@/lib/default-shops";
 import { BobaShop } from "@/lib/types";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { X } from "lucide-react";
 import Image from "next/image";
 import type React from "react";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import useShopDraft from "../../hooks/use-shop-draft";
+import { useTheme } from "../../providers/theme-provider";
 import { useUser } from "../../providers/user-provider";
 import DefaultShopsSection from "./default-shops-section";
 
@@ -18,6 +20,7 @@ interface AddShopModalProps {
 
 export default function AddShopModal({ isOpen, onClose }: AddShopModalProps) {
   const { user, setUserShops } = useUser();
+  const { isDark } = useTheme();
   const { t } = useTranslation("dashboard");
   const { t: tc } = useTranslation("common");
   const {
@@ -32,9 +35,11 @@ export default function AddShopModal({ isOpen, onClose }: AddShopModalProps) {
   } = useShopDraft();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const turnstileRef = useRef<TurnstileInstance>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [nameError, setNameError] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
 
   if (!isOpen) {
     return null;
@@ -69,6 +74,7 @@ export default function AddShopModal({ isOpen, onClose }: AddShopModalProps) {
     try {
       const formData = new FormData();
       formData.append("name", trimmedShopName);
+      formData.append("turnstileToken", turnstileToken);
       if (avatarFile) {
         formData.append("avatar", avatarFile);
       }
@@ -87,6 +93,8 @@ export default function AddShopModal({ isOpen, onClose }: AddShopModalProps) {
       };
       if (!response.ok) {
         setError(t(data.code ?? "couldNotAddShop"));
+        setTurnstileToken("");
+        turnstileRef.current?.reset();
         return;
       }
 
@@ -96,6 +104,8 @@ export default function AddShopModal({ isOpen, onClose }: AddShopModalProps) {
       setError(t("couldNotAddShop"));
     } finally {
       setIsSubmitting(false);
+      setTurnstileToken("");
+      turnstileRef.current?.reset();
     }
   }
 
@@ -211,6 +221,17 @@ export default function AddShopModal({ isOpen, onClose }: AddShopModalProps) {
             </div>
           )}
 
+          <div className="flex justify-center">
+            <Turnstile
+              ref={turnstileRef}
+              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+              onSuccess={setTurnstileToken}
+              onError={() => setTurnstileToken("")}
+              onExpire={() => setTurnstileToken("")}
+              options={{ theme: isDark ? "dark" : "light", size: "normal" }}
+            />
+          </div>
+
           {error && <p className="tea-form-error pt-2 text-center">{error}</p>}
 
           <div className="flex items-center justify-end gap-5 pt-6">
@@ -219,7 +240,7 @@ export default function AddShopModal({ isOpen, onClose }: AddShopModalProps) {
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !turnstileToken}
               className="tea-cta px-6 py-3 text-xs tracking-[0.15em] uppercase disabled:opacity-40"
             >
               {isSubmitting ? t("adding") : t("addShopLabel")}
