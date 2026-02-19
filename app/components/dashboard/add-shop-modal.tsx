@@ -1,6 +1,6 @@
 "use client";
 
-import { DEFAULT_SHOPS } from "@/lib/default-shops";
+import { DEFAULT_SHOPS, findDefaultShop } from "@/lib/default-shops";
 import { BobaShop } from "@/lib/types";
 import { X } from "lucide-react";
 import Image from "next/image";
@@ -146,6 +146,10 @@ export default function AddShopModal({
               value={shopName}
               onChange={(event) => {
                 setShopName(event.target.value);
+                const defaultShop = findDefaultShop(event.target.value);
+                if (defaultShop) {
+                  selectPreset(defaultShop);
+                }
                 if (nameError) {
                   setNameError("");
                 }

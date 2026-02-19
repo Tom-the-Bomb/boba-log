@@ -1,4 +1,3 @@
-import { findDefaultShop } from "../default-shops";
 import { BobaShop, PublicUser, ShopDocument } from "../types";
 import { getDb } from "./db";
 import { checkPublicAvatarExists, getPublicAvatarUrl } from "./r2";
@@ -28,8 +27,6 @@ async function toPublicShop(shop: ShopDocument): Promise<BobaShop> {
   let avatar: string | null = null;
   if (hasR2Avatar) {
     avatar = getPublicAvatarUrl(shop.id);
-  } else {
-    avatar = findDefaultShop(shop.name)?.avatar ?? null;
   }
 
   return {
