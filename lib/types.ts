@@ -16,3 +16,12 @@ export interface PublicUser {
   created_at: number;
   shops: BobaShop[];
 }
+
+export interface ApiErrorResponse {
+  error?: string;
+  code?: string;
+}
+
+export interface ShopMutationResponse extends ApiErrorResponse {
+  shop?: BobaShop;
+}

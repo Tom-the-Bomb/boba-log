@@ -2,7 +2,7 @@
 
 import { getShopCountForRange } from "@/lib/dashboard-metrics";
 import { translateShopName } from "@/lib/default-shops";
-import type { BobaShop } from "@/lib/types";
+import type { BobaShop, ShopMutationResponse } from "@/lib/types";
 import { Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
@@ -35,10 +35,7 @@ export default function ShopCard({
     const response = await fetch(`/api/shops/${shop.id}/${path}`, {
       method: "POST",
     });
-    const data = (await response.json()) as {
-      code?: string;
-      shop?: BobaShop;
-    };
+    const data = (await response.json()) as ShopMutationResponse;
 
     if (response.ok && data.shop) {
       setUserShops((current) =>

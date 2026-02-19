@@ -35,7 +35,7 @@ bun install
 
 ### Environment
 
-Create a `.env` file in the project root:
+Create a `.env` file in the project root (add these to cloudflare workers secrets):
 
 ```env
 JWT_SECRET=your-jwt-secret
@@ -142,12 +142,7 @@ Avatars are uploaded as `{shopId}.webp` and served via the `/api/avatars/[shopId
 
 1. Create a Turnstile widget in the [Cloudflare dashboard](https://dash.cloudflare.com/) under **Security > Turnstile**
 2. Set the domain to your production hostname and choose **Managed** mode
-3. Add the site key and secret key to your `.env` (see [Environment](#environment))
-4. For production, set the secret as a Workers secret:
-
-```bash
-bun wrangler secret put TURNSTILE_SECRET_KEY
-```
+3. Add the site key and secret key as a secret, see [Environment](#environment)
 
 The `NEXT_PUBLIC_TURNSTILE_SITE_KEY` must be available at build time since Next.js inlines `NEXT_PUBLIC_*` variables into the client bundle.
 

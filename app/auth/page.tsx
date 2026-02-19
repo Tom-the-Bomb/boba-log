@@ -1,6 +1,7 @@
 "use client";
 
 import { AuthMode } from "@/lib/api/auth";
+import type { ApiErrorResponse } from "@/lib/types";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
@@ -150,10 +151,7 @@ export default function AuthPage() {
         }),
       });
 
-      const data = (await response.json()) as {
-        error?: string;
-        code?: string;
-      };
+      const data = (await response.json()) as ApiErrorResponse;
       if (!response.ok) {
         dispatch({
           type: "set_error",

@@ -1,9 +1,8 @@
+import { ShopIdParams } from "@/lib/api/types";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { NextRequest, NextResponse } from "next/server";
 
-type Params = { params: Promise<{ shopId: string }> };
-
-export async function GET(_request: NextRequest, { params }: Params) {
+export async function GET(_request: NextRequest, { params }: ShopIdParams) {
   const { shopId } = await params;
   const key = `${shopId}.webp`;
 

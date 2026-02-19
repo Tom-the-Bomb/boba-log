@@ -1,10 +1,9 @@
 import { getUsernameFromRequest } from "@/lib/api/request-auth";
+import { ShopIdParams } from "@/lib/api/types";
 import { incrementShop } from "@/lib/api/users";
 import { NextRequest, NextResponse } from "next/server";
 
-type Params = { params: Promise<{ shopId: string }> };
-
-export async function POST(request: NextRequest, { params }: Params) {
+export async function POST(request: NextRequest, { params }: ShopIdParams) {
   try {
     const username = await getUsernameFromRequest(request);
     if (!username) {

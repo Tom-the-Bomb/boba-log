@@ -1,6 +1,6 @@
 "use client";
 
-import { BobaShop } from "@/lib/types";
+import { BobaShop, PublicUser } from "@/lib/types";
 import {
   createContext,
   ReactNode,
@@ -12,11 +12,7 @@ import {
 } from "react";
 
 interface PublicUserResponse {
-  user: {
-    username: string;
-    created_at: number;
-    shops: BobaShop[];
-  };
+  user: PublicUser;
 }
 
 interface UserSession {

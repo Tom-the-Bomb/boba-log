@@ -1,7 +1,7 @@
 "use client";
 
 import { translateShopName } from "@/lib/default-shops";
-import type { BobaShop } from "@/lib/types";
+import type { ApiErrorResponse, BobaShop } from "@/lib/types";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -33,7 +33,7 @@ export default function ConfirmDeleteModal({
         method: "DELETE",
       });
 
-      const data = (await response.json()) as { code?: string };
+      const data = (await response.json()) as ApiErrorResponse;
       if (!response.ok) {
         toast.error(t(data.code ?? "couldNotDeleteShop"));
         return;

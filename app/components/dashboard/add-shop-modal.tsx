@@ -1,7 +1,7 @@
 "use client";
 
 import { findDefaultShop } from "@/lib/default-shops";
-import { BobaShop } from "@/lib/types";
+import { BobaShop, ShopMutationResponse } from "@/lib/types";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { X } from "lucide-react";
 import Image from "next/image";
@@ -84,10 +84,7 @@ export default function AddShopModal({ isOpen, onClose }: AddShopModalProps) {
         body: formData,
       });
 
-      const data = (await response.json()) as {
-        code?: string;
-        shop?: BobaShop;
-      };
+      const data = (await response.json()) as ShopMutationResponse;
       if (!response.ok) {
         setError(t(data.code ?? "couldNotAddShop"));
         setTurnstileToken("");
