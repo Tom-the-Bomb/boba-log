@@ -5,7 +5,6 @@ export async function resizeImageToWebP(file: File): Promise<File> {
   const canvas = new OffscreenCanvas(SIZE, SIZE);
   const ctx = canvas.getContext("2d")!;
 
-  // Cover-fit: scale and center-crop
   const scale = Math.max(SIZE / bitmap.width, SIZE / bitmap.height);
   const sw = SIZE / scale;
   const sh = SIZE / scale;

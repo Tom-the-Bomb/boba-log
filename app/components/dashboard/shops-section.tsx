@@ -118,7 +118,6 @@ export default function ShopsSection({
               key={shop.id}
               shop={shop}
               count={getShopCountForRange(shop, startDate, endDate)}
-              canUndo={(undoQueueMap[shop.id] ?? 0) > 0}
               undoCount={undoQueueMap[shop.id] ?? 0}
               isIncrementPending={Boolean(pendingIncrementMap[shop.id])}
               onAddDrink={addDrink}
@@ -148,7 +147,6 @@ export default function ShopsSection({
             setUserShops((current) =>
               current.filter((shop) => shop.id !== shopId),
             );
-            setDeletingShop(null);
           }}
         />
       )}

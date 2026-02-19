@@ -9,9 +9,8 @@ import { useTranslation } from "react-i18next";
 interface ShopCardProps {
   shop: BobaShop;
   count: number;
-  canUndo: boolean;
-  undoCount?: number;
-  isIncrementPending?: boolean;
+  undoCount: number;
+  isIncrementPending: boolean;
   onAddDrink: (shopId: number) => void;
   onUndo: (shopId: number) => void;
   onDelete: (shopId: number) => void;
@@ -20,13 +19,13 @@ interface ShopCardProps {
 export default function ShopCard({
   shop,
   count,
-  canUndo,
-  undoCount = 0,
-  isIncrementPending = false,
+  undoCount,
+  isIncrementPending,
   onAddDrink,
   onUndo,
   onDelete,
 }: ShopCardProps) {
+  const canUndo = undoCount > 0;
   const { t, i18n } = useTranslation("dashboard");
   const translatedShopName = translateShopName(shop.name, i18n.language);
 

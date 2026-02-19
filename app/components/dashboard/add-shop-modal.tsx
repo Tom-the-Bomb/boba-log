@@ -96,10 +96,7 @@ export default function AddShopModal({
       }
 
       onShopAdded(data.shop as BobaShop);
-      onClose();
-      resetDraft();
-      setError("");
-      setNameError("");
+      handleClose();
     } catch {
       setError(t("couldNotAddShop"));
     } finally {
@@ -108,8 +105,8 @@ export default function AddShopModal({
   }
 
   async function handleAvatarChange(event: ChangeEvent<HTMLInputElement>) {
-    const avatarError = await handleAvatarInputChange(event);
-    setError(avatarError ?? "");
+    const errorKey = await handleAvatarInputChange(event);
+    setError(errorKey ? t(errorKey) : "");
   }
 
   return (

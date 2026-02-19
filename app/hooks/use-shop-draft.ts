@@ -10,12 +10,12 @@ function isImageMimeType(mimeType: string) {
   return mimeType.toLowerCase().startsWith("image/");
 }
 
-function getAvatarProcessingErrorMessage(error: unknown) {
+function getAvatarProcessingErrorKey(error: unknown) {
   if (error instanceof DOMException || error instanceof TypeError) {
-    return "This image format or codec isn't supported by your browser. Try another image file.";
+    return "unsupportedImageFormat";
   }
 
-  return "Could not process image.";
+  return "couldNotProcessImage";
 }
 
 function revokeObjectUrlIfNeeded(url: string) {
@@ -46,7 +46,7 @@ export default function useShopDraft() {
     }
 
     if (file.type && !isImageMimeType(file.type)) {
-      return "Invalid avatar format. Please upload an image file.";
+      return "invalidAvatarFormat";
     }
 
     presetAbortRef.current?.abort();
@@ -60,7 +60,7 @@ export default function useShopDraft() {
       setAvatarPreview(nextPreview);
       return null;
     } catch (error) {
-      return getAvatarProcessingErrorMessage(error);
+      return getAvatarProcessingErrorKey(error);
     }
   }
 
