@@ -255,20 +255,25 @@ export default function DateRangeSlider({
           </div>
 
           <div className="grid grid-cols-7 gap-0">
-            {Array.from({ length: 7 }).map((_, index) => (
-              <div
-                key={index}
-                className="tea-text-muted flex h-8 items-center justify-center text-[10px] tracking-widest uppercase"
-              >
-                {t(`weekdayNames[${index}]`)}
-              </div>
-            ))}
+            {Array.from({ length: 7 }).map((_, index) => {
+              const label = t(`weekdayNames[${index}]`);
+              return (
+                <div
+                  key={label}
+                  className="tea-text-muted flex h-8 items-center justify-center text-[10px] tracking-widest uppercase"
+                >
+                  {label}
+                </div>
+              );
+            })}
           </div>
 
           <div className="grid grid-cols-7 gap-0">
             {calendarDays.map((day, index) => {
               if (!day) {
-                return <div key={`empty-${index}`} className="h-8 w-full" />;
+                return (
+                  <div key={`empty-col${index % 7}`} className="h-8 w-full" />
+                );
               }
 
               const isDisabled = day < minDate || day > maxDate;

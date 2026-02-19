@@ -10,5 +10,4 @@ export const DEFAULT_SEO_DESCRIPTION =
 export const SOCIAL_IMAGE_URL = `${SITE_URL}/icon-512.png`;
 export const APP_ICON_ALT = `${SITE_NAME} app icon`;
 
-export const FOOTER_TAGLINE = "For tea lovers";
 export const FOOTER_YEAR = String(new Date().getFullYear());

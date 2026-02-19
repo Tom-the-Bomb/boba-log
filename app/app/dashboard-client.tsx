@@ -3,16 +3,7 @@
 import { getShopCountForRange } from "@/lib/dashboard-metrics";
 import { toDateStringUTC } from "@/lib/date";
 import type { BobaShop } from "@/lib/types";
-import {
-  BarElement,
-  CategoryScale,
-  Chart as ChartJS,
-  Legend,
-  LinearScale,
-  Tooltip,
-} from "chart.js";
-import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import ByShopChart from "../components/dashboard/by-shop-chart";
 import DateRangeSlider from "../components/dashboard/date-range-slider";
@@ -22,12 +13,9 @@ import ShopsSection from "../components/dashboard/shops-section";
 import TrendsChart from "../components/dashboard/trends-chart";
 import { useUser } from "../providers/user-provider";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
-
 const EMPTY_SHOPS: readonly BobaShop[] = [];
 
 export default function DashboardClient() {
-  const router = useRouter();
   const { user, isLoadingUser } = useUser();
   const { t } = useTranslation("dashboard");
   const shops = user?.shops ?? EMPTY_SHOPS;
@@ -42,12 +30,6 @@ export default function DashboardClient() {
 
   const startDate = startDateOverride || defaultStartDate;
   const endDate = endDateOverride || defaultEndDate;
-
-  useEffect(() => {
-    if (!isLoadingUser && !user && window.location.pathname !== "/auth") {
-      router.replace("/auth");
-    }
-  }, [isLoadingUser, router, user]);
 
   const totalCount = useMemo(
     () =>

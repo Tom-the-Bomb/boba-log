@@ -5,7 +5,7 @@ import {
   type DefaultShopPresetOption,
 } from "@/lib/default-shops";
 import { ChevronDown } from "lucide-react";
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useReducer, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import DefaultShopPresetCard from "./default-shop-preset-card";
 
@@ -13,14 +13,44 @@ interface DefaultShopsSectionProps {
   onPresetSelect: (preset: DefaultShopPresetOption) => void;
 }
 
+interface PresetsState {
+  hasMeasured: boolean;
+  isCollapsible: boolean;
+  isExpanded: boolean;
+}
+
+type PresetsAction =
+  | { type: "measured"; isCollapsible: boolean }
+  | { type: "toggle" };
+
+function presetsReducer(
+  state: PresetsState,
+  action: PresetsAction,
+): PresetsState {
+  switch (action.type) {
+    case "measured":
+      return {
+        hasMeasured: true,
+        isCollapsible: action.isCollapsible,
+        isExpanded: action.isCollapsible ? state.isExpanded : false,
+      };
+    case "toggle":
+      return { ...state, isExpanded: !state.isExpanded };
+  }
+}
+
+const INITIAL_PRESETS_STATE: PresetsState = {
+  hasMeasured: false,
+  isCollapsible: false,
+  isExpanded: false,
+};
+
 export default function DefaultShopsSection({
   onPresetSelect,
 }: DefaultShopsSectionProps) {
   const { t } = useTranslation("dashboard");
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [hasMeasured, setHasMeasured] = useState(false);
-  const [isPresetsCollapsible, setIsPresetsCollapsible] = useState(false);
-  const [isPresetsExpanded, setIsPresetsExpanded] = useState(false);
+  const [presets, dispatch] = useReducer(presetsReducer, INITIAL_PRESETS_STATE);
 
   useLayoutEffect(() => {
     const container = containerRef.current;
@@ -31,8 +61,7 @@ export default function DefaultShopsSection({
     const measure = () => {
       const items = Array.from(container.children) as HTMLElement[];
       if (items.length === 0) {
-        setIsPresetsCollapsible(false);
-        setHasMeasured(true);
+        dispatch({ type: "measured", isCollapsible: false });
         return;
       }
 
@@ -46,11 +75,7 @@ export default function DefaultShopsSection({
         }
       }
 
-      setIsPresetsCollapsible(hasMultipleRows);
-      if (!hasMultipleRows) {
-        setIsPresetsExpanded(false);
-      }
-      setHasMeasured(true);
+      dispatch({ type: "measured", isCollapsible: hasMultipleRows });
     };
 
     const initialMeasureFrame = requestAnimationFrame(measure);
@@ -74,8 +99,8 @@ export default function DefaultShopsSection({
       <p className="tea-text-muted tea-caps-10 mb-2 block">{t("presets")}</p>
       <div
         className={`overflow-hidden ${
-          hasMeasured ? "transition-[max-height] duration-200" : ""
-        } ${!isPresetsExpanded ? "max-h-9" : "max-h-125"}`}
+          presets.hasMeasured ? "transition-[max-height] duration-200" : ""
+        } ${!presets.isExpanded ? "max-h-9" : "max-h-125"}`}
       >
         <div ref={containerRef} className="flex flex-wrap gap-2">
           {DEFAULT_SHOPS.map((preset) => (
@@ -87,16 +112,16 @@ export default function DefaultShopsSection({
           ))}
         </div>
       </div>
-      {isPresetsCollapsible && (
+      {presets.isCollapsible && (
         <button
           type="button"
-          onClick={() => setIsPresetsExpanded((current) => !current)}
+          onClick={() => dispatch({ type: "toggle" })}
           className="tea-link mt-2 inline-flex items-center gap-1 py-1.5 text-[10px]!"
         >
-          {isPresetsExpanded ? t("showLess") : t("showMore")}
+          {presets.isExpanded ? t("showLess") : t("showMore")}
           <ChevronDown
             aria-hidden="true"
-            className={`h-3 w-3 transition-transform ${isPresetsExpanded ? "rotate-180" : ""}`}
+            className={`h-3 w-3 transition-transform ${presets.isExpanded ? "rotate-180" : ""}`}
             strokeWidth={1.5}
           />
         </button>

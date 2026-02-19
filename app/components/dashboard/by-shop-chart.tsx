@@ -3,10 +3,22 @@
 import { buildDashboardChartOptions } from "@/lib/dashboard-chart-options";
 import { buildByShopChartData, buildShopCounts } from "@/lib/dashboard-metrics";
 import type { BobaShop } from "@/lib/types";
+import dynamic from "next/dynamic";
 import { useMemo } from "react";
-import { Bar } from "react-chartjs-2";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "../../providers/theme-provider";
+
+const Bar = dynamic(
+  async () => {
+    const [
+      { Bar },
+      { Chart, CategoryScale, LinearScale, BarElement, Tooltip, Legend },
+    ] = await Promise.all([import("react-chartjs-2"), import("chart.js")]);
+    Chart.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
+    return { default: Bar };
+  },
+  { ssr: false },
+);
 
 interface ByShopChartProps {
   shops: readonly BobaShop[];

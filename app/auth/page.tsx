@@ -6,10 +6,84 @@ import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { SubmitEventHandler } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useReducer, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "../providers/theme-provider";
 import { useUser } from "../providers/user-provider";
+
+interface FormState {
+  mode: AuthMode;
+  username: string;
+  password: string;
+  usernameError: string;
+  passwordError: string;
+  error: string;
+  showPassword: boolean;
+  isSubmitting: boolean;
+  turnstileToken: string;
+}
+
+type FormAction =
+  | { type: "set_mode"; mode: AuthMode }
+  | { type: "set_username"; value: string }
+  | { type: "set_password"; value: string }
+  | { type: "set_validation"; usernameError: string; passwordError: string }
+  | { type: "set_error"; error: string }
+  | { type: "toggle_password" }
+  | { type: "submit_start" }
+  | { type: "submit_end" }
+  | { type: "reset_turnstile" }
+  | { type: "set_turnstile"; token: string };
+
+function formReducer(state: FormState, action: FormAction): FormState {
+  switch (action.type) {
+    case "set_mode":
+      return { ...state, mode: action.mode, turnstileToken: "" };
+    case "set_username":
+      return {
+        ...state,
+        username: action.value,
+        usernameError: state.usernameError ? "" : state.usernameError,
+      };
+    case "set_password":
+      return {
+        ...state,
+        password: action.value,
+        passwordError: state.passwordError ? "" : state.passwordError,
+      };
+    case "set_validation":
+      return {
+        ...state,
+        usernameError: action.usernameError,
+        passwordError: action.passwordError,
+        error: "",
+      };
+    case "set_error":
+      return { ...state, error: action.error, turnstileToken: "" };
+    case "toggle_password":
+      return { ...state, showPassword: !state.showPassword };
+    case "submit_start":
+      return { ...state, isSubmitting: true, error: "" };
+    case "submit_end":
+      return { ...state, isSubmitting: false, turnstileToken: "" };
+    case "reset_turnstile":
+      return { ...state, turnstileToken: "" };
+    case "set_turnstile":
+      return { ...state, turnstileToken: action.token };
+  }
+}
+
+const INITIAL_FORM_STATE: FormState = {
+  mode: "login",
+  username: "",
+  password: "",
+  usernameError: "",
+  passwordError: "",
+  error: "",
+  showPassword: false,
+  isSubmitting: false,
+  turnstileToken: "",
+};
 
 export default function AuthPage() {
   const router = useRouter();
@@ -17,15 +91,7 @@ export default function AuthPage() {
   const { isDark } = useTheme();
   const { t } = useTranslation("auth");
   const { t: tc } = useTranslation("common");
-  const [mode, setMode] = useState<AuthMode>("login");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [usernameError, setUsernameError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [error, setError] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState("");
+  const [form, dispatch] = useReducer(formReducer, INITIAL_FORM_STATE);
   const turnstileRef = useRef<TurnstileInstance>(null);
 
   function validateUsername(value: string) {
@@ -33,7 +99,7 @@ export default function AuthPage() {
     if (!normalized) {
       return t("usernameRequired");
     }
-    if (mode === "signup" && normalized.length < 3) {
+    if (form.mode === "signup" && normalized.length < 3) {
       return t("usernameMinLength");
     }
     return "";
@@ -43,7 +109,7 @@ export default function AuthPage() {
     if (!value) {
       return t("passwordRequired");
     }
-    if (mode === "signup" && value.length < 6) {
+    if (form.mode === "signup" && value.length < 6) {
       return t("passwordMinLength");
     }
     return "";
@@ -56,33 +122,38 @@ export default function AuthPage() {
   }, [isLoadingUser, router, user]);
 
   useEffect(() => {
-    setTurnstileToken("");
     turnstileRef.current?.reset();
-  }, [mode]);
+  }, [form.mode]);
 
   async function handleSubmit(
     event: Parameters<SubmitEventHandler<HTMLFormElement>>[0],
   ) {
     event.preventDefault();
 
-    const nextUsernameError = validateUsername(username);
-    const nextPasswordError = validatePassword(password);
-    setUsernameError(nextUsernameError);
-    setPasswordError(nextPasswordError);
+    const nextUsernameError = validateUsername(form.username);
+    const nextPasswordError = validatePassword(form.password);
+    dispatch({
+      type: "set_validation",
+      usernameError: nextUsernameError,
+      passwordError: nextPasswordError,
+    });
 
     if (nextUsernameError || nextPasswordError) {
-      setError("");
       return;
     }
 
-    setIsSubmitting(true);
-    setError("");
+    dispatch({ type: "submit_start" });
 
     try {
       const response = await fetch("/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode, username, password, turnstileToken }),
+        body: JSON.stringify({
+          mode: form.mode,
+          username: form.username,
+          password: form.password,
+          turnstileToken: form.turnstileToken,
+        }),
       });
 
       const data = (await response.json()) as {
@@ -91,8 +162,10 @@ export default function AuthPage() {
         token?: string;
       };
       if (!response.ok) {
-        setError(data.code ? t(data.code) : t("authFailed"));
-        setTurnstileToken("");
+        dispatch({
+          type: "set_error",
+          error: data.code ? t(data.code) : t("authFailed"),
+        });
         turnstileRef.current?.reset();
         return;
       }
@@ -100,10 +173,9 @@ export default function AuthPage() {
       await login(data.token!);
       router.push("/app");
     } catch {
-      setError(t("connectionError"));
+      dispatch({ type: "set_error", error: t("connectionError") });
     } finally {
-      setIsSubmitting(false);
-      setTurnstileToken("");
+      dispatch({ type: "submit_end" });
       turnstileRef.current?.reset();
     }
   }
@@ -116,21 +188,23 @@ export default function AuthPage() {
         <section className="w-full max-w-sm" aria-label="Authentication">
           <div className="mb-10">
             <p className="tea-text-accent text-xs tracking-[0.3em] uppercase">
-              {mode === "login"
+              {form.mode === "login"
                 ? t("welcomeBack")
                 : t("joinSite", { siteName: tc("siteName") })}
             </p>
             <h1 className="tea-text-primary mt-3 font-display text-4xl font-medium tracking-tight">
-              {mode === "login" ? t("signInTitle") : t("createAccountTitle")}
+              {form.mode === "login"
+                ? t("signInTitle")
+                : t("createAccountTitle")}
             </h1>
           </div>
 
           <div className="tea-border-subtle mb-8 flex gap-6 border-b">
             <button
               type="button"
-              onClick={() => setMode("login")}
+              onClick={() => dispatch({ type: "set_mode", mode: "login" })}
               className={`tea-auth-tab ${
-                mode === "login"
+                form.mode === "login"
                   ? "tea-border-strong tea-text-primary border-b-2"
                   : "tea-text-muted tea-hover-text-primary"
               }`}
@@ -139,9 +213,9 @@ export default function AuthPage() {
             </button>
             <button
               type="button"
-              onClick={() => setMode("signup")}
+              onClick={() => dispatch({ type: "set_mode", mode: "signup" })}
               className={`tea-auth-tab ${
-                mode === "signup"
+                form.mode === "signup"
                   ? "tea-border-strong tea-text-primary border-b-2"
                   : "tea-text-muted tea-hover-text-primary"
               }`}
@@ -160,27 +234,24 @@ export default function AuthPage() {
               </label>
               <input
                 id="auth-username"
-                value={username}
-                onChange={(event) => {
-                  setUsername(event.target.value);
-                  if (usernameError) {
-                    setUsernameError("");
-                  }
-                }}
+                value={form.username}
+                onChange={(event) =>
+                  dispatch({ type: "set_username", value: event.target.value })
+                }
                 className={`tea-text-primary tea-border-accent-focus tea-border-subtle tea-input-line transition-colors ${
-                  usernameError ? "tea-input-error" : ""
+                  form.usernameError ? "tea-input-error" : ""
                 }`}
                 aria-describedby={
-                  usernameError ? "auth-username-error" : undefined
+                  form.usernameError ? "auth-username-error" : undefined
                 }
               />
-              {usernameError && (
+              {form.usernameError && (
                 <p
                   id="auth-username-error"
                   className="tea-form-error"
                   role="alert"
                 >
-                  {usernameError}
+                  {form.usernameError}
                 </p>
               )}
             </div>
@@ -194,44 +265,44 @@ export default function AuthPage() {
               <div className="relative">
                 <input
                   id="auth-password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(event) => {
-                    setPassword(event.target.value);
-                    if (passwordError) {
-                      setPasswordError("");
-                    }
-                  }}
+                  type={form.showPassword ? "text" : "password"}
+                  value={form.password}
+                  onChange={(event) =>
+                    dispatch({
+                      type: "set_password",
+                      value: event.target.value,
+                    })
+                  }
                   className={`tea-text-primary tea-border-accent-focus tea-border-subtle tea-input-line pr-10 transition-colors ${
-                    passwordError ? "tea-input-error" : ""
+                    form.passwordError ? "tea-input-error" : ""
                   }`}
                   aria-describedby={
-                    passwordError ? "auth-password-error" : undefined
+                    form.passwordError ? "auth-password-error" : undefined
                   }
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword((s) => !s)}
+                  onClick={() => dispatch({ type: "toggle_password" })}
                   className="tea-text-muted tea-hover-text-primary absolute right-0 bottom-2.5 p-1 transition-colors"
                   aria-label={
-                    showPassword ? t("hidePassword") : t("showPassword")
+                    form.showPassword ? t("hidePassword") : t("showPassword")
                   }
                 >
-                  {password &&
-                    (showPassword ? (
+                  {form.password &&
+                    (form.showPassword ? (
                       <Eye className="h-4.5 w-4.5" />
                     ) : (
                       <EyeOff className="h-4.5 w-4.5" />
                     ))}
                 </button>
               </div>
-              {passwordError && (
+              {form.passwordError && (
                 <p
                   id="auth-password-error"
                   className="tea-form-error"
                   role="alert"
                 >
-                  {passwordError}
+                  {form.passwordError}
                 </p>
               )}
             </div>
@@ -240,27 +311,29 @@ export default function AuthPage() {
               <Turnstile
                 ref={turnstileRef}
                 siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-                onSuccess={setTurnstileToken}
-                onError={() => setTurnstileToken("")}
-                onExpire={() => setTurnstileToken("")}
+                onSuccess={(token) =>
+                  dispatch({ type: "set_turnstile", token })
+                }
+                onError={() => dispatch({ type: "reset_turnstile" })}
+                onExpire={() => dispatch({ type: "reset_turnstile" })}
                 options={{ theme: isDark ? "dark" : "light", size: "normal" }}
               />
             </div>
 
-            {error && (
+            {form.error && (
               <p className="tea-form-error" role="alert">
-                {error}
+                {form.error}
               </p>
             )}
 
             <button
               type="submit"
-              disabled={isSubmitting || !turnstileToken}
+              disabled={form.isSubmitting || !form.turnstileToken}
               className="tea-cta mt-4 w-full py-3.5 text-xs tracking-[0.2em] uppercase disabled:opacity-50"
             >
-              {isSubmitting
+              {form.isSubmitting
                 ? t("pleaseWait")
-                : mode === "login"
+                : form.mode === "login"
                   ? t("signInButton")
                   : t("createAccountButton")}
             </button>

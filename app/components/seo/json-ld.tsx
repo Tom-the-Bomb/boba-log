@@ -1,3 +1,4 @@
+import Script from "next/script";
 import type { Thing, WithContext } from "schema-dts";
 
 interface JsonLdProps {
@@ -13,11 +14,12 @@ export default function JsonLd({ data }: JsonLdProps) {
     : data;
 
   return (
-    <script
+    <Script
+      id="json-ld"
       type="application/ld+json"
-      dangerouslySetInnerHTML={{
-        __html: JSON.stringify(jsonLdData).replace(/</g, "\\u003c"),
-      }}
-    />
+      strategy="beforeInteractive"
+    >
+      {JSON.stringify(jsonLdData).replace(/</g, "\\u003c")}
+    </Script>
   );
 }
