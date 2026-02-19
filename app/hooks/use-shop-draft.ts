@@ -6,18 +6,6 @@ import type { ChangeEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-function isImageMimeType(mimeType: string) {
-  return mimeType.toLowerCase().startsWith("image/");
-}
-
-function getAvatarProcessingErrorKey(error: unknown) {
-  if (error instanceof DOMException || error instanceof TypeError) {
-    return "unsupportedImageFormat";
-  }
-
-  return "couldNotProcessImage";
-}
-
 function revokeObjectUrlIfNeeded(url: string) {
   if (url.startsWith("blob:")) {
     URL.revokeObjectURL(url);
@@ -45,7 +33,7 @@ export default function useShopDraft() {
       return null;
     }
 
-    if (file.type && !isImageMimeType(file.type)) {
+    if (file.type && !file.type.toLowerCase().startsWith("image/")) {
       return "invalidAvatarFormat";
     }
 
@@ -60,17 +48,24 @@ export default function useShopDraft() {
       setAvatarPreview(nextPreview);
       return null;
     } catch (error) {
-      return getAvatarProcessingErrorKey(error);
+      return error instanceof DOMException || error instanceof TypeError
+        ? "unsupportedImageFormat"
+        : "couldNotProcessImage";
     }
   }
 
-  async function selectPreset(preset: DefaultShopPresetOption) {
+  async function selectPreset(
+    preset: DefaultShopPresetOption,
+    setName: boolean = true,
+  ) {
     presetAbortRef.current?.abort();
     const controller = new AbortController();
     presetAbortRef.current = controller;
 
     revokeObjectUrlIfNeeded(avatarPreview);
-    setShopName(preset[i18n.language as keyof DefaultShopPresetOption]);
+    if (setName) {
+      setShopName(preset[i18n.language as keyof DefaultShopPresetOption]);
+    }
     setAvatarPreview(preset.avatar);
 
     try {

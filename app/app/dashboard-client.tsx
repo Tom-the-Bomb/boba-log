@@ -1,7 +1,7 @@
 "use client";
 
-import { buildShopCounts, getTotalCount } from "@/lib/dashboard-metrics";
-import { toDateInputValue } from "@/lib/date";
+import { getShopCountForRange } from "@/lib/dashboard-metrics";
+import { toDateStringUTC } from "@/lib/date";
 import type { BobaShop } from "@/lib/types";
 import {
   BarElement,
@@ -33,9 +33,9 @@ export default function DashboardClient() {
   const shops = user?.shops ?? EMPTY_SHOPS;
 
   const defaultStartDate = user
-    ? toDateInputValue(new Date(user.createdAt * 1000))
+    ? toDateStringUTC(new Date(user.createdAt * 1000))
     : "";
-  const defaultEndDate = user ? toDateInputValue(new Date()) : "";
+  const defaultEndDate = user ? toDateStringUTC(new Date()) : "";
 
   const [startDateOverride, setStartDate] = useState("");
   const [endDateOverride, setEndDate] = useState("");
@@ -49,12 +49,14 @@ export default function DashboardClient() {
     }
   }, [isLoadingUser, router, user]);
 
-  const shopCounts = useMemo(
-    () => buildShopCounts(shops, startDate, endDate),
+  const totalCount = useMemo(
+    () =>
+      shops.reduce(
+        (sum, shop) => sum + getShopCountForRange(shop, startDate, endDate),
+        0,
+      ),
     [shops, startDate, endDate],
   );
-
-  const totalCount = useMemo(() => getTotalCount(shopCounts), [shopCounts]);
 
   if (isLoadingUser) {
     return (
@@ -79,10 +81,10 @@ export default function DashboardClient() {
             onEndChange={setEndDate}
             minDate={
               user
-                ? toDateInputValue(new Date(user.createdAt * 1000))
+                ? toDateStringUTC(new Date(user.createdAt * 1000))
                 : startDate
             }
-            maxDate={toDateInputValue(new Date())}
+            maxDate={toDateStringUTC(new Date())}
           />
         </section>
 
@@ -101,7 +103,7 @@ export default function DashboardClient() {
 
         <div className="tea-line mb-20" />
 
-        <ByShopChart shopCounts={shopCounts} />
+        <ByShopChart shops={shops} startDate={startDate} endDate={endDate} />
 
         <TrendsChart shops={shops} startDate={startDate} endDate={endDate} />
       </main>

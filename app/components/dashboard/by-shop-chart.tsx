@@ -1,22 +1,31 @@
 "use client";
 
 import { buildDashboardChartOptions } from "@/lib/dashboard-chart-options";
-import {
-  buildByShopChartData,
-  type ShopCountItem,
-} from "@/lib/dashboard-metrics";
+import { buildByShopChartData, buildShopCounts } from "@/lib/dashboard-metrics";
+import type { BobaShop } from "@/lib/types";
 import { useMemo } from "react";
 import { Bar } from "react-chartjs-2";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "../../providers/theme-provider";
 
 interface ByShopChartProps {
-  shopCounts: ShopCountItem[];
+  shops: readonly BobaShop[];
+  startDate: string;
+  endDate: string;
 }
 
-export default function ByShopChart({ shopCounts }: ByShopChartProps) {
+export default function ByShopChart({
+  shops,
+  startDate,
+  endDate,
+}: ByShopChartProps) {
   const { isDark } = useTheme();
   const translator = useTranslation("dashboard");
+
+  const shopCounts = useMemo(
+    () => buildShopCounts(shops, startDate, endDate),
+    [shops, startDate, endDate],
+  );
 
   const data = useMemo(
     () => buildByShopChartData(translator, shopCounts),

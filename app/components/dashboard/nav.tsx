@@ -11,11 +11,6 @@ export default function Nav() {
   const { user, logout: clearAuth } = useUser();
   const { t } = useTranslation("common");
 
-  function handleLogout() {
-    clearAuth();
-    router.push("/auth");
-  }
-
   return (
     <header className="tea-page-padding tea-border-subtle flex items-center justify-between border-b py-6">
       <div>
@@ -29,7 +24,14 @@ export default function Nav() {
       <div className="flex items-center gap-3">
         <LanguageToggle />
         <ThemeToggle />
-        <button type="button" onClick={handleLogout} className="tea-link px-2">
+        <button
+          type="button"
+          onClick={() => {
+            clearAuth();
+            router.push("/auth");
+          }}
+          className="tea-link px-2"
+        >
           {t("logout")}
         </button>
       </div>

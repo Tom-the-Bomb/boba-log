@@ -10,15 +10,13 @@ import { useUser } from "../../providers/user-provider";
 interface ConfirmDeleteModalProps {
   shop: BobaShop;
   onClose: () => void;
-  onDeleted: (shopId: number) => void;
 }
 
 export default function ConfirmDeleteModal({
   shop,
   onClose,
-  onDeleted,
 }: ConfirmDeleteModalProps) {
-  const { user } = useUser();
+  const { user, setUserShops } = useUser();
   const { t, i18n } = useTranslation("dashboard");
   const { t: tc } = useTranslation("common");
   const [isDeleting, setIsDeleting] = useState(false);
@@ -42,7 +40,7 @@ export default function ConfirmDeleteModal({
         return;
       }
 
-      onDeleted(shop.id);
+      setUserShops((current) => current.filter((s) => s.id !== shop.id));
       onClose();
     } catch {
       toast.error(t("couldNotDeleteShop"));

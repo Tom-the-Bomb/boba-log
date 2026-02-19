@@ -16,7 +16,7 @@ export const GRANULARITY_KEYS: Record<Granularity, string> = {
   weekday: "granularityWeekday",
 };
 
-export interface ShopCountItem {
+interface ShopCountItem {
   shop: BobaShop;
   count: number;
 }
@@ -62,10 +62,6 @@ export function buildShopCounts(
     shop,
     count: getShopCountForRange(shop, startDate, endDate),
   }));
-}
-
-export function getTotalCount(shopCounts: ShopCountItem[]): number {
-  return shopCounts.reduce((sum, item) => sum + item.count, 0);
 }
 
 export function buildByShopChartData(

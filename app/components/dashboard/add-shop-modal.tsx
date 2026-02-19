@@ -1,10 +1,10 @@
 "use client";
 
-import { DEFAULT_SHOPS, findDefaultShop } from "@/lib/default-shops";
+import { findDefaultShop } from "@/lib/default-shops";
 import { BobaShop } from "@/lib/types";
 import { X } from "lucide-react";
 import Image from "next/image";
-import type { ChangeEvent, FormEvent } from "react";
+import type React from "react";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import useShopDraft from "../../hooks/use-shop-draft";
@@ -14,15 +14,10 @@ import DefaultShopsSection from "./default-shops-section";
 interface AddShopModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onShopAdded: (shop: BobaShop) => void;
 }
 
-export default function AddShopModal({
-  isOpen,
-  onClose,
-  onShopAdded,
-}: AddShopModalProps) {
-  const { user } = useUser();
+export default function AddShopModal({ isOpen, onClose }: AddShopModalProps) {
+  const { user, setUserShops } = useUser();
   const { t } = useTranslation("dashboard");
   const { t: tc } = useTranslation("common");
   const {
@@ -52,7 +47,7 @@ export default function AddShopModal({
     setNameError("");
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     if (!user) {
       return;
     }
@@ -95,18 +90,13 @@ export default function AddShopModal({
         return;
       }
 
-      onShopAdded(data.shop as BobaShop);
+      setUserShops((current) => [...current, data.shop as BobaShop]);
       handleClose();
     } catch {
       setError(t("couldNotAddShop"));
     } finally {
       setIsSubmitting(false);
     }
-  }
-
-  async function handleAvatarChange(event: ChangeEvent<HTMLInputElement>) {
-    const errorKey = await handleAvatarInputChange(event);
-    setError(errorKey ? t(errorKey) : "");
   }
 
   return (
@@ -124,7 +114,6 @@ export default function AddShopModal({
         </h3>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit} noValidate>
           <DefaultShopsSection
-            presets={DEFAULT_SHOPS}
             onPresetSelect={(preset) => {
               selectPreset(preset);
               setError("");
@@ -145,7 +134,7 @@ export default function AddShopModal({
                 setShopName(event.target.value);
                 const defaultShop = findDefaultShop(event.target.value);
                 if (defaultShop) {
-                  selectPreset(defaultShop);
+                  selectPreset(defaultShop, false);
                 }
                 if (nameError) {
                   setNameError("");
@@ -179,7 +168,10 @@ export default function AddShopModal({
               id="modal-avatar"
               type="file"
               accept="image/*"
-              onChange={handleAvatarChange}
+              onChange={async (event) => {
+                const errorKey = await handleAvatarInputChange(event);
+                setError(errorKey ? t(errorKey) : "");
+              }}
               className="hidden"
             />
             <div className="flex w-full items-center text-sm">

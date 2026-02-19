@@ -1,28 +1,29 @@
 "use client";
 
-import type { DefaultShopPresetOption } from "@/lib/default-shops";
+import {
+  DEFAULT_SHOPS,
+  type DefaultShopPresetOption,
+} from "@/lib/default-shops";
 import { ChevronDown } from "lucide-react";
 import { useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import DefaultShopPresetCard from "./default-shop-preset-card";
 
 interface DefaultShopsSectionProps {
-  presets: readonly DefaultShopPresetOption[];
   onPresetSelect: (preset: DefaultShopPresetOption) => void;
 }
 
 export default function DefaultShopsSection({
-  presets,
   onPresetSelect,
 }: DefaultShopsSectionProps) {
   const { t } = useTranslation("dashboard");
-  const presetsContainerRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const [hasMeasured, setHasMeasured] = useState(false);
   const [isPresetsCollapsible, setIsPresetsCollapsible] = useState(false);
   const [isPresetsExpanded, setIsPresetsExpanded] = useState(false);
 
   useLayoutEffect(() => {
-    const container = presetsContainerRef.current;
+    const container = containerRef.current;
     if (!container) {
       return;
     }
@@ -66,7 +67,7 @@ export default function DefaultShopsSection({
       observer.disconnect();
       removeEventListener("resize", measure);
     };
-  }, [presets]);
+  }, []);
 
   return (
     <div>
@@ -76,8 +77,8 @@ export default function DefaultShopsSection({
           hasMeasured ? "transition-[max-height] duration-200" : ""
         } ${!isPresetsExpanded ? "max-h-9" : "max-h-125"}`}
       >
-        <div ref={presetsContainerRef} className="flex flex-wrap gap-2">
-          {presets.map((preset) => (
+        <div ref={containerRef} className="flex flex-wrap gap-2">
+          {DEFAULT_SHOPS.map((preset) => (
             <DefaultShopPresetCard
               key={preset.en}
               preset={preset}
