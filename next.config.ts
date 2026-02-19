@@ -4,6 +4,9 @@ import type { NextConfig } from "next";
 initOpenNextCloudflareForDev();
 
 const nextConfig: NextConfig = {
+  turbopack: {
+    root: __dirname,
+  },
   output: "standalone",
   async headers() {
     return [
