@@ -13,6 +13,7 @@ Boba Log is a Next.js app for tracking tea shop visits and drink totals, deploye
 - **Object Storage:** Cloudflare R2
 - **Package Manager:** Bun
 - **Auth:** JWT (100k iterations, SHA-256) via HttpOnly cookie (30-day expiry)
+- **Security:** Cloudflare Ratelimiter + Turnstile
 - **Localization:** Chinese (simplified) + English with i18next and [simplelocalize.io](https://simplelocalize.io)
 
 ### Libraries
@@ -145,6 +146,11 @@ Avatars are uploaded as `{shopId}.webp` and served via the `/api/avatars/[shopId
 3. Add the site key and secret key as a secret, see [Environment](#environment)
 
 The `NEXT_PUBLIC_TURNSTILE_SITE_KEY` must be available at build time since Next.js inlines `NEXT_PUBLIC_*` variables into the client bundle.
+
+## Ratelimiting
+
+- `/api/auth` route: (10 requests / min / IP)
+- All other `/api/` routes: (100 requests / min / IP)
 
 ## Default Shop Avatars
 
