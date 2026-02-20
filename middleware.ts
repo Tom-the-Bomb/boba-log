@@ -2,7 +2,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { env } = getCloudflareContext();
   const ip = request.headers.get("cf-connecting-ip") ?? "127.0.0.1";
   const pathname = request.nextUrl.pathname;
