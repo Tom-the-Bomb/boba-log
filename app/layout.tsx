@@ -97,6 +97,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <style>{`html{background:#fafaf7;}html.dark{background:#121417;}`}</style>
         <script
           dangerouslySetInnerHTML={{
             __html:
