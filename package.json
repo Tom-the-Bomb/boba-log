@@ -17,7 +17,8 @@
     "prepare": "husky",
     "i18n:upload": "simplelocalize upload --dryRun",
     "i18n:upload:confirm": "simplelocalize upload",
-    "i18n:download": "simplelocalize download"
+    "i18n:download": "simplelocalize download",
+    "doctor": "bunx -y react-doctor@latest ."
   },
   "dependencies": {
     "@marsidev/react-turnstile": "^1.4.2",
@@ -69,6 +70,10 @@
     "ignore": {
       "files": [
         "open-next.config.ts"
+      ],
+      "rules": [
+        "react/no-danger",
+        "react-doctor/nextjs-no-native-script"
       ]
     }
   }

@@ -1,5 +1,7 @@
 # [Boba Log](https://boba.tomthebomb)
 
+[![React Doctor](https://www.react.doctor/share/badge?p=boba-log&s=100)](https://www.react.doctor/share?p=boba-log&s=100)
+
 Boba Log is a Next.js app for tracking tea shop visits and drink totals, deployed to Cloudflare Workers.
 
 ## Stack
@@ -183,3 +185,4 @@ bun run deploy
 - `bun run lint:fix` — ESLint fix + Prettier write + TypeScript no-emit
 - `bun run format` — Prettier write
 - `bun run format:check` — Prettier check
+- `bun run doctor` — Run [react-doctor](https://github.com/millionco/react-doctor)
