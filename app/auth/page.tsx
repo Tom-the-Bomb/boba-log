@@ -4,11 +4,11 @@ import { waitForToken } from "@/lib/turnstile";
 import type { ApiErrorResponse } from "@/lib/types";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { Eye, EyeOff } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { SubmitEventHandler } from "react";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import AuthFooter from "../components/auth/footer";
 import { useUser } from "../providers/user-provider";
 import useAuthFormReducer from "../reducers/auth-form-reducer";
 
@@ -260,13 +260,7 @@ export default function AuthPage() {
         </section>
       </main>
 
-      <div className="tea-line tea-line-bottom tea-page-padding-sm" />
-      <footer className="tea-page-padding-sm flex items-center justify-between py-6">
-        <p className="tea-text-muted tea-caps-10-wide">{tc("siteName")}</p>
-        <Link href="/" className="tea-link text-[10px]">
-          &larr; {tc("home")}
-        </Link>
-      </footer>
+      <AuthFooter />
     </div>
   );
 }

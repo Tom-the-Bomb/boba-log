@@ -32,7 +32,15 @@ interface UserContextValue {
 
 const UserContext = createContext<UserContextValue | null>(null);
 
-export default function UserProvider({ children }: { children: ReactNode }) {
+interface UserProviderProps {
+  children: ReactNode;
+  skipHydration?: boolean;
+}
+
+export default function UserProvider({
+  children,
+  skipHydration = false,
+}: UserProviderProps) {
   const [state, dispatch] = useUserReducer();
 
   const loadUser = useCallback(async () => {
@@ -53,8 +61,7 @@ export default function UserProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     await fetch("/api/auth/logout", { method: "POST" });
-    dispatch({ type: "logged_out" });
-  }, [dispatch]);
+  }, []);
 
   const refreshUser = useCallback(async () => {
     if (!state.username) {
@@ -88,6 +95,11 @@ export default function UserProvider({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
+    if (skipHydration) {
+      dispatch({ type: "done_loading" });
+      return;
+    }
+
     const hydrate = async () => {
       try {
         await loadUser();
@@ -99,7 +111,7 @@ export default function UserProvider({ children }: { children: ReactNode }) {
     };
 
     void hydrate();
-  }, [dispatch, loadUser]);
+  }, [dispatch, loadUser, skipHydration]);
 
   const user = useMemo<UserSession | null>(() => {
     if (!state.username || !state.createdAt) {

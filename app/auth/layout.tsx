@@ -34,7 +34,7 @@ export const metadata: Metadata = {
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <UserProvider>
+    <UserProvider skipHydration>
       <JsonLd data={AUTH_JSONLD} />
       {children}
     </UserProvider>

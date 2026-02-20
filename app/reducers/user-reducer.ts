@@ -10,7 +10,6 @@ interface UserState {
 
 type UserAction =
   | { type: "loaded"; username: string; createdAt: number; shops: BobaShop[] }
-  | { type: "logged_out" }
   | { type: "loading" }
   | { type: "done_loading" }
   | { type: "update_shops"; updater: (current: BobaShop[]) => BobaShop[] };
@@ -23,13 +22,6 @@ function userReducer(state: UserState, action: UserAction): UserState {
         username: action.username,
         createdAt: action.createdAt,
         shops: action.shops,
-      };
-    case "logged_out":
-      return {
-        username: null,
-        createdAt: null,
-        shops: [],
-        isLoading: false,
       };
     case "loading":
       return { ...state, isLoading: true };
