@@ -98,7 +98,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <meta name="color-scheme" content="light dark" />
+        <meta name="color-scheme" content="light" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
