@@ -2,16 +2,6 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-html {
-  background: #fafaf7;
-  height: 100%;
-  overflow: hidden;
-}
-
-html.dark {
-  background: #121417;
-}
-
 :root {
   --tea-white: #fafaf7;
   --tea-mist: #eeeae4;
@@ -50,6 +40,12 @@ html.dark {
   --color-tea-matcha: var(--tea-matcha);
   --color-tea-gold: var(--tea-gold);
   --color-tea-faint: var(--tea-faint);
+}
+
+html {
+  background: var(--tea-white);
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
