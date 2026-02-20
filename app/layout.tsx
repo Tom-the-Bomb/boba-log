@@ -12,6 +12,7 @@ import { Bricolage_Grotesque, Sora } from "next/font/google";
 import type { ReactNode } from "react";
 import { Toaster } from "sonner";
 import "./globals.css";
+import ClientOnly from "./providers/client-only";
 import LocaleProvider from "./providers/locale-provider";
 import { ThemeProvider } from "./providers/theme-provider";
 
@@ -116,12 +117,14 @@ export default function RootLayout({
         />
       </head>
       <body className={`${bricolage.variable} ${sora.variable} antialiased`}>
-        <LocaleProvider>
-          <ThemeProvider>
-            {children}
-            <Toaster position="bottom-center" />
-          </ThemeProvider>
-        </LocaleProvider>
+        <ClientOnly>
+          <LocaleProvider>
+            <ThemeProvider>
+              {children}
+              <Toaster position="bottom-center" />
+            </ThemeProvider>
+          </LocaleProvider>
+        </ClientOnly>
       </body>
     </html>
   );
