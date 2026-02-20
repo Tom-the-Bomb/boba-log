@@ -97,6 +97,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <meta name="color-scheme" content="light dark" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -104,9 +105,9 @@ export default function RootLayout({
                 try {
                   var theme = localStorage.getItem('boba_theme');
                   if (theme === 'dark') {
-                    document.documentElement.className = 'dark';
+                    document.documentElement.classList.add('dark');
                   } else {
-                    document.documentElement.className = '';
+                    document.documentElement.classList.remove('dark');
                   }
                 } catch (e) {}
               })();
