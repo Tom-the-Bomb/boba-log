@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+html {
+  background: #fafaf7;
+}
+
+html.dark {
+  background: #121417;
+}
+
 :root {
   --tea-white: #fafaf7;
   --tea-mist: #eeeae4;

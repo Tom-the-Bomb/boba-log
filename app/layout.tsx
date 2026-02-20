@@ -100,7 +100,7 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "(function(){try{var t=localStorage.getItem('boba_theme');var s=window.matchMedia('(prefers-color-scheme: dark)').matches;if(t==='dark'||(!t&&s)){document.documentElement.classList.add('dark');}}catch(e){}})();",
+              "(function(){try{var t=localStorage.getItem('boba_theme');if(t==='dark'){document.documentElement.classList.add('dark');}}catch(e){}})();",
           }}
           data-cfasync="false"
         />
