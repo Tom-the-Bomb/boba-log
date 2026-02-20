@@ -56,7 +56,7 @@ body {
   margin: 0;
   height: 100%;
   overflow-y: auto;
-  background: var(--tea-white);
+  background: inherit;
   color: var(--tea-charcoal);
   font-family: var(--font-sora), "Sora", sans-serif;
 }
