@@ -1,64 +1,17 @@
 "use client";
 
-import {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-
-type ThemeMode = "light" | "dark";
-
-interface ThemeContextValue {
-  theme: ThemeMode;
-  isDark: boolean;
-  toggleTheme: () => void;
-}
-
-const ThemeContext = createContext<ThemeContextValue | null>(null);
-const THEME_STORAGE_KEY = "boba_theme";
+import { ThemeProvider as NextThemesProvider } from "next-themes";
+import type { ReactNode } from "react";
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<ThemeMode>(() => {
-    if (typeof window === "undefined") {
-      return "light";
-    }
-    const stored = localStorage.getItem(THEME_STORAGE_KEY);
-    if (stored === "light" || stored === "dark") {
-      return stored;
-    }
-    return "light";
-  });
-
-  useEffect(() => {
-    const root = document.documentElement;
-    root.classList.toggle("dark", theme === "dark");
-    root.setAttribute("data-theme", theme);
-    root.style.colorScheme = theme;
-    localStorage.setItem(THEME_STORAGE_KEY, theme);
-  }, [theme]);
-
-  const value = useMemo<ThemeContextValue>(
-    () => ({
-      theme,
-      isDark: theme === "dark",
-      toggleTheme: () =>
-        setTheme((current) => (current === "dark" ? "light" : "dark")),
-    }),
-    [theme],
-  );
-
   return (
-    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+    <NextThemesProvider
+      attribute="class"
+      defaultTheme="light"
+      storageKey="boba_theme"
+      disableTransitionOnChange
+    >
+      {children}
+    </NextThemesProvider>
   );
-}
-
-export function useTheme() {
-  const context = useContext(ThemeContext);
-  if (!context) {
-    throw new Error("useTheme must be used within ThemeProvider.");
-  }
-  return context;
 }

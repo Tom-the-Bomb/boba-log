@@ -31,15 +31,15 @@
 @theme inline {
   --font-sans: var(--font-sora);
   --font-display: var(--font-bricolage);
-  --color-tea-white: #fafaf7;
-  --color-tea-mist: #eeeae4;
-  --color-tea-stone: #d4cfc7;
-  --color-tea-charcoal: #1a1a1a;
-  --color-tea-ink: #2d2d2d;
-  --color-tea-sage: #7b8b6f;
-  --color-tea-matcha: #9aab87;
-  --color-tea-gold: #c4a96a;
-  --color-tea-faint: #b5afa5;
+  --color-tea-white: var(--tea-white);
+  --color-tea-mist: var(--tea-mist);
+  --color-tea-stone: var(--tea-stone);
+  --color-tea-charcoal: var(--tea-charcoal);
+  --color-tea-ink: var(--tea-ink);
+  --color-tea-sage: var(--tea-sage);
+  --color-tea-matcha: var(--tea-matcha);
+  --color-tea-gold: var(--tea-gold);
+  --color-tea-faint: var(--tea-faint);
 }
 
 html {

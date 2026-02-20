@@ -8,8 +8,8 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useReducer,
 } from "react";
+import { useUserReducer } from "../reducers/user-reducer";
 
 interface PublicUserResponse {
   user: PublicUser;
@@ -36,54 +36,8 @@ interface UserContextValue {
 
 const UserContext = createContext<UserContextValue | null>(null);
 
-interface UserState {
-  username: string | null;
-  createdAt: number | null;
-  shops: BobaShop[];
-  isLoading: boolean;
-}
-
-type UserAction =
-  | { type: "loaded"; username: string; createdAt: number; shops: BobaShop[] }
-  | { type: "logged_out" }
-  | { type: "loading" }
-  | { type: "done_loading" }
-  | { type: "update_shops"; updater: (current: BobaShop[]) => BobaShop[] };
-
-function userReducer(state: UserState, action: UserAction): UserState {
-  switch (action.type) {
-    case "loaded":
-      return {
-        ...state,
-        username: action.username,
-        createdAt: action.createdAt,
-        shops: action.shops,
-      };
-    case "logged_out":
-      return {
-        username: null,
-        createdAt: null,
-        shops: [],
-        isLoading: false,
-      };
-    case "loading":
-      return { ...state, isLoading: true };
-    case "done_loading":
-      return { ...state, isLoading: false };
-    case "update_shops":
-      return { ...state, shops: action.updater(state.shops) };
-  }
-}
-
-const INITIAL_STATE: UserState = {
-  username: null,
-  createdAt: null,
-  shops: [],
-  isLoading: true,
-};
-
 export default function UserProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(userReducer, INITIAL_STATE);
+  const [state, dispatch] = useUserReducer();
 
   const loadUser = useCallback(async () => {
     const response = await fetch("/api/user");
@@ -99,12 +53,12 @@ export default function UserProvider({ children }: { children: ReactNode }) {
       createdAt: data.user.created_at,
       shops: data.user.shops ?? [],
     });
-  }, []);
+  }, [dispatch]);
 
   const logout = useCallback(async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     dispatch({ type: "logged_out" });
-  }, []);
+  }, [dispatch]);
 
   const refreshUser = useCallback(async () => {
     if (!state.username) {
@@ -116,7 +70,7 @@ export default function UserProvider({ children }: { children: ReactNode }) {
     } finally {
       dispatch({ type: "done_loading" });
     }
-  }, [loadUser, state.username]);
+  }, [dispatch, loadUser, state.username]);
 
   const login = useCallback(async () => {
     dispatch({ type: "loading" });
@@ -128,13 +82,13 @@ export default function UserProvider({ children }: { children: ReactNode }) {
     } finally {
       dispatch({ type: "done_loading" });
     }
-  }, [loadUser, logout]);
+  }, [dispatch, loadUser, logout]);
 
   const setUserShops = useCallback(
     (updater: (current: BobaShop[]) => BobaShop[]) => {
       dispatch({ type: "update_shops", updater });
     },
-    [],
+    [dispatch],
   );
 
   useEffect(() => {
@@ -149,7 +103,7 @@ export default function UserProvider({ children }: { children: ReactNode }) {
     };
 
     void hydrate();
-  }, [loadUser]);
+  }, [dispatch, loadUser]);
 
   const user = useMemo<UserSession | null>(() => {
     if (!state.username || !state.createdAt) {

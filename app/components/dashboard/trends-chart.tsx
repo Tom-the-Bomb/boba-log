@@ -8,10 +8,10 @@ import {
   type Granularity,
 } from "@/lib/dashboard-metrics";
 import type { BobaShop } from "@/lib/types";
+import { useTheme } from "next-themes";
 import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useTheme } from "../../providers/theme-provider";
 
 const Bar = dynamic(
   async () => {
@@ -36,7 +36,8 @@ export default function TrendsChart({
   startDate,
   endDate,
 }: TrendsChartProps) {
-  const { isDark } = useTheme();
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
   const { t } = useTranslation("dashboard");
   const [granularity, setGranularity] = useState<Granularity>("year");
 

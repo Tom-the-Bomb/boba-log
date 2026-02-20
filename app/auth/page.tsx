@@ -1,98 +1,23 @@
 "use client";
 
-import { AuthMode } from "@/lib/api/auth";
+import { waitForToken } from "@/lib/turnstile";
 import type { ApiErrorResponse } from "@/lib/types";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { SubmitEventHandler } from "react";
-import { useEffect, useReducer, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { useTheme } from "../providers/theme-provider";
 import { useUser } from "../providers/user-provider";
-
-interface FormState {
-  mode: AuthMode;
-  username: string;
-  password: string;
-  usernameError: string;
-  passwordError: string;
-  error: string;
-  showPassword: boolean;
-  isSubmitting: boolean;
-  turnstileToken: string;
-}
-
-type FormAction =
-  | { type: "set_mode"; mode: AuthMode }
-  | { type: "set_username"; value: string }
-  | { type: "set_password"; value: string }
-  | { type: "set_validation"; usernameError: string; passwordError: string }
-  | { type: "set_error"; error: string }
-  | { type: "toggle_password" }
-  | { type: "submit_start" }
-  | { type: "submit_end" }
-  | { type: "reset_turnstile" }
-  | { type: "set_turnstile"; token: string };
-
-function formReducer(state: FormState, action: FormAction): FormState {
-  switch (action.type) {
-    case "set_mode":
-      return { ...state, mode: action.mode, turnstileToken: "" };
-    case "set_username":
-      return {
-        ...state,
-        username: action.value,
-        usernameError: state.usernameError ? "" : state.usernameError,
-      };
-    case "set_password":
-      return {
-        ...state,
-        password: action.value,
-        passwordError: state.passwordError ? "" : state.passwordError,
-      };
-    case "set_validation":
-      return {
-        ...state,
-        usernameError: action.usernameError,
-        passwordError: action.passwordError,
-        error: "",
-      };
-    case "set_error":
-      return { ...state, error: action.error, turnstileToken: "" };
-    case "toggle_password":
-      return { ...state, showPassword: !state.showPassword };
-    case "submit_start":
-      return { ...state, isSubmitting: true, error: "" };
-    case "submit_end":
-      return { ...state, isSubmitting: false, turnstileToken: "" };
-    case "reset_turnstile":
-      return { ...state, turnstileToken: "" };
-    case "set_turnstile":
-      return { ...state, turnstileToken: action.token };
-  }
-}
-
-const INITIAL_FORM_STATE: FormState = {
-  mode: "login",
-  username: "",
-  password: "",
-  usernameError: "",
-  passwordError: "",
-  error: "",
-  showPassword: false,
-  isSubmitting: false,
-  turnstileToken: "",
-};
+import { useAuthFormReducer } from "../reducers/auth-form-reducer";
 
 export default function AuthPage() {
   const router = useRouter();
   const { login } = useUser();
-  const { isDark } = useTheme();
   const { t } = useTranslation("auth");
   const { t: tc } = useTranslation("common");
-  const [form, dispatch] = useReducer(formReducer, INITIAL_FORM_STATE);
+  const [form, dispatch] = useAuthFormReducer();
   const turnstileRef = useRef<TurnstileInstance>(null);
 
   function validateUsername(value: string) {
@@ -140,6 +65,12 @@ export default function AuthPage() {
     dispatch({ type: "submit_start" });
 
     try {
+      const token = await waitForToken(turnstileRef, form.turnstileToken);
+      if (!token) {
+        dispatch({ type: "set_error", error: t("turnstileTimeout") });
+        turnstileRef.current?.reset();
+        return;
+      }
       const response = await fetch("/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -147,7 +78,7 @@ export default function AuthPage() {
           mode: form.mode,
           username: form.username,
           password: form.password,
-          turnstileToken: form.turnstileToken,
+          turnstileToken: token,
         }),
       });
 
@@ -298,18 +229,15 @@ export default function AuthPage() {
               )}
             </div>
 
-            <div className="flex justify-center">
-              <Turnstile
-                ref={turnstileRef}
-                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-                onSuccess={(token) =>
-                  dispatch({ type: "set_turnstile", token })
-                }
-                onError={() => dispatch({ type: "reset_turnstile" })}
-                onExpire={() => dispatch({ type: "reset_turnstile" })}
-                options={{ theme: isDark ? "dark" : "light", size: "normal" }}
-              />
-            </div>
+            <Turnstile
+              ref={turnstileRef}
+              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+              onSuccess={(token) => dispatch({ type: "set_turnstile", token })}
+              onError={() => dispatch({ type: "reset_turnstile" })}
+              onExpire={() => dispatch({ type: "reset_turnstile" })}
+              options={{ size: "invisible" }}
+              className="-mt-6"
+            />
 
             {form.error && (
               <p className="tea-form-error" role="alert">
@@ -319,7 +247,7 @@ export default function AuthPage() {
 
             <button
               type="submit"
-              disabled={form.isSubmitting || !form.turnstileToken}
+              disabled={form.isSubmitting}
               className="tea-cta mt-4 w-full py-3.5 text-xs tracking-[0.2em] uppercase disabled:opacity-50"
             >
               {form.isSubmitting

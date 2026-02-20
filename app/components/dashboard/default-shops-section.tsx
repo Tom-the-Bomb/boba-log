@@ -5,52 +5,21 @@ import {
   type DefaultShopPresetOption,
 } from "@/lib/default-shops";
 import { ChevronDown } from "lucide-react";
-import { useLayoutEffect, useReducer, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { usePresetsReducer } from "../../reducers/presets-reducer";
 import DefaultShopPresetCard from "./default-shop-preset-card";
 
 interface DefaultShopsSectionProps {
   onPresetSelect: (preset: DefaultShopPresetOption) => void;
 }
 
-interface PresetsState {
-  hasMeasured: boolean;
-  isCollapsible: boolean;
-  isExpanded: boolean;
-}
-
-type PresetsAction =
-  | { type: "measured"; isCollapsible: boolean }
-  | { type: "toggle" };
-
-function presetsReducer(
-  state: PresetsState,
-  action: PresetsAction,
-): PresetsState {
-  switch (action.type) {
-    case "measured":
-      return {
-        hasMeasured: true,
-        isCollapsible: action.isCollapsible,
-        isExpanded: action.isCollapsible ? state.isExpanded : false,
-      };
-    case "toggle":
-      return { ...state, isExpanded: !state.isExpanded };
-  }
-}
-
-const INITIAL_PRESETS_STATE: PresetsState = {
-  hasMeasured: false,
-  isCollapsible: false,
-  isExpanded: false,
-};
-
 export default function DefaultShopsSection({
   onPresetSelect,
 }: DefaultShopsSectionProps) {
   const { t } = useTranslation("dashboard");
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [presets, dispatch] = useReducer(presetsReducer, INITIAL_PRESETS_STATE);
+  const [presets, dispatch] = usePresetsReducer();
 
   useLayoutEffect(() => {
     const container = containerRef.current;
@@ -92,7 +61,7 @@ export default function DefaultShopsSection({
       observer.disconnect();
       removeEventListener("resize", measure);
     };
-  }, []);
+  }, [dispatch]);
 
   return (
     <div>

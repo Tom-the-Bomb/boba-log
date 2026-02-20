@@ -1,19 +1,20 @@
 "use client";
 
 import { Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
 import { useTranslation } from "react-i18next";
-import { useTheme } from "../providers/theme-provider";
 
 export default function ThemeToggle() {
-  const { isDark, toggleTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const { t } = useTranslation("common");
 
+  const isDark = resolvedTheme === "dark";
   const label = isDark ? t("switchToLight") : t("switchToDark");
 
   return (
     <button
       type="button"
-      onClick={toggleTheme}
+      onClick={() => setTheme(isDark ? "light" : "dark")}
       className="tea-icon-btn"
       aria-label={label}
       title={label}

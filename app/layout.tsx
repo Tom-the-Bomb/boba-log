@@ -95,7 +95,7 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="en" data-theme="light" suppressHydrationWarning>
+    <html suppressHydrationWarning>
       <body className={`${bricolage.variable} ${sora.variable} antialiased`}>
         <LocaleProvider>
           <ThemeProvider>
