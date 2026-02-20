@@ -97,13 +97,21 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <style>{`html{background:#fafaf7;}html.dark{background:#121417;}`}</style>
         <script
           dangerouslySetInnerHTML={{
-            __html:
-              "(function(){try{var t=localStorage.getItem('boba_theme');if(t==='dark'){document.documentElement.classList.add('dark');}}catch(e){}})();",
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('boba_theme');
+                  if (theme === 'dark') {
+                    document.documentElement.className = 'dark';
+                  } else {
+                    document.documentElement.className = '';
+                  }
+                } catch (e) {}
+              })();
+            `,
           }}
-          data-cfasync="false"
         />
       </head>
       <body className={`${bricolage.variable} ${sora.variable} antialiased`}>
