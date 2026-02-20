@@ -95,7 +95,16 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var t=localStorage.getItem('theme');var s=window.matchMedia('(prefers-color-scheme: dark)').matches;if(t==='dark'||(!t&&s)){document.documentElement.classList.add('dark');}}catch(e){}})();",
+          }}
+          data-cfasync="false"
+        />
+      </head>
       <body className={`${bricolage.variable} ${sora.variable} antialiased`}>
         <LocaleProvider>
           <ThemeProvider>

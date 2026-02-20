@@ -1,16 +1,16 @@
 import { useReducer } from "react";
 
-export interface PresetsState {
+interface PresetsState {
   hasMeasured: boolean;
   isCollapsible: boolean;
   isExpanded: boolean;
 }
 
-export type PresetsAction =
+type PresetsAction =
   | { type: "measured"; isCollapsible: boolean }
   | { type: "toggle" };
 
-export function presetsReducer(
+function presetsReducer(
   state: PresetsState,
   action: PresetsAction,
 ): PresetsState {
@@ -26,12 +26,12 @@ export function presetsReducer(
   }
 }
 
-export const INITIAL_PRESETS_STATE: PresetsState = {
+const INITIAL_PRESETS_STATE: PresetsState = {
   hasMeasured: false,
   isCollapsible: false,
   isExpanded: false,
 };
 
-export function usePresetsReducer() {
+export default function usePresetsReducer() {
   return useReducer(presetsReducer, INITIAL_PRESETS_STATE);
 }

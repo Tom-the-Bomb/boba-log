@@ -10,7 +10,7 @@ import type { SubmitEventHandler } from "react";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useUser } from "../providers/user-provider";
-import { useAuthFormReducer } from "../reducers/auth-form-reducer";
+import useAuthFormReducer from "../reducers/auth-form-reducer";
 
 export default function AuthPage() {
   const router = useRouter();

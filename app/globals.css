@@ -1,7 +1,5 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
-
 :root {
   --tea-white: #fafaf7;
   --tea-mist: #eeeae4;
@@ -45,11 +43,6 @@
 html {
   height: 100%;
   overflow: hidden;
-  background: rgb(250, 250, 247);
-}
-
-html.dark {
-  background: #121417;
 }
 
 body {

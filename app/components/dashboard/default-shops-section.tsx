@@ -7,7 +7,7 @@ import {
 import { ChevronDown } from "lucide-react";
 import { useLayoutEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { usePresetsReducer } from "../../reducers/presets-reducer";
+import usePresetsReducer from "../../reducers/presets-reducer";
 import DefaultShopPresetCard from "./default-shop-preset-card";
 
 interface DefaultShopsSectionProps {

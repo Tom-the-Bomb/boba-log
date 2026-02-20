@@ -1,21 +1,21 @@
 import type { BobaShop } from "@/lib/types";
 import { useReducer } from "react";
 
-export interface UserState {
+interface UserState {
   username: string | null;
   createdAt: number | null;
   shops: BobaShop[];
   isLoading: boolean;
 }
 
-export type UserAction =
+type UserAction =
   | { type: "loaded"; username: string; createdAt: number; shops: BobaShop[] }
   | { type: "logged_out" }
   | { type: "loading" }
   | { type: "done_loading" }
   | { type: "update_shops"; updater: (current: BobaShop[]) => BobaShop[] };
 
-export function userReducer(state: UserState, action: UserAction): UserState {
+function userReducer(state: UserState, action: UserAction): UserState {
   switch (action.type) {
     case "loaded":
       return {
@@ -40,13 +40,13 @@ export function userReducer(state: UserState, action: UserAction): UserState {
   }
 }
 
-export const INITIAL_USER_STATE: UserState = {
+const INITIAL_USER_STATE: UserState = {
   username: null,
   createdAt: null,
   shops: [],
   isLoading: true,
 };
 
-export function useUserReducer() {
+export default function useUserReducer() {
   return useReducer(userReducer, INITIAL_USER_STATE);
 }

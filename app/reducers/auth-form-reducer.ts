@@ -1,7 +1,7 @@
 import type { AuthMode } from "@/lib/api/auth";
 import { useReducer } from "react";
 
-export interface AuthFormState {
+interface AuthFormState {
   mode: AuthMode;
   username: string;
   password: string;
@@ -13,7 +13,7 @@ export interface AuthFormState {
   turnstileToken: string;
 }
 
-export type AuthFormAction =
+type AuthFormAction =
   | { type: "set_mode"; mode: AuthMode }
   | { type: "set_username"; value: string }
   | { type: "set_password"; value: string }
@@ -25,7 +25,7 @@ export type AuthFormAction =
   | { type: "reset_turnstile" }
   | { type: "set_turnstile"; token: string };
 
-export function authFormReducer(
+function authFormReducer(
   state: AuthFormState,
   action: AuthFormAction,
 ): AuthFormState {
@@ -73,7 +73,7 @@ export function authFormReducer(
   }
 }
 
-export const INITIAL_AUTH_FORM_STATE: AuthFormState = {
+const INITIAL_AUTH_FORM_STATE: AuthFormState = {
   mode: "login",
   username: "",
   password: "",
@@ -85,6 +85,6 @@ export const INITIAL_AUTH_FORM_STATE: AuthFormState = {
   turnstileToken: "",
 };
 
-export function useAuthFormReducer() {
+export default function useAuthFormReducer() {
   return useReducer(authFormReducer, INITIAL_AUTH_FORM_STATE);
 }

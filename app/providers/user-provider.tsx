@@ -9,7 +9,7 @@ import {
   useEffect,
   useMemo,
 } from "react";
-import { useUserReducer } from "../reducers/user-reducer";
+import useUserReducer from "../reducers/user-reducer";
 
 interface PublicUserResponse {
   user: PublicUser;
