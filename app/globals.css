@@ -45,11 +45,11 @@
 html {
   height: 100%;
   overflow: hidden;
-  background: var(--tea-white);
+  background: rgb(250, 250, 247);
 }
 
 html.dark {
-  background: var(--tea-white);
+  background: #121417;
 }
 
 body {
