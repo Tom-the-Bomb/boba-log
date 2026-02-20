@@ -9,6 +9,7 @@ import {
 } from "@/lib/site";
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Sora } from "next/font/google";
+import Script from "next/script";
 import type { ReactNode } from "react";
 import { Toaster } from "sonner";
 import "./globals.css";
@@ -99,22 +100,18 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="color-scheme" content="light" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  var theme = localStorage.getItem('boba_theme');
-                  if (theme === 'dark') {
-                    document.documentElement.classList.add('dark');
-                  } else {
-                    document.documentElement.classList.remove('dark');
-                  }
-                } catch (e) {}
-              })();
-            `,
-          }}
-        />
+        <Script id="theme-loader" strategy="beforeInteractive">
+          {`(function() {
+            try {
+              var theme = localStorage.getItem('boba_theme');
+              if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+              } else {
+                document.documentElement.classList.remove('dark');
+              }
+            } catch (e) {}
+          })();`}
+        </Script>
       </head>
       <body className={`${bricolage.variable} ${sora.variable} antialiased`}>
         <ClientOnly>

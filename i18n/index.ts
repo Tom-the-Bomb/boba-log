@@ -5,6 +5,7 @@ import authMessages from "./messages/auth.json";
 import commonMessages from "./messages/common.json";
 import dashboardMessages from "./messages/dashboard.json";
 import landingMessages from "./messages/landing.json";
+import notFoundMessages from "./messages/not-found.json";
 
 const LOCALE_STORAGE_KEY = "boba_locale";
 
@@ -26,12 +27,14 @@ i18n.use(initReactI18next).init({
       landing: landingMessages.en,
       auth: authMessages.en,
       dashboard: dashboardMessages.en,
+      "not-found": notFoundMessages.en,
     },
     zh: {
       common: commonMessages.zh,
       landing: landingMessages.zh,
       auth: authMessages.zh,
       dashboard: dashboardMessages.zh,
+      "not-found": notFoundMessages.zh,
     },
   },
   lng: getSavedLocale(),

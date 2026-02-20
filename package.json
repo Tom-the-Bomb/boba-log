@@ -70,10 +70,6 @@
     "ignore": {
       "files": [
         "open-next.config.ts"
-      ],
-      "rules": [
-        "react/no-danger",
-        "react-doctor/nextjs-no-native-script"
       ]
     }
   }
