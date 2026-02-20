@@ -49,6 +49,12 @@ html {
   overflow: hidden;
 }
 
+@supports (forced-color-adjust: none) {
+  html {
+    forced-color-adjust: none;
+  }
+}
+
 html.dark {
   background: #121417;
   color-scheme: dark;
