@@ -45,6 +45,11 @@
 html {
   height: 100%;
   overflow: hidden;
+  color: var(--tea-white);
+}
+
+html.dark {
+  color: var(--tea-white);
 }
 
 body {

@@ -9,6 +9,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       attribute="class"
       defaultTheme="light"
       storageKey="boba_theme"
+      enableSystem={false}
       disableTransitionOnChange
     >
       {children}
