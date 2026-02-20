@@ -55,5 +55,6 @@
         "period": 60
       }
     }
-  ]
+  ],
+  "minify": false,
 }
