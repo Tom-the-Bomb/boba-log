@@ -1,7 +1,11 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 html {
   background: #fafaf7;
+  height: 100%;
+  overflow: hidden;
 }
 
 html.dark {
@@ -46,11 +50,6 @@ html.dark {
   --color-tea-matcha: var(--tea-matcha);
   --color-tea-gold: var(--tea-gold);
   --color-tea-faint: var(--tea-faint);
-}
-
-html {
-  height: 100%;
-  overflow: hidden;
 }
 
 body {
