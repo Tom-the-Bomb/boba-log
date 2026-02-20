@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
-import { verifyToken } from "./auth";
+import { AUTH_COOKIE_NAME, verifyToken } from "./auth";
 
 export async function getUsernameFromRequest(request: NextRequest) {
-  const token = request.cookies.get("boba_jwt")?.value ?? "";
+  const token = request.cookies.get(AUTH_COOKIE_NAME)?.value ?? "";
 
   if (!token) {
     return null;

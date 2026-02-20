@@ -1,6 +1,15 @@
 import jwt from "@tsndr/cloudflare-worker-jwt";
 
-export type AuthMode = "login" | "signup";
+export const AUTH_COOKIE_NAME = "boba_jwt";
+
+export const AUTH_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: true,
+  sameSite: "lax" as const,
+  path: "/",
+} as const;
+
+export const AUTH_COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
 
 const encoder = new TextEncoder();
 

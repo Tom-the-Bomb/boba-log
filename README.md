@@ -2,7 +2,7 @@
 
 [![React Doctor](https://www.react.doctor/share/badge?p=boba-log&s=100)](https://www.react.doctor/share?p=boba-log&s=100)
 
-Boba Log is a Next.js app for tracking tea shop visits and drink totals, deployed to Cloudflare Workers.
+Boba Log is a Next.js app for tracking tea shop visits and drink totals,deployed to Cloudflare Workers.
 
 ## Stack
 
@@ -38,7 +38,7 @@ bun install
 
 ### Environment
 
-Create a `.env` file in the project root (add these to cloudflare workers secrets):
+Create a `.env` file in the project root
 
 ```env
 JWT_SECRET=your-jwt-secret
@@ -52,6 +52,16 @@ For local development, you can use [Cloudflare's test keys](https://developers.c
 NEXT_PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA
 TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
 ```
+
+#### Production
+
+- Github Actions Secrets
+  - `CLOUDFLARE_API_TOKEN`
+  - `CLOUDFLARE_ACCOUNT_ID`
+  - `NEXT_PUBLIC_TURNSTILE_SITE_KEY`
+- Cloudflare Workers Secrets
+  - `JWT_SECRET`
+  - `TURNSTILE_SECRET_KEY`
 
 ### Local database
 

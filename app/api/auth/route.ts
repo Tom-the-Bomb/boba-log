@@ -1,11 +1,14 @@
 import {
-  AuthMode,
+  AUTH_COOKIE_MAX_AGE,
+  AUTH_COOKIE_NAME,
+  AUTH_COOKIE_OPTIONS,
   comparePassword,
   hashPassword,
   signToken,
 } from "@/lib/api/auth";
 import { verifyTurnstileToken } from "@/lib/api/turnstile";
 import { createUser, getPublicUser, getUserByUsername } from "@/lib/api/users";
+import type { AuthMode } from "@/lib/types";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -44,6 +47,27 @@ export async function POST(request: Request) {
       );
     }
 
+    if (mode === "signup") {
+      if (username.length < 3) {
+        return NextResponse.json(
+          {
+            error: "Username must be at least 3 characters.",
+            code: "usernameMinLength",
+          },
+          { status: 400 },
+        );
+      }
+      if (password.length < 6) {
+        return NextResponse.json(
+          {
+            error: "Password must be at least 6 characters.",
+            code: "passwordMinLength",
+          },
+          { status: 400 },
+        );
+      }
+    }
+
     const existing = await getUserByUsername(username);
 
     if (mode === "signup") {
@@ -61,12 +85,9 @@ export async function POST(request: Request) {
       const user = await createUser(username, hashedPassword);
       const token = await signToken({ username: user.username });
       const response = NextResponse.json({ user });
-      response.cookies.set("boba_jwt", token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax",
-        path: "/",
-        maxAge: 60 * 60 * 24 * 30,
+      response.cookies.set(AUTH_COOKIE_NAME, token, {
+        ...AUTH_COOKIE_OPTIONS,
+        maxAge: AUTH_COOKIE_MAX_AGE,
       });
       return response;
     }
@@ -95,12 +116,9 @@ export async function POST(request: Request) {
     const token = await signToken({ username: existing.username });
     const user = await getPublicUser(existing.username);
     const response = NextResponse.json({ user });
-    response.cookies.set("boba_jwt", token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 30,
+    response.cookies.set(AUTH_COOKIE_NAME, token, {
+      ...AUTH_COOKIE_OPTIONS,
+      maxAge: AUTH_COOKIE_MAX_AGE,
     });
     return response;
   } catch {

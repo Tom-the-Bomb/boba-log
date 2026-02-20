@@ -1,4 +1,4 @@
-import type { AuthMode } from "@/lib/api/auth";
+import type { AuthMode } from "@/lib/types";
 import { useReducer } from "react";
 
 interface AuthFormState {
@@ -43,13 +43,13 @@ function authFormReducer(
       return {
         ...state,
         username: action.value,
-        usernameError: state.usernameError ? "" : state.usernameError,
+        usernameError: "",
       };
     case "set_password":
       return {
         ...state,
         password: action.value,
-        passwordError: state.passwordError ? "" : state.passwordError,
+        passwordError: "",
       };
     case "set_validation":
       return {

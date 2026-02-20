@@ -19,10 +19,6 @@ interface UserSession {
   username: string;
   createdAt: number;
   shops: BobaShop[];
-  login: () => Promise<void>;
-  logout: () => Promise<void>;
-  refresh: () => Promise<void>;
-  setShops: (updater: (current: BobaShop[]) => BobaShop[]) => void;
 }
 
 interface UserContextValue {
@@ -114,20 +110,8 @@ export default function UserProvider({ children }: { children: ReactNode }) {
       username: state.username,
       createdAt: state.createdAt,
       shops: state.shops,
-      login,
-      logout,
-      refresh: refreshUser,
-      setShops: setUserShops,
     };
-  }, [
-    state.username,
-    state.createdAt,
-    state.shops,
-    login,
-    logout,
-    refreshUser,
-    setUserShops,
-  ]);
+  }, [state.username, state.createdAt, state.shops]);
 
   const value = useMemo<UserContextValue>(
     () => ({

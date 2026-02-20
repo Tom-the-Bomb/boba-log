@@ -1,3 +1,5 @@
+export type AuthMode = "login" | "signup";
+
 type DateCountMap = Record<string, number>;
 
 export interface ShopDocument {

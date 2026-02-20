@@ -1,14 +1,12 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { useUser } from "../../providers/user-provider";
 import LanguageToggle from "../language-toggle";
 import ThemeToggle from "../theme-toggle";
 
 export default function Nav() {
-  const router = useRouter();
-  const { user, logout: clearAuth } = useUser();
+  const { user, logout } = useUser();
   const { t } = useTranslation("common");
 
   return (
@@ -27,8 +25,8 @@ export default function Nav() {
         <button
           type="button"
           onClick={async () => {
-            await clearAuth();
-            router.push("/auth");
+            await logout();
+            window.location.href = "/auth";
           }}
           className="tea-link px-2"
         >

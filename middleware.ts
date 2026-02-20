@@ -26,7 +26,7 @@ export async function middleware(request: NextRequest) {
 
   const isLoggedIn = request.cookies.has("boba_jwt");
 
-  if (pathname === "/dashboard" && !isLoggedIn) {
+  if (pathname.startsWith("/dashboard") && !isLoggedIn) {
     return NextResponse.redirect(new URL("/auth", request.url));
   }
 
