@@ -43,9 +43,15 @@
 }
 
 html {
-  background: var(--tea-white);
+  background: #fafaf7;
+  color-scheme: light;
   height: 100%;
   overflow: hidden;
+}
+
+html.dark {
+  background: #121417;
+  color-scheme: dark;
 }
 
 body {
