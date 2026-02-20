@@ -43,7 +43,7 @@
 }
 
 html {
-  background: #fafaf7;
+  background: #fafaf7 !important;
   color-scheme: light;
   height: 100%;
   overflow: hidden;
@@ -56,7 +56,7 @@ html {
 }
 
 html.dark {
-  background: #121417;
+  background: #121417 !important;
   color-scheme: dark;
 }
 
