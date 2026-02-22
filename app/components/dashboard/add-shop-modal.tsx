@@ -118,7 +118,7 @@ export default function AddShopModal({ isOpen, onClose }: AddShopModalProps) {
         aria-label={tc("closeModal")}
       />
 
-      <div className="tea-surface tea-border-subtle relative z-10 mx-3 max-h-[90vh] w-full max-w-md border px-10 py-10 md:mx-0">
+      <div className="tea-surface tea-border-subtle relative z-10 mx-3 max-h-[90vh] w-full max-w-md overflow-y-auto border px-10 py-10 md:mx-0">
         <h3 className="tea-text-primary font-display text-2xl font-medium tracking-tight">
           {t("addShopLabel")}
         </h3>
