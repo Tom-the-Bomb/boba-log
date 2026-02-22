@@ -9,45 +9,19 @@ interface UserRow {
   created_at: number;
 }
 
-interface ShopRow {
-  id: number;
-  name: string;
-  total: number;
-}
-
-interface DateRow {
+interface ShopDateJoinRow {
   shop_id: number;
-  date_key: number;
-  count: number;
+  shop_name: string;
+  shop_total: number;
+  date_key: number | null;
+  count: number | null;
 }
 
 async function toPublicShop(shop: ShopDocument): Promise<BobaShop> {
   const hasR2Avatar = await checkPublicAvatarExists(shop.id);
-
-  let avatar: string | null = null;
-  if (hasR2Avatar) {
-    avatar = getPublicAvatarUrl(shop.id);
-  }
-
   return {
     ...shop,
-    avatar,
-  };
-}
-
-function buildShopDocument(
-  shopRow: ShopRow,
-  dateRows: DateRow[],
-): ShopDocument {
-  const dates: Record<string, number> = {};
-  for (const row of dateRows) {
-    dates[row.date_key] = row.count;
-  }
-  return {
-    id: shopRow.id,
-    name: shopRow.name,
-    total: shopRow.total,
-    dates,
+    avatar: hasR2Avatar ? getPublicAvatarUrl(shop.id) : null,
   };
 }
 
@@ -55,24 +29,47 @@ async function getShopAsPublic(
   db: D1Database,
   shopId: number,
 ): Promise<BobaShop | null> {
-  const shopRow = await db
-    .prepare("SELECT id, name, total FROM shops WHERE id = ?")
+  const rows = await db
+    .prepare(
+      `SELECT s.id AS shop_id, s.name AS shop_name, s.total AS shop_total,
+              sd.date_key, sd.count
+       FROM shops s
+       LEFT JOIN shop_dates sd ON sd.shop_id = s.id
+       WHERE s.id = ?`,
+    )
     .bind(shopId)
-    .first<ShopRow>();
+    .all<ShopDateJoinRow>();
 
-  if (!shopRow) {
+  if (rows.results.length === 0) {
     return null;
   }
 
-  const dateRows = await db
-    .prepare(
-      "SELECT shop_id, date_key, count FROM shop_dates WHERE shop_id = ?",
-    )
-    .bind(shopId)
-    .all<DateRow>();
+  const first = rows.results[0];
+  const dates: Record<string, number> = {};
+  for (const row of rows.results) {
+    if (row.date_key !== null && row.count !== null) {
+      dates[row.date_key] = row.count;
+    }
+  }
 
-  const doc = buildShopDocument(shopRow, dateRows.results);
-  return await toPublicShop(doc);
+  return toPublicShop({
+    id: first.shop_id,
+    name: first.shop_name,
+    total: first.shop_total,
+    dates,
+  });
+}
+
+async function verifyShopOwnership(
+  db: D1Database,
+  shopId: number,
+  username: string,
+): Promise<boolean> {
+  const row = await db
+    .prepare("SELECT 1 FROM shops WHERE id = ? AND username = ?")
+    .bind(shopId, username)
+    .first();
+  return row !== null;
 }
 
 export async function getUserByUsername(username: string) {
@@ -108,57 +105,58 @@ export async function createUser(
 
 export async function getPublicUser(
   username: string,
+  knownCreatedAt?: number,
 ): Promise<PublicUser | null> {
   const db = getDb();
 
-  const user = await db
-    .prepare("SELECT username, created_at FROM users WHERE username = ?")
-    .bind(username)
-    .first<{ username: string; created_at: number }>();
-
-  if (!user) {
-    return null;
-  }
-
-  const shopRows = await db
-    .prepare("SELECT id, name, total FROM shops WHERE username = ?")
-    .bind(username)
-    .all<ShopRow>();
-
-  const shops: BobaShop[] = [];
-  if (shopRows.results.length > 0) {
-    const dateRows = await db
-      .prepare(
-        `SELECT sd.shop_id, sd.date_key, sd.count
-         FROM shop_dates sd
-         JOIN shops s ON sd.shop_id = s.id
-         WHERE s.username = ?`,
-      )
+  let createdAt = knownCreatedAt;
+  if (createdAt === undefined) {
+    const user = await db
+      .prepare("SELECT created_at FROM users WHERE username = ?")
       .bind(username)
-      .all<DateRow>();
+      .first<{ created_at: number }>();
 
-    const datesByShop = new Map<number, DateRow[]>();
-    for (const row of dateRows.results) {
-      const arr = datesByShop.get(row.shop_id) ?? [];
-      arr.push(row);
-      datesByShop.set(row.shop_id, arr);
+    if (!user) {
+      return null;
     }
-
-    const publicShops = await Promise.all(
-      shopRows.results.map(async (shopRow) => {
-        const doc = buildShopDocument(
-          shopRow,
-          datesByShop.get(shopRow.id) ?? [],
-        );
-        return await toPublicShop(doc);
-      }),
-    );
-    shops.push(...publicShops);
+    createdAt = user.created_at;
   }
+
+  const rows = await db
+    .prepare(
+      `SELECT s.id AS shop_id, s.name AS shop_name, s.total AS shop_total,
+              sd.date_key, sd.count
+       FROM shops s
+       LEFT JOIN shop_dates sd ON sd.shop_id = s.id
+       WHERE s.username = ?`,
+    )
+    .bind(username)
+    .all<ShopDateJoinRow>();
+
+  const shopMap = new Map<
+    number,
+    { name: string; total: number; dates: Record<string, number> }
+  >();
+  for (const row of rows.results) {
+    let shop = shopMap.get(row.shop_id);
+    if (!shop) {
+      shop = { name: row.shop_name, total: row.shop_total, dates: {} };
+      shopMap.set(row.shop_id, shop);
+    }
+    if (row.date_key !== null && row.count !== null) {
+      shop.dates[row.date_key] = row.count;
+    }
+  }
+
+  const shops = await Promise.all(
+    Array.from(shopMap.entries()).map(([id, shop]) =>
+      toPublicShop({ id, ...shop }),
+    ),
+  );
 
   return {
-    username: user.username,
-    created_at: user.created_at,
+    username,
+    created_at: createdAt,
     shops,
   };
 }
@@ -175,8 +173,7 @@ export async function addShop(
     .run();
 
   const shopId = result.meta.last_row_id as number;
-  const doc: ShopDocument = { id: shopId, name, total: 0, dates: {} };
-  return await toPublicShop(doc);
+  return toPublicShop({ id: shopId, name, total: 0, dates: {} });
 }
 
 function todayDateKey(): number {
@@ -192,12 +189,7 @@ export async function incrementShop(
 ): Promise<BobaShop | null> {
   const db = getDb();
 
-  const owns = await db
-    .prepare("SELECT 1 FROM shops WHERE id = ? AND username = ?")
-    .bind(shopId, username)
-    .first();
-
-  if (!owns) {
+  if (!(await verifyShopOwnership(db, shopId, username))) {
     return null;
   }
 
@@ -222,20 +214,11 @@ export async function deleteShop(
 ): Promise<boolean> {
   const db = getDb();
 
-  const owns = await db
-    .prepare("SELECT 1 FROM shops WHERE id = ? AND username = ?")
-    .bind(shopId, username)
-    .first();
-
-  if (!owns) {
+  if (!(await verifyShopOwnership(db, shopId, username))) {
     return false;
   }
 
-  await db.batch([
-    db.prepare("DELETE FROM shop_dates WHERE shop_id = ?").bind(shopId),
-    db.prepare("DELETE FROM shops WHERE id = ?").bind(shopId),
-  ]);
-
+  await db.prepare("DELETE FROM shops WHERE id = ?").bind(shopId).run();
   return true;
 }
 
@@ -245,21 +228,16 @@ export async function undoShopIncrement(
 ): Promise<BobaShop | null> {
   const db = getDb();
 
-  const owns = await db
-    .prepare("SELECT 1 FROM shops WHERE id = ? AND username = ?")
+  const shop = await db
+    .prepare("SELECT total FROM shops WHERE id = ? AND username = ?")
     .bind(shopId, username)
-    .first();
+    .first<{ total: number }>();
 
-  if (!owns) {
+  if (!shop) {
     return null;
   }
 
-  const shop = await db
-    .prepare("SELECT total FROM shops WHERE id = ?")
-    .bind(shopId)
-    .first<{ total: number }>();
-
-  if (!shop || shop.total <= 0) {
+  if (shop.total <= 0) {
     return getShopAsPublic(db, shopId);
   }
 

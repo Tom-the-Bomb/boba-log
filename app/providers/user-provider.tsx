@@ -104,7 +104,7 @@ export default function UserProvider({
       try {
         await loadUser();
       } catch {
-        // No valid cookie — user is not logged in
+        // No valid cookie => not logged in
       } finally {
         dispatch({ type: "done_loading" });
       }

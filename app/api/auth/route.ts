@@ -114,7 +114,7 @@ export async function POST(request: Request) {
     }
 
     const token = await signToken({ username: existing.username });
-    const user = await getPublicUser(existing.username);
+    const user = await getPublicUser(existing.username, existing.created_at);
     const response = NextResponse.json({ user });
     response.cookies.set(AUTH_COOKIE_NAME, token, {
       ...AUTH_COOKIE_OPTIONS,

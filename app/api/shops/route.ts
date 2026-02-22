@@ -1,8 +1,7 @@
-import { processAndUploadAvatar } from "@/lib/api/avatar";
-import { getPublicAvatarUrl } from "@/lib/api/r2";
+import { getPublicAvatarUrl, uploadAvatarToR2 } from "@/lib/api/r2";
 import { getUsernameFromRequest } from "@/lib/api/request-auth";
 import { verifyTurnstileToken } from "@/lib/api/turnstile";
-import { addShop, getUserByUsername } from "@/lib/api/users";
+import { addShop } from "@/lib/api/users";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -44,23 +43,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const hasUploadedAvatar = avatarFile instanceof File;
-
-    const user = await getUserByUsername(username);
-    if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized", code: "unauthorized" },
-        { status: 401 },
-      );
-    }
-
     const shop = await addShop(username, name);
 
-    if (hasUploadedAvatar) {
+    if (avatarFile instanceof File) {
       try {
-        await processAndUploadAvatar({
-          file: avatarFile,
+        await uploadAvatarToR2({
           shopId: shop.id,
+          body: await avatarFile.arrayBuffer(),
         });
         shop.avatar = getPublicAvatarUrl(shop.id);
       } catch {

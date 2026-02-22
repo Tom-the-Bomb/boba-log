@@ -9,7 +9,7 @@ export const AUTH_COOKIE_OPTIONS = {
   path: "/",
 } as const;
 
-export const AUTH_COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
+export const AUTH_COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
 
 const encoder = new TextEncoder();
 
@@ -25,8 +25,7 @@ interface AuthTokenPayload {
   username: string;
 }
 
-export async function hashPassword(password: string): Promise<string> {
-  const salt = crypto.getRandomValues(new Uint8Array(16));
+async function pbkdf2(password: string, salt: Uint8Array): Promise<Uint8Array> {
   const keyMaterial = await crypto.subtle.importKey(
     "raw",
     encoder.encode(password),
@@ -34,17 +33,24 @@ export async function hashPassword(password: string): Promise<string> {
     false,
     ["deriveBits"],
   );
-  const hash = await crypto.subtle.deriveBits(
-    {
-      name: "PBKDF2",
-      salt: salt.buffer as ArrayBuffer,
-      iterations: 100_000,
-      hash: "SHA-256",
-    },
-    keyMaterial,
-    256,
+  return new Uint8Array(
+    await crypto.subtle.deriveBits(
+      {
+        name: "PBKDF2",
+        salt: salt.buffer as ArrayBuffer,
+        iterations: 100_000,
+        hash: "SHA-256",
+      },
+      keyMaterial,
+      256,
+    ),
   );
-  return `${bufToHex(salt)}:${bufToHex(new Uint8Array(hash))}`;
+}
+
+export async function hashPassword(password: string): Promise<string> {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const hash = await pbkdf2(password, salt);
+  return `${bufToHex(salt)}:${bufToHex(hash)}`;
 }
 
 export async function comparePassword(
@@ -55,25 +61,8 @@ export async function comparePassword(
   if (!saltHex || !hashHex) {
     return false;
   }
-  const salt = hexToBuf(saltHex);
-  const keyMaterial = await crypto.subtle.importKey(
-    "raw",
-    encoder.encode(password),
-    "PBKDF2",
-    false,
-    ["deriveBits"],
-  );
-  const hash = await crypto.subtle.deriveBits(
-    {
-      name: "PBKDF2",
-      salt: salt.buffer as ArrayBuffer,
-      iterations: 100_000,
-      hash: "SHA-256",
-    },
-    keyMaterial,
-    256,
-  );
-  return bufToHex(new Uint8Array(hash)) === hashHex;
+  const hash = await pbkdf2(password, hexToBuf(saltHex));
+  return constantTimeEqual(hash, hexToBuf(hashHex));
 }
 
 export async function signToken(payload: AuthTokenPayload): Promise<string> {
@@ -83,9 +72,7 @@ export async function signToken(payload: AuthTokenPayload): Promise<string> {
   );
 }
 
-export async function verifyToken(
-  token: string,
-): Promise<{ username: string }> {
+export async function verifyToken(token: string): Promise<AuthTokenPayload> {
   const isValid = await jwt.verify(token, getJwtSecret());
   if (!isValid) {
     throw new Error("Invalid token.");
@@ -111,4 +98,15 @@ function hexToBuf(hex: string): Uint8Array {
     bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
   }
   return bytes;
+}
+
+function constantTimeEqual(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) {
+    diff |= a[i] ^ b[i];
+  }
+  return diff === 0;
 }
