@@ -4,21 +4,9 @@ import { buildDashboardChartOptions } from "@/lib/dashboard-chart-options";
 import { buildByShopChartData, buildShopCounts } from "@/lib/dashboard-metrics";
 import type { BobaShop } from "@/lib/types";
 import { useTheme } from "next-themes";
-import dynamic from "next/dynamic";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-
-const Bar = dynamic(
-  async () => {
-    const [
-      { Bar },
-      { Chart, CategoryScale, LinearScale, BarElement, Tooltip, Legend },
-    ] = await Promise.all([import("react-chartjs-2"), import("chart.js")]);
-    Chart.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
-    return { default: Bar };
-  },
-  { ssr: false },
-);
+import LazyBar from "./lazy-bar";
 
 interface ByShopChartProps {
   shops: readonly BobaShop[];
@@ -33,7 +21,8 @@ export default function ByShopChart({
 }: ByShopChartProps) {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
-  const translator = useTranslation("dashboard");
+  const { t, i18n } = useTranslation("dashboard");
+  const locale = i18n.language;
 
   const shopCounts = useMemo(
     () => buildShopCounts(shops, startDate, endDate),
@@ -41,8 +30,8 @@ export default function ByShopChart({
   );
 
   const data = useMemo(
-    () => buildByShopChartData(translator, shopCounts),
-    [shopCounts, translator],
+    () => buildByShopChartData(t, locale, shopCounts),
+    [shopCounts, t, locale],
   );
 
   const options = useMemo(() => buildDashboardChartOptions(isDark), [isDark]);
@@ -50,10 +39,10 @@ export default function ByShopChart({
   return (
     <section className="mb-20">
       <h2 className="tea-text-primary mb-8 font-display text-xl font-medium tracking-tight">
-        {translator.t("byShop")}
+        {t("byShop")}
       </h2>
       <div className="h-72 w-full">
-        <Bar data={data} options={options} />
+        <LazyBar data={data} options={options} />
       </div>
     </section>
   );

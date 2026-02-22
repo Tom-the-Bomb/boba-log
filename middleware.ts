@@ -1,3 +1,4 @@
+import { AUTH_COOKIE_NAME } from "@/lib/api/auth";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
@@ -24,7 +25,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  const isLoggedIn = request.cookies.has("boba_jwt");
+  const isLoggedIn = request.cookies.has(AUTH_COOKIE_NAME);
 
   if (pathname.startsWith("/dashboard") && !isLoggedIn) {
     return NextResponse.redirect(new URL("/auth", request.url));

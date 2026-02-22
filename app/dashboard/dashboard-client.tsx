@@ -61,11 +61,7 @@ export default function DashboardClient() {
             endDate={endDate}
             onStartChange={setStartDate}
             onEndChange={setEndDate}
-            minDate={
-              user
-                ? toDateStringUTC(new Date(user.createdAt * 1000))
-                : startDate
-            }
+            minDate={user ? defaultStartDate : startDate}
             maxDate={toDateStringUTC(new Date())}
           />
         </section>

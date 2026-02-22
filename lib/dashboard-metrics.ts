@@ -1,4 +1,5 @@
-import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
+import { parseDateStringUTC } from "./date";
 import { translateShopName } from "./default-shops";
 import type { BobaShop } from "./types";
 
@@ -32,8 +33,8 @@ function getDateBounds(startDate: string, endDate: string): DateBounds | null {
   }
 
   return {
-    start: new Date(`${startDate}T00:00:00.000Z`),
-    end: new Date(`${endDate}T23:59:59.999Z`),
+    start: parseDateStringUTC(startDate),
+    end: new Date(parseDateStringUTC(endDate).getTime() + 86_399_999),
   };
 }
 
@@ -65,13 +66,12 @@ export function buildShopCounts(
 }
 
 export function buildByShopChartData(
-  { t, i18n }: ReturnType<typeof useTranslation>,
+  t: TFunction,
+  locale: string,
   shopCounts: ShopCountItem[],
 ) {
   return {
-    labels: shopCounts.map(({ shop }) =>
-      translateShopName(shop.name, i18n.language),
-    ),
+    labels: shopCounts.map(({ shop }) => translateShopName(shop.name, locale)),
     datasets: [
       {
         label: t("drinks"),
@@ -84,7 +84,7 @@ export function buildByShopChartData(
 }
 
 export function buildTrendsChartData(
-  t: ReturnType<typeof useTranslation>["t"],
+  t: TFunction,
   shops: readonly BobaShop[],
   startDate: string,
   endDate: string,

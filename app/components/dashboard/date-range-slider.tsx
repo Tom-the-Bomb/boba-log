@@ -2,9 +2,7 @@
 
 import {
   formatShortDateUTC,
-  inRangeInclusiveISO,
   parseDateStringUTC,
-  sameDayISO,
   toDateStringUTC,
 } from "@/lib/date";
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
@@ -121,9 +119,9 @@ export default function DateRangeSlider({
   ];
 
   const getDayClasses = (day: string): string => {
-    const isStart = sameDayISO(day, startDate);
-    const isEnd = sameDayISO(day, endDate);
-    const isInRange = inRangeInclusiveISO(day, startDate, endDate);
+    const isStart = day === startDate;
+    const isEnd = day === endDate;
+    const isInRange = day >= startDate && day <= endDate;
     const isDisabled = day < minDate || day > maxDate;
     const isToday = day === toDateStringUTC(new Date());
 
@@ -151,9 +149,9 @@ export default function DateRangeSlider({
       return "";
     }
 
-    const isInRange = inRangeInclusiveISO(day, startDate, endDate);
-    const isStart = sameDayISO(day, startDate);
-    const isEnd = sameDayISO(day, endDate);
+    const isInRange = day >= startDate && day <= endDate;
+    const isStart = day === startDate;
+    const isEnd = day === endDate;
 
     if (!isInRange || startDate === endDate) {
       return "";

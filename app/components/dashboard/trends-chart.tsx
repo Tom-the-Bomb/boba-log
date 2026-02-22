@@ -9,21 +9,9 @@ import {
 } from "@/lib/dashboard-metrics";
 import type { BobaShop } from "@/lib/types";
 import { useTheme } from "next-themes";
-import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-
-const Bar = dynamic(
-  async () => {
-    const [
-      { Bar },
-      { Chart, CategoryScale, LinearScale, BarElement, Tooltip, Legend },
-    ] = await Promise.all([import("react-chartjs-2"), import("chart.js")]);
-    Chart.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
-    return { default: Bar };
-  },
-  { ssr: false },
-);
+import LazyBar from "./lazy-bar";
 
 interface TrendsChartProps {
   shops: readonly BobaShop[];
@@ -72,7 +60,7 @@ export default function TrendsChart({
         </div>
       </div>
       <div className="h-72 w-full">
-        <Bar data={data} options={options} />
+        <LazyBar data={data} options={options} />
       </div>
     </section>
   );

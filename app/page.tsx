@@ -3,7 +3,13 @@ import {
   HOME_WEBPAGE_JSONLD,
   HOME_WEBSITE_JSONLD,
 } from "@/lib/jsonld/home";
-import { APP_ICON_ALT, SITE_URL, SOCIAL_IMAGE_URL } from "@/lib/site";
+import {
+  APP_ICON_ALT,
+  DEFAULT_SEO_DESCRIPTION,
+  DEFAULT_SEO_TITLE,
+  SITE_URL,
+  SOCIAL_IMAGE_URL,
+} from "@/lib/site";
 import type { Metadata } from "next";
 import Footer from "./components/landing/footer";
 import Hero from "./components/landing/hero";
@@ -12,10 +18,9 @@ import JsonLd from "./components/seo/json-ld";
 
 export const metadata: Metadata = {
   title: {
-    absolute: "Boba Log | Track Tea Shops, Drinks, and Trends",
+    absolute: DEFAULT_SEO_TITLE,
   },
-  description:
-    "Track every bubble tea visit in one clean dashboard. Log shops, upload avatars, count drinks by date, and spot weekly or monthly trends across your favorites.",
+  description: DEFAULT_SEO_DESCRIPTION,
   alternates: {
     canonical: "/",
   },

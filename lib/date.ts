@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 
 export function toDateStringUTC(date: Date): string {
   const year = date.getUTCFullYear();
@@ -11,22 +11,7 @@ export function parseDateStringUTC(value: string): Date {
   return new Date(`${value}T00:00:00.000Z`);
 }
 
-export function formatShortDateUTC(
-  t: ReturnType<typeof useTranslation>["t"],
-  value: string,
-): string {
+export function formatShortDateUTC(t: TFunction, value: string): string {
   const date = parseDateStringUTC(value);
   return `${t(`monthLabels[${date.getUTCMonth()}]`)} ${date.getUTCDate()}, ${date.getUTCFullYear()}`;
-}
-
-export function sameDayISO(left: string, right: string): boolean {
-  return left === right;
-}
-
-export function inRangeInclusiveISO(
-  day: string,
-  start: string,
-  end: string,
-): boolean {
-  return day >= start && day <= end;
 }
