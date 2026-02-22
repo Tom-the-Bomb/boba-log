@@ -52,7 +52,7 @@ export default function ConfirmDeleteModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <button
         type="button"
-        className="absolute inset-0 bg-black/45 backdrop-blur-[1px] dark:bg-black/60"
+        className="modal-bg"
         onClick={onClose}
         aria-label={tc("closeModal")}
       />

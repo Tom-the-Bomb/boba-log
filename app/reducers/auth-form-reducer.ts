@@ -37,7 +37,6 @@ function authFormReducer(
         usernameError: "",
         passwordError: "",
         error: "",
-        turnstileToken: "",
       };
     case "set_username":
       return {

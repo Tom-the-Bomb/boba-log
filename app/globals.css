@@ -361,6 +361,10 @@ input::-ms-clear {
   padding-right: 1.25rem;
 }
 
+.modal-bg {
+  @apply absolute inset-0 bg-black/45 backdrop-blur-sm dark:bg-black/60;
+}
+
 @media (min-width: 640px) {
   .tea-page-padding,
   .tea-page-padding-sm {

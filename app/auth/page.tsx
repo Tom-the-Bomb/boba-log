@@ -6,7 +6,7 @@ import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { SubmitEventHandler } from "react";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import AuthFooter from "../components/auth/footer";
 import { useUser } from "../providers/user-provider";
@@ -40,10 +40,6 @@ export default function AuthPage() {
     }
     return "";
   }
-
-  useEffect(() => {
-    turnstileRef.current?.reset();
-  }, [form.mode]);
 
   async function handleSubmit(
     event: Parameters<SubmitEventHandler<HTMLFormElement>>[0],

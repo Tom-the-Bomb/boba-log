@@ -21,7 +21,7 @@ export default function DefaultShopPresetCard({
       key={presetName}
       type="button"
       onClick={() => onSelect(preset)}
-      className="tea-border-subtle tea-border-accent-hover tea-surface-muted inline-flex w-auto items-center gap-1.5 border px-2 py-1.5 text-left dark:hover:border-(--tea-matcha)"
+      className="tea-border-subtle tea-border-accent-hover tea-surface-muted inline-flex w-auto items-center gap-1.5 border px-2 py-1.5 text-left dark:hover:border-tea-matcha"
     >
       <Image
         src={preset.avatar}
