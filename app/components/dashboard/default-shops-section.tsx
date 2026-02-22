@@ -65,7 +65,7 @@ export default function DefaultShopsSection({
 
   return (
     <div>
-      <p className="tea-text-muted tea-caps-10 mb-2 block">{t("presets")}</p>
+      <p className="tea-caps-10 mb-2 block text-tea-faint">{t("presets")}</p>
       <div
         className={`overflow-hidden ${
           presets.hasMeasured ? "transition-[max-height] duration-200" : ""

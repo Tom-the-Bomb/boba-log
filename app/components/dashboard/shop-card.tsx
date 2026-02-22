@@ -96,7 +96,7 @@ export default function ShopCard({
             e.stopPropagation();
             onDelete(shop);
           }}
-          className="tea-text-muted absolute -top-2 -right-2 z-10 rounded-full p-1 opacity-0 transition-colors group-hover:opacity-100 hover:text-red-500!"
+          className="absolute -top-2 -right-2 z-10 rounded-full p-1 text-tea-faint opacity-0 transition-colors group-hover:opacity-100 hover:text-red-500!"
           aria-label={t("deleteShopAria", { name: translatedShopName })}
         >
           <Trash2 size={14} />
@@ -114,13 +114,13 @@ export default function ShopCard({
               alt={translatedShopName}
               width={56}
               height={56}
-              className="tea-ring-subtle h-14 w-14 rounded-full object-cover ring-1"
+              className="h-14 w-14 rounded-full object-cover ring-1 ring-tea-stone"
               unoptimized
             />
-            <h3 className="tea-text-primary mt-3 text-xs font-medium tracking-widest uppercase">
+            <h3 className="mt-3 text-xs font-medium tracking-widest text-tea-charcoal uppercase">
               {translatedShopName}
             </h3>
-            <p className="tea-text-accent mt-2 font-display text-5xl font-medium tracking-tight">
+            <p className="mt-2 font-display text-5xl font-medium tracking-tight text-tea-sage">
               {count}
             </p>
           </div>
@@ -131,7 +131,7 @@ export default function ShopCard({
           type="button"
           onClick={undoDrink}
           disabled={undoCount <= 0 || isPending}
-          className="tea-text-muted tea-hover-text-accent-enabled text-[10px] tracking-[0.15em] uppercase transition-colors disabled:pointer-events-none disabled:opacity-30"
+          className="text-[10px] tracking-[0.15em] text-tea-faint uppercase transition-colors hover:enabled:text-tea-sage disabled:pointer-events-none disabled:opacity-30"
         >
           {undoCount > 0 ? t("undoWithCount", { count: undoCount }) : t("undo")}
         </button>

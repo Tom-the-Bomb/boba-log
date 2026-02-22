@@ -118,8 +118,8 @@ export default function AddShopModal({ isOpen, onClose }: AddShopModalProps) {
         aria-label={tc("closeModal")}
       />
 
-      <div className="tea-surface tea-border-subtle relative z-10 mx-3 max-h-[90vh] w-full max-w-md overflow-y-auto border px-10 py-10 md:mx-0">
-        <h3 className="tea-text-primary font-display text-2xl font-medium tracking-tight">
+      <div className="relative z-10 mx-3 max-h-[90vh] w-full max-w-md overflow-y-auto border border-tea-stone bg-tea-white px-10 py-10 md:mx-0">
+        <h3 className="font-display text-2xl font-medium tracking-tight text-tea-charcoal">
           {t("addShopLabel")}
         </h3>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit} noValidate>
@@ -131,10 +131,7 @@ export default function AddShopModal({ isOpen, onClose }: AddShopModalProps) {
           />
 
           <div>
-            <label
-              htmlFor="modal-shop-name"
-              className="tea-text-muted tea-form-label"
-            >
+            <label htmlFor="modal-shop-name" className="tea-form-label">
               {t("shopName")}
             </label>
             <input
@@ -150,9 +147,7 @@ export default function AddShopModal({ isOpen, onClose }: AddShopModalProps) {
                   setNameError("");
                 }
               }}
-              className={`tea-text-primary tea-border-accent-focus tea-border-subtle tea-input-line transition-colors ${
-                nameError ? "tea-input-error" : ""
-              }`}
+              className={`tea-input-line ${nameError ? "tea-input-error" : ""}`}
               aria-describedby={nameError ? "modal-shop-name-error" : undefined}
             />
             {nameError && (
@@ -167,10 +162,7 @@ export default function AddShopModal({ isOpen, onClose }: AddShopModalProps) {
           </div>
 
           <div>
-            <label
-              htmlFor="modal-avatar"
-              className="tea-text-muted tea-form-label"
-            >
+            <label htmlFor="modal-avatar" className="tea-form-label">
               {t("avatarImage")}
             </label>
             <input
@@ -188,18 +180,18 @@ export default function AddShopModal({ isOpen, onClose }: AddShopModalProps) {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="tea-text-muted mr-4 bg-transparent py-2 text-xs tracking-wider uppercase"
+                className="mr-4 bg-transparent py-2 text-xs tracking-wider text-tea-faint uppercase"
               >
                 {t("chooseFile")}
               </button>
-              <span className="tea-text-muted truncate">
+              <span className="truncate text-tea-faint">
                 {avatarFile ? avatarFile.name : t("noFileChosen")}
               </span>
               {avatarFile && (
                 <button
                   type="button"
                   onClick={clearAvatar}
-                  className="tea-text-muted ml-2 shrink-0 hover:text-red-500"
+                  className="ml-2 shrink-0 text-tea-faint hover:text-red-500"
                   aria-label={t("removeAvatar")}
                 >
                   <X size={14} />
@@ -210,13 +202,13 @@ export default function AddShopModal({ isOpen, onClose }: AddShopModalProps) {
 
           {avatarPreview && (
             <div className="pt-2">
-              <p className="tea-text-muted tea-caps-10 mb-2">{t("preview")}</p>
+              <p className="tea-caps-10 mb-2 text-tea-faint">{t("preview")}</p>
               <Image
                 src={avatarPreview}
                 alt={t("avatarPreviewAlt")}
                 width={64}
                 height={64}
-                className="tea-ring-subtle h-16 w-16 rounded-full object-cover ring-1"
+                className="h-16 w-16 rounded-full object-cover ring-1 ring-tea-stone"
               />
             </div>
           )}

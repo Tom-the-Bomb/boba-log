@@ -21,7 +21,7 @@ export default function DefaultShopPresetCard({
       key={presetName}
       type="button"
       onClick={() => onSelect(preset)}
-      className="tea-border-subtle tea-border-accent-hover tea-surface-muted inline-flex w-auto items-center gap-1.5 border px-2 py-1.5 text-left dark:hover:border-tea-matcha"
+      className="inline-flex w-auto items-center gap-1.5 border border-tea-stone bg-tea-mist px-2 py-1.5 text-left hover:border-tea-sage dark:hover:border-tea-matcha"
     >
       <Image
         src={preset.avatar}
@@ -30,10 +30,10 @@ export default function DefaultShopPresetCard({
         height={22}
         className="h-5.5 w-5.5 rounded-full object-cover"
       />
-      <span className="tea-text-primary text-xs whitespace-nowrap">
+      <span className="text-xs whitespace-nowrap text-tea-charcoal">
         {presetName}
       </span>
-      <span className="tea-text-accent text-sm leading-none">+</span>
+      <span className="text-sm leading-none text-tea-sage">+</span>
     </button>
   );
 }

@@ -57,13 +57,13 @@ export default function ConfirmDeleteModal({
         aria-label={tc("closeModal")}
       />
 
-      <div className="tea-surface tea-border-subtle relative z-10 w-full max-w-sm border px-10 py-10">
-        <h3 className="tea-text-primary font-display text-2xl font-medium tracking-tight">
+      <div className="relative z-10 w-full max-w-sm border border-tea-stone bg-tea-white px-10 py-10">
+        <h3 className="font-display text-2xl font-medium tracking-tight text-tea-charcoal">
           {t("deleteShopTitle")}
         </h3>
-        <p className="tea-text-muted mt-4 text-sm leading-relaxed">
+        <p className="mt-4 text-sm leading-relaxed text-tea-faint">
           {t("deleteConfirmBefore")}
-          <span className="tea-text-primary font-medium">
+          <span className="font-medium text-tea-charcoal">
             {translateShopName(shop.name, i18n.language)}
           </span>
           {t("deleteConfirmAfter")}

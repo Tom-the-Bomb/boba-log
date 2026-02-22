@@ -11,17 +11,17 @@ export default function Hero() {
   return (
     <main className="tea-page-padding relative flex flex-1 flex-col items-start justify-center py-12 sm:py-20">
       <div className="w-full max-w-3xl">
-        <h3 className="reveal reveal-d1 tea-text-accent text-xs tracking-[0.35em] uppercase">
+        <h3 className="reveal reveal-d1 text-xs tracking-[0.35em] text-tea-sage uppercase">
           {t("tagline")}
         </h3>
 
-        <h1 className="reveal reveal-d2 tea-text-primary mt-6 font-display text-5xl leading-[1.08] font-semibold sm:mt-8 sm:text-6xl lg:text-7xl">
+        <h1 className="reveal reveal-d2 mt-6 font-display text-5xl leading-[1.08] font-semibold text-tea-charcoal sm:mt-8 sm:text-6xl lg:text-7xl">
           {t("headingLine1")}
           <br />
-          <span className="tea-text-accent">{t("headingLine2")}</span>
+          <span className="text-tea-sage">{t("headingLine2")}</span>
         </h1>
 
-        <h2 className="reveal reveal-d3 tea-text-secondary mt-6 max-w-lg text-base leading-relaxed sm:mt-8 sm:text-lg">
+        <h2 className="reveal reveal-d3 mt-6 max-w-lg text-base leading-relaxed text-tea-ink sm:mt-8 sm:text-lg">
           {t("subheading")}
         </h2>
 
@@ -38,7 +38,7 @@ export default function Hero() {
             onClick={() =>
               window.open("https://github.com/Tom-the-Bomb/boba-log", "_blank")
             }
-            className="group tea-text-muted tea-hover-text-primary flex items-center gap-2 text-xs tracking-[0.15em] uppercase transition-colors duration-300"
+            className="group flex items-center gap-2 text-xs tracking-[0.15em] text-tea-faint uppercase transition-colors duration-300 hover:text-tea-charcoal"
           >
             {t("learnMore")}
             <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">

@@ -135,13 +135,13 @@ export default function DateRangeSlider({
       return `${baseClass} cursor-pointer rounded-full bg-tea-sage text-tea-white font-medium`;
     }
     if (isInRange) {
-      return `${baseClass} cursor-pointer bg-tea-sage/15 tea-text-primary`;
+      return `${baseClass} cursor-pointer bg-tea-sage/15 text-tea-charcoal`;
     }
     if (isToday) {
-      return `${baseClass} cursor-pointer tea-text-accent font-medium`;
+      return `${baseClass} cursor-pointer text-tea-sage font-medium`;
     }
 
-    return `${baseClass} cursor-pointer tea-text-primary hover:bg-tea-mist rounded-full`;
+    return `${baseClass} cursor-pointer text-tea-charcoal hover:bg-tea-mist rounded-full`;
   };
 
   const getRangeBackground = (day: string | null, index: number): string => {
@@ -199,7 +199,7 @@ export default function DateRangeSlider({
             key={preset.label}
             type="button"
             onClick={preset.apply}
-            className="tea-mini-tab tea-border-accent-hover tea-text-muted tea-hover-text-primary border-b border-transparent pb-0.5"
+            className="tea-mini-tab border-b border-transparent pb-0.5 text-tea-faint hover:border-tea-sage hover:text-tea-charcoal"
           >
             {preset.label}
           </button>
@@ -212,18 +212,18 @@ export default function DateRangeSlider({
           setCalendarOpen((current) => !current);
           setPhase("idle");
         }}
-        className="tea-text-primary tea-hover-text-accent mx-auto mt-4 flex items-center gap-2 text-sm"
+        className="mx-auto mt-4 flex items-center gap-2 text-sm text-tea-charcoal hover:text-tea-sage"
       >
         <span className="font-medium">{formatShortDateUTC(t, startDate)}</span>
-        <span className="tea-text-muted">&ndash;</span>
+        <span className="text-tea-faint">&ndash;</span>
         <span className="font-medium">{formatShortDateUTC(t, endDate)}</span>
         <ChevronDown
-          className={`tea-text-muted h-3 w-3 transition-transform duration-200 ${calendarOpen ? "rotate-180" : ""}`}
+          className={`h-3 w-3 text-tea-faint transition-transform duration-200 ${calendarOpen ? "rotate-180" : ""}`}
         />
       </button>
 
       {calendarOpen && phase === "selecting-end" && (
-        <p className="tea-text-accent mt-2 text-center text-[10px] tracking-[0.15em]">
+        <p className="mt-2 text-center text-[10px] tracking-[0.15em] text-tea-sage">
           {t("selectEndDate")}
         </p>
       )}
@@ -234,18 +234,18 @@ export default function DateRangeSlider({
             <button
               type="button"
               onClick={selectPrevMonth}
-              className="tea-text-muted tea-hover-text-primary flex h-7 w-7 items-center justify-center transition-colors"
+              className="flex h-7 w-7 items-center justify-center text-tea-faint transition-colors hover:text-tea-charcoal"
               aria-label={t("previousMonth")}
             >
               <ChevronLeft className="h-3.5 w-3.5" />
             </button>
-            <span className="tea-text-primary text-xs font-medium tracking-widest">
+            <span className="text-xs font-medium tracking-widest text-tea-charcoal">
               {t(`monthNames[${viewMonth}]`)} {viewYear}
             </span>
             <button
               type="button"
               onClick={selectNextMonth}
-              className="tea-text-muted tea-hover-text-primary flex h-7 w-7 items-center justify-center transition-colors"
+              className="flex h-7 w-7 items-center justify-center text-tea-faint transition-colors hover:text-tea-charcoal"
               aria-label={t("nextMonth")}
             >
               <ChevronRight className="h-3.5 w-3.5" />
@@ -258,7 +258,7 @@ export default function DateRangeSlider({
               return (
                 <div
                   key={label}
-                  className="tea-text-muted flex h-8 items-center justify-center text-[10px] tracking-widest uppercase"
+                  className="flex h-8 items-center justify-center text-[10px] tracking-widest text-tea-faint uppercase"
                 >
                   {label}
                 </div>

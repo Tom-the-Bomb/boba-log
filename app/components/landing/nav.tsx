@@ -14,7 +14,7 @@ export default function Nav() {
     <header className="tea-page-padding reveal flex items-center justify-between py-4 sm:py-8">
       <div className="flex items-center gap-3">
         <TeaLeafMark />
-        <span className="tea-text-primary text-sm font-medium tracking-[0.2em] uppercase">
+        <span className="text-sm font-medium tracking-[0.2em] text-tea-charcoal uppercase">
           {tc("siteName")}
         </span>
       </div>

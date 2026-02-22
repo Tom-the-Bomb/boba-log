@@ -1,6 +1,6 @@
 export default function TeaCupMark() {
   return (
-    <div className="tea-color-stone relative">
+    <div className="relative dark:text-tea-stone">
       <div className="absolute -top-8 left-1/2 flex -translate-x-1/2 gap-3">
         <span className="steam steam-1" />
         <span className="steam steam-2" />

@@ -10,12 +10,12 @@ export default function Nav() {
   const { t } = useTranslation("common");
 
   return (
-    <header className="tea-page-padding tea-border-subtle flex items-center justify-between border-b py-6">
+    <header className="tea-page-padding flex items-center justify-between border-b border-tea-stone py-6">
       <div>
-        <h1 className="tea-text-primary font-display text-2xl font-medium tracking-tight">
+        <h1 className="font-display text-2xl font-medium tracking-tight text-tea-charcoal">
           {t("siteName")}
         </h1>
-        <p className="tea-text-muted tea-caps-10 mt-0.5">
+        <p className="tea-caps-10 mt-0.5 text-tea-faint">
           {user?.username ?? ""}
         </p>
       </div>

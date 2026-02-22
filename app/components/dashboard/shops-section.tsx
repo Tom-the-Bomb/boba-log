@@ -25,7 +25,7 @@ export default function ShopsSection({
   return (
     <>
       <section className="mb-20">
-        <p className="tea-text-accent mb-10 text-xs tracking-[0.3em] uppercase">
+        <p className="mb-10 text-xs tracking-[0.3em] text-tea-sage uppercase">
           {t("yourShops")}
         </p>
         <div className="flex flex-wrap justify-center gap-10 lg:justify-start">
@@ -42,10 +42,10 @@ export default function ShopsSection({
           <button
             type="button"
             onClick={() => setIsModalOpen(true)}
-            className="tea-border-accent-hover tea-border-subtle flex h-44 w-full max-w-60 items-center justify-center border border-dashed"
+            className="flex h-44 w-full max-w-60 items-center justify-center border border-dashed border-tea-stone hover:border-tea-sage"
             aria-label={t("addShopLabel")}
           >
-            <span className="tea-text-accent font-display text-4xl font-medium opacity-80">
+            <span className="font-display text-4xl font-medium text-tea-sage opacity-80">
               +
             </span>
           </button>

@@ -254,56 +254,6 @@ h3:not(.font-display) {
   transform: translateY(-1px);
 }
 
-.tea-text-primary {
-  color: var(--tea-charcoal);
-}
-.tea-text-secondary {
-  color: var(--tea-ink);
-}
-.tea-text-muted {
-  color: var(--tea-faint);
-}
-.tea-text-accent {
-  color: var(--tea-sage);
-}
-.tea-hover-text-primary:hover {
-  color: var(--tea-charcoal);
-}
-.tea-hover-text-accent:hover {
-  color: var(--tea-sage);
-}
-.tea-hover-text-accent-enabled:hover:enabled {
-  color: var(--tea-sage);
-}
-
-.tea-border-subtle {
-  border-color: var(--tea-stone);
-}
-.tea-border-strong {
-  border-color: var(--tea-charcoal);
-}
-.tea-border-accent-hover:hover {
-  border-color: var(--tea-sage);
-}
-.tea-border-accent-focus:focus {
-  border-color: var(--tea-sage);
-}
-
-.dark .tea-color-stone {
-  color: var(--tea-stone);
-}
-
-.tea-ring-subtle {
-  --tw-ring-color: var(--tea-stone);
-}
-
-.tea-surface {
-  background: var(--tea-white);
-}
-.tea-surface-muted {
-  background: var(--tea-mist);
-}
-
 .tea-caps-10 {
   @apply text-[10px] uppercase;
   letter-spacing: 0.2em;
@@ -315,17 +265,17 @@ h3:not(.font-display) {
 }
 
 .tea-form-label {
-  @apply mb-1.5 block text-[10px] uppercase;
+  @apply mb-1.5 block text-[10px] text-tea-faint uppercase;
   letter-spacing: 0.2em;
 }
 
 .tea-auth-form-label {
-  @apply mb-1.5 block text-xs uppercase;
+  @apply mb-1.5 block text-xs text-tea-faint uppercase;
   letter-spacing: 0.15em;
 }
 
 .tea-input-line {
-  @apply w-full border-b bg-transparent py-2.5 text-sm outline-none;
+  @apply w-full border-b border-tea-stone bg-transparent py-2.5 text-sm text-tea-charcoal transition-colors outline-none focus:border-tea-sage;
 }
 
 input::-ms-reveal,

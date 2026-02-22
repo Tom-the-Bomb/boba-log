@@ -39,10 +39,10 @@ export default function TrendsChart({
   return (
     <section className="mb-20">
       <div className="mb-8 flex flex-wrap items-center gap-8">
-        <h2 className="tea-text-primary font-display text-xl font-medium tracking-tight">
+        <h2 className="font-display text-xl font-medium tracking-tight text-tea-charcoal">
           {t("trends")}
         </h2>
-        <div className="tea-border-subtle flex gap-4 border-b">
+        <div className="flex gap-4 border-b border-tea-stone">
           {GRANULARITY_OPTIONS.map((value) => (
             <button
               key={value}
@@ -50,8 +50,8 @@ export default function TrendsChart({
               onClick={() => setGranularity(value)}
               className={`tea-mini-tab pb-2 ${
                 granularity === value
-                  ? "tea-border-strong tea-text-primary border-b-2"
-                  : "tea-text-muted tea-hover-text-primary"
+                  ? "border-b-2 border-tea-charcoal text-tea-charcoal"
+                  : "text-tea-faint hover:text-tea-charcoal"
               }`}
             >
               {t(GRANULARITY_KEYS[value])}

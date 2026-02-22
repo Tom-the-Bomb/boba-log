@@ -43,7 +43,7 @@ export default function DashboardClient() {
   if (isLoadingUser) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-tea-white">
-        <p className="tea-text-muted text-sm tracking-[0.2em] uppercase">
+        <p className="text-sm tracking-[0.2em] text-tea-faint uppercase">
           {t("loading")}
         </p>
       </div>
@@ -67,10 +67,10 @@ export default function DashboardClient() {
         </section>
 
         <section className="mb-20 text-center">
-          <p className="tea-text-accent text-xs tracking-[0.3em] uppercase">
+          <p className="text-xs tracking-[0.3em] text-tea-sage uppercase">
             {t("totalDrinks")}
           </p>
-          <p className="tea-text-primary mt-3 font-display text-8xl font-medium tracking-tight sm:text-9xl">
+          <p className="mt-3 font-display text-8xl font-medium tracking-tight text-tea-charcoal sm:text-9xl">
             {totalCount}
           </p>
         </section>

@@ -13,13 +13,13 @@ export default function NotFound() {
 
       <main className="tea-page-padding-sm flex flex-1 items-center justify-center py-16">
         <section className="reveal text-center">
-          <p className="tea-text-accent text-xs tracking-[0.35em] uppercase">
+          <p className="text-xs tracking-[0.35em] text-tea-sage uppercase">
             {t("title")}
           </p>
-          <h1 className="tea-text-primary reveal-d1 mt-4 font-display text-8xl font-medium tracking-tight sm:text-9xl">
+          <h1 className="reveal-d1 mt-4 font-display text-8xl font-medium tracking-tight text-tea-charcoal sm:text-9xl">
             404
           </h1>
-          <p className="tea-text-secondary reveal-d2 mt-4 text-base leading-relaxed">
+          <p className="reveal-d2 mt-4 text-base leading-relaxed text-tea-ink">
             {t("description")}
           </p>
           <Link

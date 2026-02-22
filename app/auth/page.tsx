@@ -105,26 +105,26 @@ export default function AuthPage() {
       <main className="tea-page-padding-sm flex flex-1 items-center justify-center py-16">
         <section className="w-full max-w-sm" aria-label="Authentication">
           <div className="mb-10">
-            <p className="tea-text-accent text-xs tracking-[0.3em] uppercase">
+            <p className="text-xs tracking-[0.3em] text-tea-sage uppercase">
               {form.mode === "login"
                 ? t("welcomeBack")
                 : t("joinSite", { siteName: tc("siteName") })}
             </p>
-            <h1 className="tea-text-primary mt-3 font-display text-4xl font-medium tracking-tight">
+            <h1 className="mt-3 font-display text-4xl font-medium tracking-tight text-tea-charcoal">
               {form.mode === "login"
                 ? t("signInTitle")
                 : t("createAccountTitle")}
             </h1>
           </div>
 
-          <div className="tea-border-subtle mb-8 flex gap-6 border-b">
+          <div className="mb-8 flex gap-6 border-b border-tea-stone">
             <button
               type="button"
               onClick={() => dispatch({ type: "set_mode", mode: "login" })}
               className={`tea-auth-tab ${
                 form.mode === "login"
-                  ? "tea-border-strong tea-text-primary border-b-2"
-                  : "tea-text-muted tea-hover-text-primary"
+                  ? "border-b-2 border-tea-charcoal text-tea-charcoal"
+                  : "text-tea-faint hover:text-tea-charcoal"
               }`}
             >
               {t("loginTab")}
@@ -134,8 +134,8 @@ export default function AuthPage() {
               onClick={() => dispatch({ type: "set_mode", mode: "signup" })}
               className={`tea-auth-tab ${
                 form.mode === "signup"
-                  ? "tea-border-strong tea-text-primary border-b-2"
-                  : "tea-text-muted tea-hover-text-primary"
+                  ? "border-b-2 border-tea-charcoal text-tea-charcoal"
+                  : "text-tea-faint hover:text-tea-charcoal"
               }`}
             >
               {t("signupTab")}
@@ -144,10 +144,7 @@ export default function AuthPage() {
 
           <form className="space-y-6" onSubmit={handleSubmit} noValidate>
             <div>
-              <label
-                htmlFor="auth-username"
-                className="tea-text-muted tea-auth-form-label"
-              >
+              <label htmlFor="auth-username" className="tea-auth-form-label">
                 {t("username")}
               </label>
               <input
@@ -156,7 +153,7 @@ export default function AuthPage() {
                 onChange={(event) =>
                   dispatch({ type: "set_username", value: event.target.value })
                 }
-                className={`tea-text-primary tea-border-accent-focus tea-border-subtle tea-input-line transition-colors ${
+                className={`tea-input-line ${
                   form.usernameError ? "tea-input-error" : ""
                 }`}
                 aria-describedby={
@@ -174,10 +171,7 @@ export default function AuthPage() {
               )}
             </div>
             <div>
-              <label
-                htmlFor="auth-password"
-                className="tea-text-muted tea-auth-form-label"
-              >
+              <label htmlFor="auth-password" className="tea-auth-form-label">
                 {t("password")}
               </label>
               <div className="relative">
@@ -191,7 +185,7 @@ export default function AuthPage() {
                       value: event.target.value,
                     })
                   }
-                  className={`tea-text-primary tea-border-accent-focus tea-border-subtle tea-input-line pr-10 transition-colors ${
+                  className={`tea-input-line pr-10 ${
                     form.passwordError ? "tea-input-error" : ""
                   }`}
                   aria-describedby={
@@ -201,7 +195,7 @@ export default function AuthPage() {
                 <button
                   type="button"
                   onClick={() => dispatch({ type: "toggle_password" })}
-                  className="tea-text-muted tea-hover-text-primary absolute right-0 bottom-2.5 p-1 transition-colors"
+                  className="absolute right-0 bottom-2.5 p-1 text-tea-faint transition-colors hover:text-tea-charcoal"
                   aria-label={
                     form.showPassword ? t("hidePassword") : t("showPassword")
                   }

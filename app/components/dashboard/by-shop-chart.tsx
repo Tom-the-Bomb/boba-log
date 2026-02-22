@@ -38,7 +38,7 @@ export default function ByShopChart({
 
   return (
     <section className="mb-20">
-      <h2 className="tea-text-primary mb-8 font-display text-xl font-medium tracking-tight">
+      <h2 className="mb-8 font-display text-xl font-medium tracking-tight text-tea-charcoal">
         {t("byShop")}
       </h2>
       <div className="h-72 w-full">

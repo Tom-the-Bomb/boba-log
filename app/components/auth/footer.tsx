@@ -8,7 +8,7 @@ export default function AuthFooter() {
     <>
       <div className="tea-line tea-line-bottom tea-page-padding-sm" />
       <footer className="tea-page-padding-sm flex items-center justify-between py-6">
-        <p className="tea-text-muted tea-caps-10-wide">{t("siteName")}</p>
+        <p className="tea-caps-10-wide text-tea-faint">{t("siteName")}</p>
         <Link href="/" className="tea-link text-[10px]">
           &larr; {t("home")}
         </Link>
