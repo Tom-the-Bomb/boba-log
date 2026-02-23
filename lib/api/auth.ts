@@ -67,7 +67,7 @@ export async function comparePassword(
 
 export async function signToken(payload: AuthTokenPayload): Promise<string> {
   return jwt.sign(
-    { ...payload, exp: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60 },
+    { ...payload, exp: Math.floor(Date.now() / 1000) + AUTH_COOKIE_MAX_AGE },
     getJwtSecret(),
   );
 }

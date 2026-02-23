@@ -1,7 +1,7 @@
 import { getPublicAvatarUrl, uploadAvatarToR2 } from "@/lib/api/r2";
 import { getUsernameFromRequest } from "@/lib/api/request-auth";
 import { verifyTurnstileToken } from "@/lib/api/turnstile";
-import { addShop } from "@/lib/api/users";
+import { addShop, deleteShop } from "@/lib/api/users";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -53,12 +53,13 @@ export async function POST(request: NextRequest) {
         });
         shop.avatar = getPublicAvatarUrl(shop.id);
       } catch {
+        await deleteShop(username, shop.id);
         return NextResponse.json(
           {
-            error: "Invalid avatar format. Use JPEG, PNG, or WebP.",
-            code: "invalidAvatarFormat",
+            error: "Failed to upload avatar.",
+            code: "avatarUploadFailed",
           },
-          { status: 400 },
+          { status: 500 },
         );
       }
     }
