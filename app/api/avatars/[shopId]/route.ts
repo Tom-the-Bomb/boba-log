@@ -1,13 +1,11 @@
+import { getPublicAvatar } from "@/lib/api/r2";
 import { ShopIdParams } from "@/lib/api/types";
-import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(_request: NextRequest, { params }: ShopIdParams) {
   const { shopId } = await params;
-  const key = `${shopId}.webp`;
 
-  const { env } = getCloudflareContext();
-  const object = await env.R2.get(key);
+  const object = await getPublicAvatar(Number(shopId));
 
   if (!object) {
     return new NextResponse(null, { status: 404 });

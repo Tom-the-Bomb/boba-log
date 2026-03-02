@@ -20,6 +20,11 @@ export function getPublicAvatarUrl(shopId: number) {
   return `/api/avatars/${shopId}`;
 }
 
+export async function getPublicAvatar(shopId: number) {
+  const r2 = getR2();
+  return await r2.get(`${shopId}.webp`);
+}
+
 export async function checkPublicAvatarExists(shopId: number) {
   const now = Date.now();
   const cached = avatarExistsCache.get(shopId);
