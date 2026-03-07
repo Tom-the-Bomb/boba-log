@@ -68,7 +68,7 @@ TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
 Initialize the local D1 database for `bun dev`:
 
 ```bash
-wrangler d1 execute boba-log --local --file=schema.sql
+bunx wrangler d1 execute boba-log --local --file=schema.sql
 ```
 
 ### SimpleLocalize (i18n)
@@ -112,13 +112,13 @@ This project uses the `D1` D1 binding from `wrangler.jsonc` with database name `
 Create the D1 database:
 
 ```bash
-bun wrangler d1 create boba-log
+bunx wrangler d1 create boba-log
 ```
 
 Apply schema:
 
 ```bash
-bun wrangler d1 execute boba-log --remote --file=schema.sql
+bunx wrangler d1 execute boba-log --remote --file=schema.sql
 ```
 
 ### Schema
@@ -142,7 +142,7 @@ This project uses the `R2` R2 binding from `wrangler.jsonc` with bucket name `bo
 Create the R2 bucket:
 
 ```bash
-bun wrangler r2 bucket create boba-log
+bunx wrangler r2 bucket create boba-log
 ```
 
 Avatars are uploaded as `{shopId}.webp` and served via the `/api/avatars/[shopId]` API route, which reads directly from the R2 binding.

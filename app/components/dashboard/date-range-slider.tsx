@@ -135,7 +135,7 @@ export default function DateRangeSlider({
       return `${baseClass} cursor-pointer rounded-full bg-tea-sage text-tea-white font-medium`;
     }
     if (isInRange) {
-      return `${baseClass} cursor-pointer bg-tea-sage/15 text-tea-charcoal`;
+      return `${baseClass} cursor-pointer text-tea-charcoal`;
     }
     if (isToday) {
       return `${baseClass} cursor-pointer text-tea-sage font-medium`;
