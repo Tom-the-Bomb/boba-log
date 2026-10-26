@@ -5,7 +5,7 @@ export const AUTHOR_NAME = "Tom the Bomb";
 export const DEFAULT_SEO_TITLE =
   "Boba Log | Track Tea Shops, Drinks, and Trends";
 export const DEFAULT_SEO_DESCRIPTION =
-  "Track every bubble tea visit in one clean dashboard. Log shops, upload avatars, count drinks by date, and spot weekly or monthly trends across your favorites.";
+  "A calm log for your bubble tea. Tap a shop to log a drink, open any day to add what you had and what it cost, and see your whole year at a glance.";
 
 export const SOCIAL_IMAGE_URL = `${SITE_URL}/icon-512.png`;
 export const APP_ICON_ALT = `${SITE_NAME} app icon`;

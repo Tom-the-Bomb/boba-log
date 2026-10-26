@@ -1,11 +1,11 @@
 {
   "name": "Boba Log App",
   "short_name": "Boba Log",
-  "description": "A web app to track your boba tea consumption and show you insights about your habits.",
+  "description": "A calm log of your bubble tea: tap a shop to log a drink, open any day to add details, and see your year at a glance.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#fafaf7",
-  "theme_color": "#7B8B6F",
+  "background_color": "#f4f0e8",
+  "theme_color": "#f4f0e8",
   "orientation": "portrait-primary",
   "icons": [
     {
