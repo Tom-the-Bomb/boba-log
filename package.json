@@ -12,6 +12,8 @@
     "db:migrate:local": "wrangler d1 migrations apply boba-log --local",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "assets:process": "node scripts/normalize-default-shops.mjs",
+    "assets:textures": "node scripts/paint-textures.mts",
+    "assets:fonts": "python3 scripts/subset-mark-fonts.py",
     "lint": "eslint . && prettier --check . && tsc --noEmit",
     "lint:fix": "eslint --fix . && prettier --write . && tsc --noEmit",
     "format": "prettier --write .",
