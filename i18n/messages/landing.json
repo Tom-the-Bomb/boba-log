@@ -1,20 +1,36 @@
 {
   "en": {
-    "getStarted": "Get Started",
+    "getStarted": "Get started",
     "headingLine1": "Your tea,",
     "headingLine2": "your ritual.",
-    "learnMore": "Learn more",
-    "signIn": "Sign In",
+    "openLog": "Open your log",
+    "pointDataBody": "Export every drink as a CSV whenever you like, or delete your account and all of it in one step.",
+    "pointDataTitle": "Your data stays yours.",
+    "pointDayBody": "Open any day to add what you had, what it cost and a note, or to fill in a day you missed.",
+    "pointDayTitle": "Any day, any detail.",
+    "pointTapBody": "One tap logs a drink for today, with undo right beside it.",
+    "pointTapTitle": "Tap the shop.",
+    "sampleLabel": "A sample year of drinks",
+    "scrollRoller": "Scroll roller: drag it up to roll the scroll, let go to drop it",
+    "signIn": "Sign in",
     "subheading": "A quiet space to log your favorite tea shops, track every drink, and find the patterns in what you love.",
-    "tagline": "Track · Discover · Savor"
+    "yourLog": "Your log"
   },
   "zh": {
     "getStarted": "立即开始",
     "headingLine1": "你的茶，",
     "headingLine2": "你的仪式。",
-    "learnMore": "了解更多",
+    "openLog": "打开我的记录",
+    "pointDataBody": "随时将全部饮品导出为 CSV，或一步删除账户与所有数据。",
+    "pointDataTitle": "数据始终归你。",
+    "pointDayBody": "打开任意一天，补记喝了什么、花了多少、写一句备注，或补上漏记的一天。",
+    "pointDayTitle": "任意一天，任意细节。",
+    "pointTapBody": "轻点一下即记下今天的一杯，撤销就在旁边。",
+    "pointTapTitle": "点一下店铺。",
+    "sampleLabel": "一年饮品记录示例",
+    "scrollRoller": "卷轴下轴：向上拖动卷起，松手落下",
     "signIn": "登录",
     "subheading": "一个安静的空间，记录你喜爱的茶店，追踪每一杯饮品，发现你所爱的规律。",
-    "tagline": "记录 · 发现 · 品味"
+    "yourLog": "我的记录"
   }
 }

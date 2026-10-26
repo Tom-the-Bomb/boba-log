@@ -1,12 +1,12 @@
 {
   "en": {
-    "title": "Page not found",
-    "description": "This page doesn't exist or has been moved.",
-    "backToHome": "Back to Home"
+    "backToHome": "Back to home",
+    "description": "This page doesn't exist, or it has moved.",
+    "title": "Nothing poured here."
   },
   "zh": {
-    "title": "页面未找到",
-    "description": "此页面不存在或已被移动。",
-    "backToHome": "返回首页"
+    "backToHome": "返回首页",
+    "description": "这个页面不存在，或已被移动。",
+    "title": "这里空空如也。"
   }
 }
