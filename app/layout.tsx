@@ -1,3 +1,4 @@
+import { LOCALE_COOKIE, toLocale } from "@/i18n/locale";
 import {
   APP_ICON_ALT,
   AUTHOR_NAME,
@@ -8,26 +9,20 @@ import {
   SOCIAL_IMAGE_URL,
 } from "@/lib/site";
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, Sora } from "next/font/google";
-import Script from "next/script";
+import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 import { Toaster } from "sonner";
+// Self-hosted, unicode-range sliced fonts: browsers fetch only the glyph
+// slices a page uses, and builds never reach out to Google Fonts.
+import "@fontsource/lxgw-wenkai-tc/400.css";
+import "@fontsource/noto-sans-sc/300.css";
+import "@fontsource/noto-sans-sc/400.css";
+// The handful of Chinese glyphs English pages show (seal, scroll title,
+// language toggle), so those pages skip the large CJK slices.
+import "./fonts/marks.css";
 import "./globals.css";
-import ClientOnly from "./providers/client-only";
 import LocaleProvider from "./providers/locale-provider";
 import { ThemeProvider } from "./providers/theme-provider";
-
-const PRIMARY_TEA_LEAF_COLOR = "#7B8B6F";
-
-const bricolage = Bricolage_Grotesque({
-  variable: "--font-bricolage",
-  subsets: ["latin"],
-});
-
-const sora = Sora({
-  variable: "--font-sora",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -88,40 +83,52 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: PRIMARY_TEA_LEAF_COLOR,
+  themeColor: "#f4f0e8",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: ReactNode;
 }>) {
+  // The language is a cookie so the server renders the page in it.
+  const locale = toLocale((await cookies()).get(LOCALE_COOKIE)?.value);
+
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <meta name="color-scheme" content="light" />
-        <Script id="theme-loader" strategy="beforeInteractive">
-          {`(function() {
-            try {
-              var theme = localStorage.getItem('boba_theme');
-              if (theme === 'dark') {
-                document.documentElement.classList.add('dark');
-              } else {
-                document.documentElement.classList.remove('dark');
-              }
-            } catch (e) {}
-          })();`}
-        </Script>
-      </head>
-      <body className={`${bricolage.variable} ${sora.variable} antialiased`}>
-        <ClientOnly>
-          <LocaleProvider>
-            <ThemeProvider>
-              {children}
-              <Toaster position="bottom-center" />
-            </ThemeProvider>
-          </LocaleProvider>
-        </ClientOnly>
+    <html lang={locale} suppressHydrationWarning>
+      <body>
+        {/* Roughens the seal's edges like a carved stone impression. */}
+        <svg aria-hidden="true" width="0" height="0" className="absolute">
+          <filter id="seal-carve">
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.7"
+              numOctaves="2"
+              seed="3"
+            />
+            <feDisplacementMap in="SourceGraphic" scale="1.6" />
+          </filter>
+        </svg>
+        <LocaleProvider locale={locale}>
+          <ThemeProvider>
+            {children}
+            <Toaster
+              position="bottom-center"
+              toastOptions={{
+                unstyled: true,
+                classNames: {
+                  toast:
+                    "flex w-[min(26rem,calc(100vw-2rem))] items-center gap-3 rounded-lg border border-rule bg-surface px-4 py-3 text-sm text-text shadow-(--lift)",
+                  error: "text-danger",
+                  icon: "shrink-0",
+                  // Custom toasts sit inside these; let them span the toast.
+                  content: "min-w-0 flex-1",
+                  title: "w-full",
+                },
+              }}
+            />
+          </ThemeProvider>
+        </LocaleProvider>
       </body>
     </html>
   );
