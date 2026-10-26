@@ -6,14 +6,21 @@ function subscribe() {
   return () => {};
 }
 
-export default function ClientOnly({ children }: { children: ReactNode }) {
+/** Renders its children in the browser only; the server sends `fallback`. */
+export default function ClientOnly({
+  children,
+  fallback = null,
+}: {
+  children: ReactNode;
+  fallback?: ReactNode;
+}) {
   const mounted = useSyncExternalStore(
     subscribe,
     () => true,
     () => false,
   );
   if (!mounted) {
-    return null;
+    return fallback;
   }
   return <>{children}</>;
 }
