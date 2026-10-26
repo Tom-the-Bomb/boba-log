@@ -71,3 +71,14 @@ export async function deleteAvatarFromR2(shopId: number) {
   await r2.delete(`${shopId}.webp`);
   avatarExistsCache.delete(shopId);
 }
+
+export async function deleteAvatarsFromR2(shopIds: number[]) {
+  if (shopIds.length === 0) {
+    return;
+  }
+  const r2 = getR2();
+  await r2.delete(shopIds.map((shopId) => `${shopId}.webp`));
+  for (const shopId of shopIds) {
+    avatarExistsCache.delete(shopId);
+  }
+}

@@ -25,6 +25,11 @@ interface AuthTokenPayload {
   username: string;
 }
 
+interface VerifiedToken extends AuthTokenPayload {
+  /** Epoch seconds the token was issued. */
+  issuedAt: number;
+}
+
 async function pbkdf2(password: string, salt: Uint8Array): Promise<Uint8Array> {
   const keyMaterial = await crypto.subtle.importKey(
     "raw",
@@ -66,13 +71,14 @@ export async function comparePassword(
 }
 
 export async function signToken(payload: AuthTokenPayload): Promise<string> {
+  const now = Math.floor(Date.now() / 1000);
   return jwt.sign(
-    { ...payload, exp: Math.floor(Date.now() / 1000) + AUTH_COOKIE_MAX_AGE },
+    { ...payload, iat: now, exp: now + AUTH_COOKIE_MAX_AGE },
     getJwtSecret(),
   );
 }
 
-export async function verifyToken(token: string): Promise<AuthTokenPayload> {
+export async function verifyToken(token: string): Promise<VerifiedToken> {
   const isValid = await jwt.verify(token, getJwtSecret());
   if (!isValid) {
     throw new Error("Invalid token.");
@@ -83,7 +89,10 @@ export async function verifyToken(token: string): Promise<AuthTokenPayload> {
     throw new Error("Invalid token payload.");
   }
 
-  return { username: payload.username };
+  // Tokens signed before `iat` was added still carry `exp`.
+  const issuedAt = payload.iat ?? (payload.exp ?? 0) - AUTH_COOKIE_MAX_AGE;
+
+  return { username: payload.username, issuedAt };
 }
 
 function bufToHex(buf: Uint8Array): string {
