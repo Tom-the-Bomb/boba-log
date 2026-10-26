@@ -1,142 +1,172 @@
-import type { TFunction } from "i18next";
-import { parseDateStringUTC } from "./date";
-import { translateShopName } from "./default-shops";
-import type { BobaShop } from "./types";
+import { addDays, dayFromLocalDate, dayParts, daysBetween } from "./date";
+import type { Drink } from "./types";
 
-export type Granularity = "year" | "month" | "weekday";
+export type RangePreset = "all" | "7" | "30" | "year" | "custom";
 
-export const GRANULARITY_OPTIONS: readonly Granularity[] = [
+export interface DayRange {
+  start: string;
+  end: string;
+}
+
+export const RANGE_PRESETS: readonly Exclude<RangePreset, "custom">[] = [
+  "7",
+  "30",
   "year",
-  "month",
-  "weekday",
+  "all",
 ];
 
-export const GRANULARITY_KEYS: Record<Granularity, string> = {
-  year: "granularityYear",
-  month: "granularityMonth",
-  weekday: "granularityWeekday",
+export const RANGE_PRESET_KEYS: Record<RangePreset, string> = {
+  "7": "range7",
+  "30": "range30",
+  year: "rangeYear",
+  all: "rangeAll",
+  custom: "rangeCustom",
 };
 
-interface ShopCountItem {
-  shop: BobaShop;
-  count: number;
-}
-
-interface DateBounds {
-  start: Date;
-  end: Date;
-}
-
-function getDateBounds(startDate: string, endDate: string): DateBounds | null {
-  if (!startDate || !endDate) {
-    return null;
-  }
-
-  return {
-    start: parseDateStringUTC(startDate),
-    end: new Date(parseDateStringUTC(endDate).getTime() + 86_399_999),
-  };
-}
-
-export function getShopCountForRange(
-  shop: BobaShop,
-  startDate: string,
-  endDate: string,
-): number {
-  const bounds = getDateBounds(startDate, endDate);
-  if (!bounds) {
-    return shop.total;
-  }
-
-  return Object.entries(shop.dates).reduce((sum, [epochStr, count]) => {
-    const point = new Date(Number(epochStr) * 1000);
-    return point >= bounds.start && point <= bounds.end ? sum + count : sum;
-  }, 0);
-}
-
-export function buildShopCounts(
-  shops: readonly BobaShop[],
-  startDate: string,
-  endDate: string,
-): ShopCountItem[] {
-  return shops.map((shop) => ({
-    shop,
-    count: getShopCountForRange(shop, startDate, endDate),
-  }));
-}
-
-export function buildByShopChartData(
-  t: TFunction,
-  locale: string,
-  shopCounts: ShopCountItem[],
-) {
-  return {
-    labels: shopCounts.map(({ shop }) => translateShopName(shop.name, locale)),
-    datasets: [
-      {
-        label: t("drinks"),
-        data: shopCounts.map(({ count }) => count),
-        backgroundColor: "rgba(123, 139, 111, 0.6)",
-        borderRadius: 4,
-      },
-    ],
-  };
-}
-
-export function buildTrendsChartData(
-  t: TFunction,
-  shops: readonly BobaShop[],
-  startDate: string,
-  endDate: string,
-  granularity: Granularity,
-) {
-  const bucketMap: Record<string, number> = {};
-  const bounds = getDateBounds(startDate, endDate);
-
-  for (const shop of shops) {
-    for (const [epochStr, count] of Object.entries(shop.dates)) {
-      const point = new Date(Number(epochStr) * 1000);
-
-      if (bounds && (point < bounds.start || point > bounds.end)) {
-        continue;
-      }
-
-      let key = "";
-      if (granularity === "year") {
-        key = String(point.getUTCFullYear());
-      } else if (granularity === "month") {
-        key = t(`monthLabels[${point.getUTCMonth()}]`);
-      } else {
-        key = t(`weekdayNames[${point.getUTCDay()}]`);
-      }
-
-      bucketMap[key] = (bucketMap[key] ?? 0) + count;
+/** The first day worth showing: the earlier of sign-up and the oldest drink. */
+export function earliestDay(drinks: readonly Drink[], createdAt: number) {
+  let earliest = dayFromLocalDate(new Date(createdAt * 1000));
+  for (const drink of drinks) {
+    if (drink.day < earliest) {
+      earliest = drink.day;
     }
   }
+  return earliest;
+}
 
-  let labels: readonly string[];
-  if (granularity === "month") {
-    labels = Array.from({ length: 12 }, (_, i) => t(`monthLabels[${i}]`));
-  } else if (granularity === "weekday") {
-    labels = Array.from({ length: 7 }, (_, i) => t(`weekdayNames[${i}]`));
-  } else {
-    const currentYear = String(new Date().getUTCFullYear());
-    const yearLabels = new Set(Object.keys(bucketMap));
-    yearLabels.add(currentYear);
-    labels = Array.from(yearLabels).sort((a, b) => Number(a) - Number(b));
+export function presetRange(
+  preset: Exclude<RangePreset, "custom">,
+  today: string,
+  earliest: string,
+): DayRange {
+  switch (preset) {
+    case "7":
+      return { start: addDays(today, -6), end: today };
+    case "30":
+      return { start: addDays(today, -29), end: today };
+    case "year":
+      return { start: `${dayParts(today).year}-01-01`, end: today };
+    case "all":
+      return { start: earliest < today ? earliest : today, end: today };
   }
+}
 
-  return {
-    labels: labels as string[],
-    datasets: [
-      {
-        label: t("bobaPerGranularity", {
-          granularity: t(GRANULARITY_KEYS[granularity]),
-        }),
-        data: labels.map((label) => bucketMap[label] ?? 0),
-        backgroundColor: "rgba(196, 169, 106, 0.6)",
-        borderRadius: 4,
-      },
-    ],
-  };
+export function drinksInRange(
+  drinks: readonly Drink[],
+  { start, end }: DayRange,
+): Drink[] {
+  return drinks.filter((drink) => drink.day >= start && drink.day <= end);
+}
+
+/** What one drink adds to a total: the drink itself, or what it cost. */
+export type Weigh = (drink: Drink) => number;
+const oneEach: Weigh = () => 1;
+export const priceOf: Weigh = (drink) => drink.priceCents ?? 0;
+
+export function countsByShop(drinks: readonly Drink[], weigh = oneEach) {
+  const counts = new Map<number, number>();
+  for (const drink of drinks) {
+    counts.set(drink.shopId, (counts.get(drink.shopId) ?? 0) + weigh(drink));
+  }
+  return counts;
+}
+
+export function countsByDay(drinks: readonly Drink[], weigh = oneEach) {
+  const counts = new Map<string, number>();
+  for (const drink of drinks) {
+    counts.set(drink.day, (counts.get(drink.day) ?? 0) + weigh(drink));
+  }
+  return counts;
+}
+
+/** Where a day's spending steps up a drop size: about one, two and three
+ *  drinks' worth of the typical price, in whole currency units. */
+export function spendSteps(typical: number) {
+  return [1.5, 2.5, 3.5].map((step) =>
+    Math.max(100, Math.round((step * typical) / 100) * 100),
+  );
+}
+
+/** A day's drop size, 1 to 4, from what was spent. */
+export function spendLevel(cents: number, steps: readonly number[]) {
+  return 1 + steps.filter((step) => cents > step).length;
+}
+
+/** The middle price of the priced drinks, or null when none have one. */
+export function typicalPrice(drinks: readonly Drink[]) {
+  const prices = drinks
+    .flatMap((drink) => (drink.priceCents === null ? [] : [drink.priceCents]))
+    .sort((a, b) => a - b);
+  return prices.length > 0 ? prices[Math.floor(prices.length / 2)] : null;
+}
+
+export function countsByWeekday(drinks: readonly Drink[], weigh = oneEach) {
+  const counts = [0, 0, 0, 0, 0, 0, 0];
+  for (const drink of drinks) {
+    counts[dayParts(drink.day).weekday] += weigh(drink);
+  }
+  return counts;
+}
+
+export function lastDayByShop(drinks: readonly Drink[]) {
+  const last = new Map<number, string>();
+  for (const drink of drinks) {
+    const current = last.get(drink.shopId);
+    if (!current || drink.day > current) {
+      last.set(drink.shopId, drink.day);
+    }
+  }
+  return last;
+}
+
+export function spendSummary(drinks: readonly Drink[]) {
+  let cents = 0;
+  let priced = 0;
+  for (const drink of drinks) {
+    if (drink.priceCents !== null) {
+      cents += drink.priceCents;
+      priced += 1;
+    }
+  }
+  return { cents, priced };
+}
+
+export function perWeek(count: number, { start, end }: DayRange) {
+  const days = daysBetween(start, end) + 1;
+  return (count / days) * 7;
+}
+
+/** Newest first: by day, then by when the entry was written. */
+export function sortNewestFirst(drinks: readonly Drink[]) {
+  return [...drinks].sort(
+    (a, b) =>
+      b.day.localeCompare(a.day) || b.createdAt - a.createdAt || b.id - a.id,
+  );
+}
+
+export function countsByMonth(drinks: readonly Drink[], weigh = oneEach) {
+  const counts = Array.from({ length: 12 }, () => 0);
+  for (const drink of drinks) {
+    counts[dayParts(drink.day).month] += weigh(drink);
+  }
+  return counts;
+}
+
+/** Totals per calendar year, for every year the range touches. */
+export function countsByYear(
+  drinks: readonly Drink[],
+  { start, end }: DayRange,
+  weigh = oneEach,
+) {
+  const first = dayParts(start).year;
+  const last = dayParts(end).year;
+  const counts = new Map<number, number>();
+  for (let year = first; year <= last; year++) {
+    counts.set(year, 0);
+  }
+  for (const drink of drinks) {
+    const year = dayParts(drink.day).year;
+    counts.set(year, (counts.get(year) ?? 0) + weigh(drink));
+  }
+  return [...counts.entries()];
 }
