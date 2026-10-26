@@ -29,7 +29,8 @@
     {
       "binding": "DB",
       "database_name": "boba-log",
-      "database_id": "f4e53a5a-59d6-4a48-add4-cf41e2192f78"
+      "database_id": "f4e53a5a-59d6-4a48-add4-cf41e2192f78",
+      "migrations_dir": "migrations"
     }
   ],
   "r2_buckets": [
@@ -56,5 +57,5 @@
       }
     }
   ],
-  "keep_names": false,
+  "keep_names": false
 }

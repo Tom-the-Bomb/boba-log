@@ -1,3 +1,5 @@
+-- Baseline: the schema that was live before migrations were introduced.
+-- Every statement is idempotent so applying this to the existing database is a no-op.
 CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY,
   username TEXT NOT NULL UNIQUE,
