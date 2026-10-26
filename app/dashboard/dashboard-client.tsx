@@ -1,92 +1,51 @@
 "use client";
 
-import { getShopCountForRange } from "@/lib/dashboard-metrics";
-import { toDateStringUTC } from "@/lib/date";
-import type { BobaShop } from "@/lib/types";
-import { useMemo, useState } from "react";
+import { drinksInRange } from "@/lib/dashboard-metrics";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import ByShopChart from "../components/dashboard/by-shop-chart";
-import DateRangeSlider from "../components/dashboard/date-range-slider";
-import Footer from "../components/dashboard/footer";
-import Nav from "../components/dashboard/nav";
-import ShopsSection from "../components/dashboard/shops-section";
-import TrendsChart from "../components/dashboard/trends-chart";
+import DayPanel from "../components/dashboard/day-panel";
+import RecentDrinks from "../components/dashboard/recent-drinks";
+import SheetSection from "../components/dashboard/sheet-section";
+import ShopList from "../components/dashboard/shop-list";
+import SummarySentence from "../components/dashboard/summary-sentence";
+import TrendsSection from "../components/dashboard/trends-section";
 import { useUser } from "../providers/user-provider";
-
-const EMPTY_SHOPS: readonly BobaShop[] = [];
+import { useDashboard } from "./dashboard-context";
 
 export default function DashboardClient() {
-  const { user, isLoadingUser } = useUser();
+  const { user } = useUser();
+  const { range } = useDashboard();
   const { t } = useTranslation("dashboard");
-  const shops = user?.shops ?? EMPTY_SHOPS;
+  const drinks = useMemo(() => user?.drinks ?? [], [user?.drinks]);
+  const inRange = useMemo(() => drinksInRange(drinks, range), [drinks, range]);
 
-  const defaultStartDate = user
-    ? toDateStringUTC(new Date(user.createdAt * 1000))
-    : "";
-  const defaultEndDate = user ? toDateStringUTC(new Date()) : "";
-
-  const [startDateOverride, setStartDate] = useState("");
-  const [endDateOverride, setEndDate] = useState("");
-
-  const startDate = startDateOverride || defaultStartDate;
-  const endDate = endDateOverride || defaultEndDate;
-
-  const totalCount = useMemo(
-    () =>
-      shops.reduce(
-        (sum, shop) => sum + getShopCountForRange(shop, startDate, endDate),
-        0,
-      ),
-    [shops, startDate, endDate],
-  );
-
-  if (isLoadingUser) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-tea-white">
-        <p className="text-sm tracking-[0.2em] text-tea-faint uppercase">
-          {t("loading")}
-        </p>
-      </div>
-    );
+  if (!user) {
+    return null;
   }
 
   return (
-    <div className="tea-grid-bg min-h-screen">
-      <Nav />
-
-      <main className="mx-auto w-full max-w-5xl px-10 py-16 sm:px-16 lg:px-24">
-        <section className="mb-20">
-          <DateRangeSlider
-            startDate={startDate}
-            endDate={endDate}
-            onStartChange={setStartDate}
-            onEndChange={setEndDate}
-            minDate={user ? defaultStartDate : startDate}
-            maxDate={toDateStringUTC(new Date())}
-          />
-        </section>
-
-        <section className="mb-20 text-center">
-          <p className="text-xs tracking-[0.3em] text-tea-sage uppercase">
-            {t("totalDrinks")}
-          </p>
-          <p className="mt-3 font-display text-8xl font-medium tracking-tight text-tea-charcoal sm:text-9xl">
-            {totalCount}
-          </p>
-        </section>
-
-        <div className="tea-line mb-20" />
-
-        <ShopsSection shops={shops} startDate={startDate} endDate={endDate} />
-
-        <div className="tea-line mb-20" />
-
-        <ByShopChart shops={shops} startDate={startDate} endDate={endDate} />
-
-        <TrendsChart shops={shops} startDate={startDate} endDate={endDate} />
-      </main>
-
-      <Footer />
-    </div>
+    // Phones stack shops, recent and the year. Tablets and phones on their side
+    // set shops beside recent above a full-width year, which needs the width;
+    // desktops give the year its own column.
+    <main
+      id="main-content"
+      className="mx-auto grid max-w-7xl grid-cols-1 gap-x-10 gap-y-12 px-4 pt-8 pb-20 [grid-template-areas:'shops'_'recent'_'main'] sm:px-8 sm:pt-10 md:grid-cols-2 md:[grid-template-areas:'shops_recent'_'main_main'] lg:grid-cols-[22rem_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:gap-x-16 lg:px-12 lg:[grid-template-areas:'shops_main'_'recent_main'] xl:gap-x-20"
+    >
+      <h1 className="sr-only">{t("tabLog")}</h1>
+      <div className="[grid-area:shops]">
+        <ShopList />
+      </div>
+      <div className="self-start [grid-area:recent]">
+        <RecentDrinks />
+      </div>
+      <div className="space-y-10 [grid-area:main]">
+        <SummarySentence drinks={inRange} currency={user.currency} />
+        <SheetSection drinks={drinks} />
+        {drinks.length > 0 && (
+          <TrendsSection drinks={drinks} inRange={inRange} />
+        )}
+        <DayPanel />
+      </div>
+    </main>
   );
 }
