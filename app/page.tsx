@@ -1,3 +1,4 @@
+import { AUTH_COOKIE_NAME } from "@/lib/api/auth";
 import {
   HOME_ORGANIZATION_JSONLD,
   HOME_WEBPAGE_JSONLD,
@@ -11,9 +12,8 @@ import {
   SOCIAL_IMAGE_URL,
 } from "@/lib/site";
 import type { Metadata } from "next";
-import Footer from "./components/landing/footer";
-import Hero from "./components/landing/hero";
-import Nav from "./components/landing/nav";
+import { cookies } from "next/headers";
+import Landing from "./components/landing/landing";
 import JsonLd from "./components/seo/json-ld";
 
 export const metadata: Metadata = {
@@ -40,9 +40,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Home() {
+export default async function Home() {
+  const signedIn = (await cookies()).has(AUTH_COOKIE_NAME);
+
   return (
-    <div className="tea-grid-bg relative flex min-h-screen flex-col">
+    <>
       <JsonLd
         data={[
           HOME_ORGANIZATION_JSONLD,
@@ -50,15 +52,7 @@ export default function Home() {
           HOME_WEBPAGE_JSONLD,
         ]}
       />
-
-      <Nav />
-
-      <div className="tea-line tea-page-padding" />
-
-      <Hero />
-
-      <div className="tea-line tea-line-bottom tea-page-padding" />
-      <Footer />
-    </div>
+      <Landing signedIn={signedIn} />
+    </>
   );
 }

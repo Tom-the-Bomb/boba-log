@@ -1,0 +1,416 @@
+/* A small hanging scroll of the sample year: silk mount, wooden stave and
+   roller, hung by a cord from a nail. One number, --open (0 rolled up, 1
+   hanging free), drives the silk, the roller, its grain and the shadow. */
+@property --open {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+
+@keyframes unroll {
+  from {
+    --open: 0;
+  }
+  to {
+    --open: 1;
+  }
+}
+
+.scroll {
+  --hs-cord-h: 38px;
+  --hs-tian: 22px;
+  --hs-di: 11px;
+  --hs-side: 12px;
+  --hs-roller-h: 16px;
+  --hs-silk: #d8d0bb;
+  --hs-geshui: #c2b48f;
+  --hs-paper: #faf7f1;
+  --hs-line: rgb(90 70 40 / 0.3);
+  --hs-wood-a: #2f1c12;
+  --hs-wood-b: #5e3b27;
+  --hs-jade-a: #bfc7ae;
+  --hs-jade-b: #eef1e3;
+  --hs-jade-c: #9aa38a;
+  --hs-brass-a: #8a6a2f;
+  --hs-brass-b: #e6c983;
+  --hs-cord: #7c3528;
+  --hs-cord-hi: #c46a55;
+  --hs-wall: rgb(43 41 37 / 0.3);
+  /* Horizontal wood grain shared by the stave and roller. */
+  --hs-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1400' height='60'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.004 0.35' numOctaves='4' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.06 0 0 0 0 0.03 0 0 0 2.2 -0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  position: relative;
+  margin: 0;
+  padding-top: var(--hs-cord-h);
+}
+
+:global(.dark) .scroll {
+  --hs-silk: #3d3327;
+  --hs-geshui: #4c3f2d;
+  --hs-paper: #27221d;
+  --hs-line: rgb(240 220 180 / 0.12);
+  --hs-wood-a: #160d08;
+  --hs-wood-b: #3b2518;
+  --hs-jade-a: #76806b;
+  --hs-jade-b: #a6b097;
+  --hs-jade-c: #5f6856;
+  --hs-brass-a: #6b5223;
+  --hs-brass-b: #b99a5c;
+  --hs-cord: #6a2d22;
+  --hs-cord-hi: #9c5444;
+  --hs-wall: rgb(0 0 0 / 0.65);
+}
+
+/* It arrives rolled up and drops open; the easing is the fall itself. */
+@media (prefers-reduced-motion: no-preference) {
+  .scroll {
+    animation: unroll var(--drop-ms) var(--drop-easing) 250ms both;
+  }
+}
+
+.scroll[data-grabbing],
+.scroll[data-grabbing] * {
+  cursor: grabbing;
+}
+
+.nail {
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  z-index: 3;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 30%,
+    var(--hs-brass-b),
+    var(--hs-brass-a) 60%,
+    #3b2a10
+  );
+  box-shadow: 1px 2px 2px rgb(0 0 0 / 0.35);
+}
+
+.hang {
+  position: relative;
+  padding-bottom: var(--hs-roller-h);
+}
+
+.wallShadow {
+  position: absolute;
+  inset: 0 10px -14px;
+  pointer-events: none;
+  filter: blur(12px);
+  transform: scaleY(var(--open));
+  transform-origin: 50% 0;
+}
+
+.wallShadow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--hs-wall);
+  clip-path: polygon(2% 0, 98% 0, 100% 100%, 0 100%);
+  transform: translate(5px, 10px);
+}
+
+/* The cord runs on past the stave's top edge and disappears behind it. */
+.cord {
+  position: absolute;
+  top: calc(-1 * var(--hs-cord-h));
+  left: 0;
+  z-index: 2;
+  width: 100%;
+  height: var(--hs-cord-h);
+  overflow: visible;
+  pointer-events: none;
+}
+
+.stave {
+  position: relative;
+  z-index: 2;
+  height: 9px;
+  border-radius: 3px 3px 1px 1px;
+  background:
+    linear-gradient(
+      180deg,
+      rgb(255 232 205 / 0.22),
+      rgb(255 232 205 / 0) 40%,
+      rgb(0 0 0 / 0.35)
+    ),
+    var(--hs-grain) 0 0 / 1400px 60px,
+    linear-gradient(180deg, var(--hs-wood-b), var(--hs-wood-a));
+  box-shadow: 0 2px 3px rgb(0 0 0 / 0.25);
+}
+
+.length {
+  position: relative;
+  z-index: 1;
+}
+
+.silk {
+  position: relative;
+  padding: 0 var(--hs-side);
+  clip-path: inset(0 0 calc((1 - var(--open)) * 100%) 0);
+  background:
+    linear-gradient(
+      90deg,
+      rgb(0 0 0 / 0.09),
+      rgb(0 0 0 / 0) 2.2%,
+      rgb(0 0 0 / 0) 97.8%,
+      rgb(0 0 0 / 0.09)
+    ),
+    repeating-linear-gradient(
+      45deg,
+      rgb(255 255 255 / 0.045) 0 1px,
+      transparent 1px 3px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgb(0 0 0 / 0.025) 0 1px,
+      transparent 1px 3px
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--hs-silk) 90%, #fff),
+      var(--hs-silk) 35%,
+      color-mix(in srgb, var(--hs-silk) 93%, #000)
+    );
+}
+
+.tian {
+  position: relative;
+  height: var(--hs-tian);
+}
+
+.di {
+  height: var(--hs-di);
+}
+
+/* The two hanging strips (惊燕) at the top of the mount. */
+.ribbon {
+  position: absolute;
+  top: -1px;
+  z-index: 2;
+  width: 11px;
+  height: calc(var(--hs-tian) + 14px);
+  margin-left: -5.5px;
+  opacity: clamp(0, calc(var(--open) * 6), 1);
+  clip-path: polygon(0 0, 100% 0, 96% 100%, 4% 100%);
+  background:
+    linear-gradient(
+      180deg,
+      rgb(0 0 0 / 0.2) 0 3px,
+      rgb(255 255 255 / 0.12) 3px 5px,
+      transparent 5px
+    ),
+    linear-gradient(
+      90deg,
+      rgb(0 0 0 / 0.14),
+      rgb(255 255 255 / 0.12) 45%,
+      rgb(0 0 0 / 0.12)
+    ),
+    var(--hs-geshui);
+  filter: drop-shadow(1px 2px 1.5px rgb(0 0 0 / 0.22));
+}
+
+.ribbon::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--hs-geshui) 0 1px,
+    transparent 1px 2px
+  );
+}
+
+.paperWrap {
+  border-top: 4px solid var(--hs-geshui);
+  border-bottom: 4px solid var(--hs-geshui);
+  box-shadow:
+    0 -1px 0 var(--hs-line),
+    0 1px 0 var(--hs-line);
+}
+
+.paper {
+  position: relative;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  padding: 14px 16px 12px;
+  background: var(--hs-paper);
+  box-shadow: inset 0 0 0 1px var(--hs-line);
+}
+
+.paper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--text);
+  opacity: 0.06;
+  mask: url("/textures/paper-fibre.webp") 0 0 / 420px;
+}
+
+.title {
+  justify-self: center;
+  margin: 0;
+  font-size: 17px;
+  letter-spacing: 0.3em;
+  color: var(--text);
+  writing-mode: vertical-rl;
+}
+
+.month {
+  display: grid;
+  grid-template-areas: "name days total";
+  grid-template-columns: 30px minmax(0, 1fr) 22px;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 1px;
+}
+
+.monthName {
+  grid-area: name;
+  font-size: 12px;
+  font-weight: 300;
+  color: var(--text-2);
+}
+
+.monthTotal {
+  grid-area: total;
+  font-size: 12.5px;
+  text-align: right;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.days {
+  grid-area: days;
+  display: grid;
+  grid-template-columns: repeat(31, minmax(0, 1fr));
+  gap: 2px;
+}
+
+.day {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+
+.empty {
+  width: 2.5px;
+  height: 2.5px;
+  border-radius: 50%;
+  background: var(--text);
+  opacity: 0.26;
+}
+
+.day[data-day]:hover {
+  box-shadow: 0 0 0 1.5px var(--text-3);
+}
+
+.roller {
+  position: absolute;
+  top: calc(var(--open) * 100%);
+  right: 0;
+  left: 0;
+  z-index: 2;
+  display: block;
+  height: var(--hs-roller-h);
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  background:
+    linear-gradient(
+      180deg,
+      rgb(0 0 0 / 0.45),
+      rgb(255 232 205 / 0.28) 30%,
+      rgb(255 232 205 / 0) 55%,
+      rgb(0 0 0 / 0.4)
+    ),
+    var(--hs-grain) 0 calc(var(--open) * var(--hs-travel, 300px)) / 1400px 60px,
+    linear-gradient(180deg, var(--hs-wood-b), var(--hs-wood-a));
+  box-shadow: 0 7px 9px -5px rgb(0 0 0 / 0.45);
+}
+
+/* A larger grip than the rod itself; larger again for a finger. */
+.roller::after {
+  content: "";
+  position: absolute;
+  inset: -10px -16px;
+}
+
+@media (pointer: coarse) {
+  .roller::after {
+    inset: -14px -16px;
+  }
+}
+
+.knob {
+  position: absolute;
+  top: -3px;
+  width: 15px;
+  height: 22px;
+  border-radius: 5px;
+  background: linear-gradient(
+    180deg,
+    var(--hs-jade-c),
+    var(--hs-jade-a) 25%,
+    var(--hs-jade-b) 45%,
+    var(--hs-jade-a) 70%,
+    var(--hs-jade-c)
+  );
+  box-shadow: 0 5px 7px -4px rgb(0 0 0 / 0.45);
+}
+
+.knob::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  width: 2px;
+  border-radius: 1px;
+  background: rgb(0 0 0 / 0.28);
+}
+
+.knobStart {
+  left: -14px;
+}
+
+.knobStart::before {
+  right: 0;
+}
+
+.knobEnd {
+  right: -14px;
+}
+
+.knobEnd::before {
+  left: 0;
+}
+
+.tip {
+  position: fixed;
+  z-index: 60;
+  padding: 5px 10px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  pointer-events: none;
+  font-size: 13px;
+  line-height: 1.3;
+  white-space: nowrap;
+  color: var(--text);
+  background: var(--surface);
+  box-shadow: 0 8px 20px -10px rgb(0 0 0 / 0.35);
+  transform: translate(-50%, calc(-100% - 10px));
+}
