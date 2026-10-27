@@ -1,17 +1,8 @@
-# [Boba Log](https://boba.tomthebomb)
+# [Boba Log](https://boba.tomthebomb.dev)
 
 [![React Doctor](https://www.react.doctor/share/badge?p=boba-log&s=100)](https://www.react.doctor/share?p=boba-log&s=100)
 
-Boba Log is a calm, bilingual (English / 简体中文) log for bubble tea, deployed to Cloudflare Workers.
-
-## Features
-
-- **One-tap logging:** tap a shop's +1 to log a drink for today, with undo right in the toast.
-- **Any day, any detail:** open any day on the year sheet to add, edit, move or remove drinks, each with an optional name, price and note.
-- **Local dates:** drinks belong to the calendar day in your own time zone, not UTC.
-- **The year sheet:** every day of the year as a tea drop that grows and deepens with each drink, plus the year painted as an ink-wash handscroll, with month totals, a range summary, spend for priced drinks, and a weekday breakdown.
-- **Drinks list:** every entry in the range, filterable by shop and editable inline.
-- **Your data:** CSV export, currency setting, password change (signs out other devices) and account deletion.
+Boba Log is a Next.js app for logging bubble tea drinks, deployed to Cloudflare Workers.
 
 ## Stack
 
@@ -29,10 +20,10 @@ Boba Log is a calm, bilingual (English / 简体中文) log for bubble tea, deplo
 
 ### Libraries
 
-- **Components:** `react-aria-components` (unstyled, accessible primitives: calendars, popovers, menus, dialogs, selects)
+- **Components:** `react-aria-components` for accessible UI primitives
 - **Icons:** `lucide-react` for UI icons
 - **Toasts:** `sonner`
-- **Fonts:** LXGW WenKai TC and Noto Sans SC, self-hosted from `@fontsource` packages (unicode-range slices)
+- **Fonts:** LXGW WenKai TC and Noto Sans SC
 
 ## Setup
 
@@ -128,25 +119,17 @@ bunx wrangler d1 create boba-log
 
 ### Migrations
 
-The schema lives in [`migrations/`](migrations) and is applied with Wrangler's D1 migrations, which record what has run in the `d1_migrations` table.
+The schema lives in [`migrations/`](migrations):
 
 ```bash
 bun run db:migrate:local   # local database used by `bun dev`
 bun run db:migrate         # remote (production) database
+bunx wrangler d1 migrations create boba-log <name>   # new migration
 ```
 
-`bun run deploy` applies pending remote migrations after the build and before the new Worker is uploaded, so the CI deploy migrates automatically. The Cloudflare API token used by CI needs **D1 edit** permission for this step.
+`bun run deploy` applies pending remote migrations before uploading the Worker, so the CI token needs **D1 edit** permission.
 
-To add a migration:
-
-```bash
-bunx wrangler d1 migrations create boba-log <name>
-```
-
-- `0001_initial.sql` records the schema that existed before migrations; every statement is idempotent, so it is a no-op on the existing database.
-- `0002_drink_entries.sql` adds per-drink entries (`drinks`), expands each legacy per-day count into that many entries, and adds `users.currency` and `users.sessions_valid_after`.
-
-The legacy `shop_dates` table and `shops.total` column are no longer read or written; they are kept so the previous release keeps working during rollout, and can be dropped in a later migration.
+The legacy `shop_dates` table and `shops.total` column are unused but kept for rollout, and can be dropped in a later migration.
 
 ### Schema
 
@@ -238,6 +221,8 @@ bun run deploy
 - `bun run db:migrate` — Apply pending D1 migrations to the remote database
 - `bun run db:migrate:local` — Apply pending D1 migrations to the local database
 - `bun run assets:process` — Normalize `public/default-shops` images to `256x256` WebP
+- `bun run assets:textures` — Regenerate the paper and mountain textures in `public/textures`
+- `bun run assets:fonts` — Regenerate the subset Chinese fonts in `app/fonts` (needs Python with `fonttools` and `brotli`)
 - `bun run i18n:upload` — Dry run upload translations to SimpleLocalize
 - `bun run i18n:upload:confirm` — Upload translations to SimpleLocalize
 - `bun run i18n:download` — Download translations from SimpleLocalize
