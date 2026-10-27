@@ -1,7 +1,7 @@
 {
   "name": "Boba Log App",
   "short_name": "Boba Log",
-  "description": "A calm log of your bubble tea: tap a shop to log a drink, open any day to add details, and see your year at a glance.",
+  "description": "Keep track of the bubble tea you drink and how much you spend on it.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f4f0e8",

@@ -1,12 +1,12 @@
 {
   "en": {
     "backToHome": "Back to home",
-    "description": "This page doesn't exist, or it has moved.",
-    "title": "Nothing poured here."
+    "description": "There's nothing at this address. The link might be wrong, or the page was moved.",
+    "title": "Page not found"
   },
   "zh": {
     "backToHome": "返回首页",
-    "description": "这个页面不存在，或已被移动。",
-    "title": "这里空空如也。"
+    "description": "这个地址下什么都没有。可能是链接有误，或者页面已被移走。",
+    "title": "页面不存在"
   }
 }

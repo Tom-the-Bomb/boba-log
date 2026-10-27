@@ -1,6 +1,6 @@
 "use client";
 
-import { FOOTER_YEAR } from "@/lib/site";
+import { AUTHOR_NAME, FOOTER_YEAR } from "@/lib/site";
 import { useTranslation } from "react-i18next";
 
 export default function SiteFooter() {
@@ -9,7 +9,7 @@ export default function SiteFooter() {
   return (
     <footer className="mx-auto w-full max-w-7xl px-4 sm:px-8 lg:px-12">
       <div className="flex items-center justify-between gap-4 border-t border-rule py-6 text-sm text-text-2">
-        <p>{t("footerTagline")}</p>
+        <p>{t("footerTagline", { author: AUTHOR_NAME })}</p>
         <div className="flex items-center gap-5">
           <a
             href="https://github.com/Tom-the-Bomb/boba-log"

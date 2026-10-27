@@ -11,9 +11,9 @@ import HangingScroll from "./hanging-scroll";
 import InkMountains from "./ink-mountains";
 
 const POINTS = [
-  { title: "pointTapTitle", body: "pointTapBody" },
-  { title: "pointDayTitle", body: "pointDayBody" },
-  { title: "pointDataTitle", body: "pointDataBody" },
+  { title: "pointYearTitle", body: "pointYearBody" },
+  { title: "pointTrendsTitle", body: "pointTrendsBody" },
+  { title: "pointSummaryTitle", body: "pointSummaryBody" },
 ] as const;
 
 export default function Landing({ signedIn = false }) {

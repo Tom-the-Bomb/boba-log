@@ -2,10 +2,9 @@ export const SITE_URL = "https://boba.tomthebomb.dev";
 export const SITE_NAME = "Boba Log";
 export const AUTHOR_NAME = "Tom the Bomb";
 
-export const DEFAULT_SEO_TITLE =
-  "Boba Log | Track Tea Shops, Drinks, and Trends";
+export const DEFAULT_SEO_TITLE = "Boba Log | Bubble Tea Tracker";
 export const DEFAULT_SEO_DESCRIPTION =
-  "A calm log for your bubble tea. Tap a shop to log a drink, open any day to add what you had and what it cost, and see your whole year at a glance.";
+  "Keep track of the bubble tea you drink. Tap a shop each time you buy one, then see how many you've had this year and how much you spent.";
 
 export const SOCIAL_IMAGE_URL = `${SITE_URL}/icon-512.png`;
 export const APP_ICON_ALT = `${SITE_NAME} app icon`;
