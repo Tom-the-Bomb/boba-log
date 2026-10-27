@@ -1,6 +1,5 @@
 import { dayFromParts, dayParts, daysInMonth } from "./date";
 
-/** A fixed, fully synthetic year of drinks for the landing page. */
 export const SAMPLE_YEAR = 2025;
 
 export const SAMPLE_SHOPS = [
@@ -28,7 +27,6 @@ function buildSample() {
   const shopTotals = [0, 0, 0];
 
   for (let month = 0; month < 12; month++) {
-    // Warmer months bring more drinks.
     const season = 0.55 + 0.45 * Math.sin(((month - 2) / 11) * Math.PI);
     for (let date = 1; date <= daysInMonth(SAMPLE_YEAR, month); date++) {
       const day = dayFromParts(SAMPLE_YEAR, month, date);

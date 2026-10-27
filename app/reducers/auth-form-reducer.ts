@@ -10,7 +10,6 @@ interface AuthFormState {
   error: string;
   showPassword: boolean;
   isSubmitting: boolean;
-  turnstileToken: string;
 }
 
 type AuthFormAction =
@@ -20,10 +19,7 @@ type AuthFormAction =
   | { type: "set_validation"; usernameError: string; passwordError: string }
   | { type: "set_error"; error: string }
   | { type: "toggle_password" }
-  | { type: "submit_start" }
-  | { type: "submit_end" }
-  | { type: "reset_turnstile" }
-  | { type: "set_turnstile"; token: string };
+  | { type: "submit_start" };
 
 function authFormReducer(
   state: AuthFormState,
@@ -58,17 +54,11 @@ function authFormReducer(
         error: "",
       };
     case "set_error":
-      return { ...state, error: action.error, turnstileToken: "" };
+      return { ...state, error: action.error, isSubmitting: false };
     case "toggle_password":
       return { ...state, showPassword: !state.showPassword };
     case "submit_start":
       return { ...state, isSubmitting: true, error: "" };
-    case "submit_end":
-      return { ...state, isSubmitting: false, turnstileToken: "" };
-    case "reset_turnstile":
-      return { ...state, turnstileToken: "" };
-    case "set_turnstile":
-      return { ...state, turnstileToken: action.token };
   }
 }
 
@@ -81,7 +71,6 @@ const INITIAL_AUTH_FORM_STATE: AuthFormState = {
   error: "",
   showPassword: false,
   isSubmitting: false,
-  turnstileToken: "",
 };
 
 export default function useAuthFormReducer() {

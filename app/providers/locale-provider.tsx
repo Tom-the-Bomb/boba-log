@@ -14,7 +14,6 @@ import { I18nextProvider, useTranslation } from "react-i18next";
 
 const ONE_YEAR = 60 * 60 * 24 * 365;
 
-/** Keeps React Aria's calendars and formatting in the app's language. */
 function AriaLocale({ children }: { children: ReactNode }) {
   const { i18n: instance } = useTranslation();
   return (
@@ -24,10 +23,6 @@ function AriaLocale({ children }: { children: ReactNode }) {
   );
 }
 
-/**
- * The app's language, starting from the one the server rendered (read from a
- * cookie). Changing it rewrites the cookie and the page's lang attribute.
- */
 export default function LocaleProvider({
   locale,
   children,
@@ -44,7 +39,7 @@ export default function LocaleProvider({
     };
     i18n.on("languageChanged", remember);
 
-    // Visitors from before the cookie: carry their saved language over once.
+    // Migrates the language saved before it moved to a cookie.
     try {
       const saved = localStorage.getItem(LEGACY_LOCALE_STORAGE_KEY);
       if (saved && toLocale(saved) !== locale) {

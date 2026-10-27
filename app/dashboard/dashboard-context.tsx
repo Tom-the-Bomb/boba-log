@@ -20,9 +20,7 @@ import { useUser } from "../providers/user-provider";
 
 interface DayFocus {
   day: string;
-  /** Opens this drink's editor when the day panel shows. */
   drinkId?: number;
-  /** Preselects a shop in the day panel's add form. */
   shopId?: number;
 }
 

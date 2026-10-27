@@ -1,10 +1,12 @@
+import { listDrinks } from "@/lib/api/drinks";
 import { getUsernameFromRequest } from "@/lib/api/request-auth";
 import {
   errorResponse,
   serverErrorResponse,
   unauthorizedResponse,
 } from "@/lib/api/responses";
-import { getPublicUser } from "@/lib/api/users";
+import { listShopRows } from "@/lib/api/shops";
+import { getUserRow } from "@/lib/api/users";
 import { dayFromUTCDate } from "@/lib/date";
 import { NextRequest } from "next/server";
 
@@ -34,14 +36,18 @@ export async function GET(request: NextRequest) {
       return unauthorizedResponse();
     }
 
-    const user = await getPublicUser(username);
+    const [user, shops, drinks] = await Promise.all([
+      getUserRow(username),
+      listShopRows(username),
+      listDrinks(username),
+    ]);
     if (!user) {
       return errorResponse("accountNotFound", "User not found", 404);
     }
 
-    const shopNames = new Map(user.shops.map((shop) => [shop.id, shop.name]));
+    const shopNames = new Map(shops.map((shop) => [shop.id, shop.name]));
     const lines = [HEADER.join(",")];
-    for (const drink of user.drinks) {
+    for (const drink of drinks) {
       lines.push(
         [
           drink.day,

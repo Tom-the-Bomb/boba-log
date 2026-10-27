@@ -1,15 +1,9 @@
+import { errorResponse } from "./responses";
+
 const TURNSTILE_VERIFY_URL =
   "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
-interface TurnstileVerifyResponse {
-  success: boolean;
-  "error-codes"?: string[];
-}
-
-export async function verifyTurnstileToken(
-  token: string,
-  ip: string | null,
-): Promise<{ success: boolean }> {
+async function verifyTurnstileToken(token: string, ip: string | null) {
   const secretKey = process.env.TURNSTILE_SECRET_KEY;
   if (!secretKey) {
     throw new Error("Missing TURNSTILE_SECRET_KEY");
@@ -22,14 +16,20 @@ export async function verifyTurnstileToken(
     body.append("remoteip", ip);
   }
 
-  const response = await fetch(TURNSTILE_VERIFY_URL, {
-    method: "POST",
-    body,
-  });
-
+  const response = await fetch(TURNSTILE_VERIFY_URL, { method: "POST", body });
   if (!response.ok) {
-    return { success: false };
+    return false;
   }
-  const data = (await response.json()) as TurnstileVerifyResponse;
-  return { success: data.success === true };
+  const data = (await response.json()) as { success?: boolean };
+  return data.success === true;
+}
+
+export async function checkTurnstile(request: Request, token: unknown) {
+  if (typeof token !== "string" || !token) {
+    return errorResponse("turnstileRequired", "Verification is required.", 400);
+  }
+  const ip = request.headers.get("cf-connecting-ip");
+  return (await verifyTurnstileToken(token, ip))
+    ? null
+    : errorResponse("turnstileFailed", "Verification failed.", 403);
 }

@@ -1,32 +1,35 @@
 "use client";
 
+import { MAX_USERNAME_LENGTH } from "@/lib/drinks";
 import { failureCode } from "@/lib/network";
 import { waitForToken } from "@/lib/turnstile";
 import type { ApiErrorResponse, AuthMode } from "@/lib/types";
-import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
+import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { ChangeEvent, SubmitEventHandler } from "react";
 import { useRef } from "react";
 import { useTranslation } from "react-i18next";
+import InvisibleTurnstile from "../components/invisible-turnstile";
 import SiteFooter from "../components/site-footer";
 import SiteHeader from "../components/site-header";
 import { Segmented } from "../components/ui/fields";
-import { useUser } from "../providers/user-provider";
 import useAuthFormReducer from "../reducers/auth-form-reducer";
 
-/** The message key for what's wrong with a username, or null. */
 function usernameProblem(value: string, mode: AuthMode) {
   const normalized = value.trim();
   if (!normalized) {
     return "usernameRequired";
   }
-  return mode === "signup" && normalized.length < 3
-    ? "usernameMinLength"
-    : null;
+  if (mode === "login") {
+    return null;
+  }
+  if (normalized.length < 3) {
+    return "usernameMinLength";
+  }
+  return normalized.length > MAX_USERNAME_LENGTH ? "usernameMaxLength" : null;
 }
 
-/** The message key for what's wrong with a password, or null. */
 function passwordProblem(value: string, mode: AuthMode) {
   if (!value) {
     return "passwordRequired";
@@ -93,7 +96,6 @@ function PasswordInput({
 
 export default function AuthPage() {
   const router = useRouter();
-  const { login } = useUser();
   const { t } = useTranslation("auth");
   const [form, dispatch] = useAuthFormReducer();
   const turnstileRef = useRef<TurnstileInstance>(null);
@@ -118,10 +120,9 @@ export default function AuthPage() {
     dispatch({ type: "submit_start" });
 
     try {
-      const token = await waitForToken(turnstileRef, form.turnstileToken);
+      const token = await waitForToken(turnstileRef);
       if (!token) {
         dispatch({ type: "set_error", error: t("turnstileTimeout") });
-        turnstileRef.current?.reset();
         return;
       }
       const response = await fetch("/api/auth", {
@@ -135,22 +136,15 @@ export default function AuthPage() {
         }),
       });
 
-      const data = (await response.json()) as ApiErrorResponse;
       if (!response.ok) {
-        dispatch({
-          type: "set_error",
-          error: data.code ? t(data.code) : t("authFailed"),
-        });
-        turnstileRef.current?.reset();
+        const data = (await response.json()) as ApiErrorResponse;
+        dispatch({ type: "set_error", error: t(data.code ?? "authFailed") });
         return;
       }
-
-      await login();
-      router.push("/dashboard");
+      router.replace("/dashboard");
     } catch {
       dispatch({ type: "set_error", error: t(failureCode("connectionError")) });
     } finally {
-      dispatch({ type: "submit_end" });
       turnstileRef.current?.reset();
     }
   }
@@ -223,20 +217,7 @@ export default function AuthPage() {
               />
             </div>
 
-            {/* Runs unseen and never needs a person, so it stays out of the tab order. */}
-            <div inert>
-              <Turnstile
-                ref={turnstileRef}
-                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-                onSuccess={(token) =>
-                  dispatch({ type: "set_turnstile", token })
-                }
-                onError={() => dispatch({ type: "reset_turnstile" })}
-                onExpire={() => dispatch({ type: "reset_turnstile" })}
-                options={{ size: "invisible" }}
-                className="h-0 overflow-hidden"
-              />
-            </div>
+            <InvisibleTurnstile ref={turnstileRef} />
 
             {form.error && (
               <p className="text-sm text-danger" role="alert">

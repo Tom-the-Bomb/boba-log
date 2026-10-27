@@ -2,11 +2,7 @@ import { NextRequest } from "next/server";
 import { AUTH_COOKIE_NAME, verifyToken } from "./auth";
 import { getSessionWindow } from "./users";
 
-/**
- * Returns the signed-in username, or null. A token only counts if the account
- * still exists and the token was issued after the account was created and
- * after the last password change.
- */
+// Tokens issued before sign-up or the last password change don't count.
 export async function getUsernameFromRequest(request: NextRequest) {
   const token = request.cookies.get(AUTH_COOKIE_NAME)?.value ?? "";
 

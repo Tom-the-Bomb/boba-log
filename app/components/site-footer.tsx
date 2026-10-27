@@ -1,6 +1,6 @@
 "use client";
 
-import { AUTHOR_NAME, FOOTER_YEAR } from "@/lib/site";
+import { AUTHOR_NAME, FOOTER_YEAR, REPO_URL } from "@/lib/site";
 import { useTranslation } from "react-i18next";
 
 export default function SiteFooter() {
@@ -12,14 +12,14 @@ export default function SiteFooter() {
         <p>{t("footerTagline", { author: AUTHOR_NAME })}</p>
         <div className="flex items-center gap-5">
           <a
-            href="https://github.com/Tom-the-Bomb/boba-log"
+            href={REPO_URL}
             className="tap-target relative hover:text-text hover:underline"
             target="_blank"
             rel="noreferrer"
           >
             {t("sourceOnGitHub")}
           </a>
-          <span className="num">{FOOTER_YEAR}</span>
+          <span className="tabular-nums">{FOOTER_YEAR}</span>
         </div>
       </div>
     </footer>

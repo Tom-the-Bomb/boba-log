@@ -5,11 +5,8 @@ import { useTranslation } from "react-i18next";
 
 interface RemovedToastProps {
   onUndo: () => void;
-  /** Escape on Undo: let the toast go and return to the list. */
   onDismiss: () => void;
-  /** Removed from the keyboard: Undo takes focus so it is one key away. */
   autoFocus?: boolean;
-  /** Focus moved elsewhere, by the visitor's choice: let the toast go. */
   onLeave?: () => void;
 }
 

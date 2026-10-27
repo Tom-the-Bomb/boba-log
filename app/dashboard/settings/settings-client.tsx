@@ -47,7 +47,6 @@ function PasswordSection({ username }: { username: string }) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  // Which password field an error is about, so it can be marked and focused.
   const [passwordField, setPasswordField] = useState<"current" | "new" | null>(
     null,
   );
@@ -174,7 +173,6 @@ function DeleteAccountSection() {
     setIsDeleting(true);
     setDeleteError("");
     setDeletePasswordWrong(false);
-    // Stays busy while the page unloads, so the button can't fire again.
     let leaving = false;
     try {
       const code = await postJson("/api/auth/account", "DELETE", {
@@ -189,8 +187,7 @@ function DeleteAccountSection() {
         return;
       }
       leaving = true;
-      // A full load drops the deleted account from memory, and replacing the
-      // entry keeps Back off a dashboard that would bounce.
+      // A full load drops the account from memory; replace keeps Back off the dashboard.
       window.location.replace("/");
     } catch {
       setDeleteError(t(failureCode("couldNotDeleteAccount")));

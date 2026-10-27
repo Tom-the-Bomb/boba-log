@@ -12,7 +12,6 @@ function subscribe(onChange: () => void) {
   };
 }
 
-/** Today's local date, refreshed when the day rolls over. */
 export default function useToday() {
   return useSyncExternalStore(subscribe, localToday, localToday);
 }

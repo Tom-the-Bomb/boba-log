@@ -10,7 +10,6 @@ import { useRangeLabel } from "./range-picker";
 
 const EMPHASIS = { em: <em className="text-accent-ink not-italic" /> };
 
-/** The range read back as one neutral sentence. */
 export default function SummarySentence({
   drinks,
   currency,

@@ -2,14 +2,7 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/*
- * Ink and rice paper (墨 · 宣纸): fibre-grained paper, ink type and actions,
- * tea-liquor fills that steep from pale green tea to deep red tea, and one
- * cinnabar seal for the mark, today and removal.
- */
 :root {
-  --font-kai-face: "LXGW WenKai TC";
-  --font-sans-face: "Noto Sans SC";
   --ground: #f4f0e8;
   --surface: #faf7f1;
   --rule: #e3dacb;
@@ -22,7 +15,6 @@
   --accent-hover: #46423b;
   --accent-ink: #7e4a27;
   --focus: var(--accent-ink);
-  /* Hover wash: a little ink in the paper, visible on paper and surface. */
   --hover: color-mix(in srgb, var(--ink) 8%, var(--ground));
   --on-accent: #f7f3ec;
   --glaze-0: #fbf8f2;
@@ -45,7 +37,6 @@
   --fibre-opacity: 0.1;
   --wash-opacity: 0.34;
   --lift: 0 14px 34px -14px rgb(43 41 37 / 0.28);
-  --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b6458' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   color-scheme: light;
 }
 
@@ -82,14 +73,11 @@
   --fibre-opacity: 0.06;
   --wash-opacity: 0.22;
   --lift: 0 16px 40px -12px rgb(0 0 0 / 0.6);
-  --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b3aa9b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   color-scheme: dark;
 }
 
-/*
- * LXGW WenKai TC centres full-width punctuation the Traditional way. In the
- * Simplified UI, borrow just those glyphs from an installed SC face.
- */
+/* LXGW WenKai TC centres full-width punctuation the Traditional way; the
+   Simplified UI borrows just those glyphs from an installed SC face. */
 @font-face {
   font-family: "Kai SC Punctuation";
   src:
@@ -99,12 +87,10 @@
 }
 
 @theme inline {
-  --font-sans:
-    "Noto Sans SC Mark", var(--font-sans-face), "Noto Sans SC", system-ui,
-    sans-serif;
+  --font-sans: "Noto Sans SC Mark", "Noto Sans SC", system-ui, sans-serif;
   --font-kai:
-    "Kai SC Punctuation", "LXGW WenKai TC Mark", var(--font-kai-face),
-    "LXGW WenKai TC", "Kaiti SC", serif;
+    "Kai SC Punctuation", "LXGW WenKai TC Mark", "LXGW WenKai TC", "Kaiti SC",
+    serif;
   --color-ground: var(--ground);
   --color-surface: var(--surface);
   --color-rule: var(--rule);
@@ -115,7 +101,6 @@
   --color-ink: var(--ink);
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-ink);
-  --color-focus: var(--focus);
   --color-hover: var(--hover);
   --color-on-accent: var(--on-accent);
   --color-glaze-0: var(--glaze-0);
@@ -129,46 +114,38 @@
   --color-danger: var(--danger);
 }
 
-html {
-  background: var(--ground);
-  color: var(--text);
-  -webkit-text-size-adjust: 100%;
-  scrollbar-color: var(--rule-strong) transparent;
-}
-
-body {
-  position: relative;
-  margin: 0;
-  min-height: 100dvh;
-  color: var(--text);
-  font-family:
-    "Noto Sans SC Mark", var(--font-sans-face), "Noto Sans SC", system-ui,
-    sans-serif;
-  font-weight: 300;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  caret-color: var(--accent);
-}
-
-/* Rice-paper fibre, tinted by the ink colour so one texture serves both themes. */
-body::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: var(--text);
-  opacity: var(--fibre-opacity);
-  mask: url("/textures/paper-fibre.webp") 0 0 / 512px repeat;
-}
-
-::selection {
-  background: var(--glaze-2);
-  color: var(--text);
-}
-
-/* In the base layer so components and utilities can restyle it. */
 @layer base {
+  html {
+    background: var(--ground);
+    color: var(--text);
+    scrollbar-color: var(--rule-strong) transparent;
+  }
+
+  body {
+    position: relative;
+    min-height: 100dvh;
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    caret-color: var(--accent);
+  }
+
+  body::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: var(--text);
+    opacity: var(--fibre-opacity);
+    mask: url("/textures/paper-fibre.webp") 0 0 / 512px repeat;
+  }
+
+  ::selection {
+    background: var(--glaze-2);
+    color: var(--text);
+  }
+
   :focus-visible {
     outline: 1.5px solid var(--focus);
     outline-offset: 2px;
@@ -185,89 +162,35 @@ body::before {
   figcaption {
     text-wrap: pretty;
   }
-}
 
-a {
-  text-underline-offset: 0.25em;
-  text-decoration-thickness: 1px;
-}
+  a {
+    text-underline-offset: 0.25em;
+    text-decoration-thickness: 1px;
+  }
 
-button:not(:disabled),
-[role="button"]:not([aria-disabled="true"]),
-summary {
-  cursor: pointer;
-}
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
 
-input::-ms-reveal,
-input::-ms-clear {
-  display: none;
-}
-
-/* Native date inputs follow the theme. */
-input[type="date"]::-webkit-calendar-picker-indicator {
-  opacity: 0.55;
-  cursor: pointer;
-}
-
-.dark input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(1);
-}
-
-.num {
-  font-variant-numeric: tabular-nums;
-}
-
-/* Colours steep in quickly: the +1 tile and the share bars. */
-.steep {
-  transition:
-    background-color 100ms ease-out,
-    box-shadow 100ms ease-out,
-    color 100ms ease-out;
-}
-
-/* An ink-wash column: dark where the brush first touches, thinning below.
-   Mixed into the paper colour so the bar stays solid over the fibre;
-   hovered, the wash steeps to tea. */
-.ink-bar {
-  border-radius: 3px 3px 0 0;
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--ink) 58%, var(--ground)),
-    color-mix(in srgb, var(--ink) 16%, var(--ground))
-  );
-  box-shadow: inset 0 1.5px 0 color-mix(in srgb, var(--ink) 72%, var(--ground));
-}
-
-:hover > .ink-bar {
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--accent-ink) 78%, var(--ground)),
-    color-mix(in srgb, var(--accent-ink) 22%, var(--ground))
-  );
-  box-shadow: inset 0 1.5px 0 var(--accent-ink);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .steep {
-    transition: none;
+  input::-ms-reveal,
+  input::-ms-clear {
+    display: none;
   }
 }
 
-/* Keyboard focus: a thin tea-brown ring a little off the control. */
 @utility focus-ring {
   outline: 1.5px solid var(--focus);
   outline-offset: 2px;
 }
 
-/* The same focus for field-like triggers that aren't native inputs. */
 @utility field-focus {
   border-color: var(--focus);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 16%, transparent);
 }
 
-/* On touch screens a small control's hit area grows to at least 44px square,
-   centred on it, without changing how it looks. The element must be
-   positioned (`relative`, unless it is already absolute). */
+/* Grows a small control's hit area to 44px on touch screens; the element must
+   be positioned. */
 @utility tap-target {
   @media (pointer: coarse) {
     &::after {
@@ -282,19 +205,16 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   }
 }
 
-/* Windows High Contrast drops background fills, which is how selection shows
-   here; draw it in the system's own selection colours instead. */
+/* High Contrast keeps the normal fill, so selection needs !important. */
 @utility forced-selected {
   @media (forced-colors: active) {
     forced-color-adjust: none;
-    /* Over the normal fill, which this mode would otherwise keep. */
     background-color: Highlight !important;
     color: HighlightText !important;
   }
 }
 
-/* Shown only if a wait runs long: hidden at first, then simply there after
-   15 seconds. Pure CSS, so it appears even when scripts never ran. */
+/* Pure CSS, so it still appears when scripts never ran. */
 @utility reveal-late {
   visibility: hidden;
   animation: reveal-late 0s 15s forwards;
@@ -306,7 +226,17 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   }
 }
 
-/* Form controls share one quiet field style; utilities can still override. */
+@utility steep {
+  transition:
+    background-color 100ms ease-out,
+    box-shadow 100ms ease-out,
+    color 100ms ease-out;
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
 @layer components {
   .field {
     width: 100%;
@@ -331,17 +261,15 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   }
 
   .field:focus-visible {
+    @apply field-focus;
     outline: none;
-    border-color: var(--focus);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 16%, transparent);
   }
 
   .field[aria-invalid="true"] {
     border-color: var(--danger);
   }
 
-  /* On touch screens: 16px, below which iOS zooms the page into a field when
-     it takes focus, and a finger-sized height. */
+  /* iOS zooms into fields below 16px. */
   @media (pointer: coarse) {
     .field {
       min-height: 2.75rem;
@@ -359,7 +287,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
   .btn {
     @apply tap-target relative;
-    /* Invisible on its fill, but drawn as the button's edge in High Contrast. */
     border: 1px solid transparent;
     display: inline-flex;
     align-items: center;
@@ -392,7 +319,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   }
 
   .btn-quiet {
-    border: 1px solid var(--rule);
+    border-color: var(--rule);
     color: var(--text);
   }
 
@@ -402,13 +329,17 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   }
 
   .btn-danger {
-    border: 1px solid var(--danger);
+    border-color: var(--danger);
     color: var(--danger);
   }
 
   .btn-danger:hover:not(:disabled) {
     background: var(--danger);
     color: var(--on-accent);
+  }
+
+  .icon-btn {
+    @apply tap-target relative grid place-items-center rounded-md text-text-2 hover:bg-hover hover:text-text;
   }
 
   .link {
@@ -421,20 +352,23 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     text-decoration-color: currentColor;
   }
 
-  select.field {
-    appearance: none;
-    padding-right: 2.25rem;
-    background-image: var(--chevron);
-    background-repeat: no-repeat;
-    background-position: right 0.75rem center;
-    background-size: 0.875rem;
+  .ink-bar {
+    border-radius: 3px 3px 0 0;
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--ink) 58%, var(--ground)),
+      color-mix(in srgb, var(--ink) 16%, var(--ground))
+    );
+    box-shadow: inset 0 1.5px 0
+      color-mix(in srgb, var(--ink) 72%, var(--ground));
   }
-}
 
-dialog {
-  color: var(--text);
-}
-
-dialog::backdrop {
-  background: var(--scrim);
+  :hover > .ink-bar {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--accent-ink) 78%, var(--ground)),
+      color-mix(in srgb, var(--accent-ink) 22%, var(--ground))
+    );
+    box-shadow: inset 0 1.5px 0 var(--accent-ink);
+  }
 }

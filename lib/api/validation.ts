@@ -9,10 +9,7 @@ import type { DrinkInput } from "../types";
 
 type ParseResult<T> = { ok: true; value: T } | { ok: false; code: string };
 
-/**
- * Accepts any real calendar day from EARLIEST_DAY up to tomorrow in UTC, which
- * covers "today" for every time zone up to UTC+14.
- */
+// Up to tomorrow in UTC, which is still today as far east as UTC+14.
 function parseDay(value: unknown): ParseResult<string> {
   if (typeof value !== "string" || !isValidDay(value)) {
     return { ok: false, code: "invalidDay" };
@@ -57,11 +54,6 @@ function parseOptionalPrice(value: unknown): ParseResult<number | null> {
   return { ok: true, value };
 }
 
-/**
- * Validates the drink fields present in a request body. With `requireDay`,
- * a missing `day` is an error (creating); otherwise absent fields are skipped
- * (updating).
- */
 export function parseDrinkInput(
   body: Record<string, unknown>,
   requireDay: boolean,

@@ -9,11 +9,12 @@ import { formatDay } from "@/lib/date";
 import { translateShopName } from "@/lib/default-shops";
 import { formatMoney } from "@/lib/drinks";
 import type { Drink } from "@/lib/types";
-import { Download, Pencil, Trash2 } from "lucide-react";
+import { Download } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import DrinkForm from "../../components/dashboard/drink-form";
+import { DrinkActions } from "../../components/dashboard/drink-item";
 import ShopAvatar from "../../components/dashboard/shop-avatar";
 import { Select } from "../../components/ui/fields";
 import useRemoveDrink from "../../hooks/use-remove-drink";
@@ -25,14 +26,14 @@ const PAGE_SIZE = 50;
 export default function DrinksClient() {
   const { user, updateDrink } = useUser();
   const remove = useRemoveDrink();
-  const { range, today } = useDashboard();
+  const { range, preset, today } = useDashboard();
   const { t, i18n } = useTranslation("dashboard");
   const [shopFilter, setShopFilter] = useState("all");
   const [visible, setVisible] = useState(PAGE_SIZE);
-  // A new range starts from the newest drinks again, like a new shop filter.
-  const [rangeKey, setRangeKey] = useState(range);
-  if (range !== rangeKey) {
-    setRangeKey(range);
+  const rangeKey = preset === "custom" ? `${range.start}/${range.end}` : preset;
+  const [shownRangeKey, setShownRangeKey] = useState(rangeKey);
+  if (rangeKey !== shownRangeKey) {
+    setShownRangeKey(rangeKey);
     setVisible(PAGE_SIZE);
   }
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -91,25 +92,11 @@ export default function DrinksClient() {
   );
 
   const actions = (drink: Drink) => (
-    <div className="flex justify-end">
-      <button
-        type="button"
-        onClick={() => setEditingId(drink.id)}
-        className="tap-target relative grid size-10 place-items-center rounded-md text-text-3 hover:bg-hover hover:text-text sm:size-9"
-        aria-label={t("editDrinkAria")}
-      >
-        <Pencil size={15} strokeWidth={1.5} />
-      </button>
-      <button
-        type="button"
-        data-remove
-        onClick={(event) => void remove(drink, event.detail === 0)}
-        className="tap-target relative grid size-10 place-items-center rounded-md text-text-3 hover:bg-hover hover:text-danger sm:size-9"
-        aria-label={t("removeDrinkAria")}
-      >
-        <Trash2 size={15} strokeWidth={1.5} />
-      </button>
-    </div>
+    <DrinkActions
+      drink={drink}
+      onEdit={() => setEditingId(drink.id)}
+      onRemove={(fromKeyboard) => void remove(drink, fromKeyboard)}
+    />
   );
 
   return (
@@ -211,7 +198,7 @@ export default function DrinksClient() {
                     data-drink-row={drink.id}
                     className="border-b border-rule hover:bg-hover"
                   >
-                    <td className="num py-2.5 pl-3 whitespace-nowrap text-text-2">
+                    <td className="py-2.5 pl-3 whitespace-nowrap text-text-2 tabular-nums">
                       {date(drink)}
                     </td>
                     <td className="py-2.5">
@@ -233,7 +220,7 @@ export default function DrinksClient() {
                     >
                       {drink.name ?? ""}
                     </td>
-                    <td className="num py-2.5 text-right whitespace-nowrap">
+                    <td className="py-2.5 text-right whitespace-nowrap tabular-nums">
                       {price(drink)}
                     </td>
                     <td
@@ -277,7 +264,7 @@ export default function DrinksClient() {
                         {drink.note && ` · ${drink.note}`}
                       </p>
                     </div>
-                    <span className="num text-sm">{price(drink)}</span>
+                    <span className="text-sm tabular-nums">{price(drink)}</span>
                     {actions(drink)}
                   </div>
                 )}
@@ -287,7 +274,7 @@ export default function DrinksClient() {
 
           {drinks.length > visible && (
             <div className="mt-8 flex flex-col items-center gap-3">
-              <p className="num text-xs text-text-2">
+              <p className="text-xs text-text-2 tabular-nums">
                 {t("showingOf", { shown: visible, total: drinks.length })}
               </p>
               <button

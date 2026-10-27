@@ -79,7 +79,7 @@ export default function RecentDrinks() {
                       <span className="text-text-2"> · {drink.name}</span>
                     )}
                   </span>
-                  <span className="num text-text-2">
+                  <span className="text-text-2 tabular-nums">
                     {drink.priceCents === null
                       ? ""
                       : formatMoney(

@@ -1,4 +1,4 @@
-import { deleteAvatarFromR2 } from "@/lib/api/r2";
+import { deleteAvatars } from "@/lib/api/r2";
 import { getUsernameFromRequest } from "@/lib/api/request-auth";
 import {
   errorResponse,
@@ -21,7 +21,9 @@ export async function DELETE(request: NextRequest, { params }: ShopIdParams) {
     if (!shopId || !(await deleteShop(username, shopId))) {
       return errorResponse("shopNotFound", "Shop not found", 404);
     }
-    await deleteAvatarFromR2(shopId);
+    try {
+      await deleteAvatars([shopId]);
+    } catch {}
 
     return NextResponse.json({ success: true });
   } catch {

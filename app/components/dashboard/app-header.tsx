@@ -6,8 +6,8 @@ import { usePathname } from "next/navigation";
 import { Button, MenuTrigger } from "react-aria-components";
 import { useTranslation } from "react-i18next";
 import { useUser } from "../../providers/user-provider";
-import SealMark from "../brand/seal-mark";
 import LanguageToggle from "../language-toggle";
+import { BrandLink } from "../site-header";
 import ThemeToggle from "../theme-toggle";
 import { Menu, MenuItem, Popover } from "../ui/overlays";
 import RangePicker from "./range-picker";
@@ -39,8 +39,7 @@ function AccountMenu() {
           aria-label={tc("account")}
           onAction={async () => {
             await logout();
-            // A full load drops the signed-out account from memory, and
-            // replacing the entry keeps Back off a dashboard that would bounce.
+            // A full load drops the account from memory; replace keeps Back off the dashboard.
             window.location.replace("/auth");
           }}
         >
@@ -62,7 +61,7 @@ export default function AppHeader() {
 
   const tabs = (
     <nav
-      aria-label="Dashboard"
+      aria-label={tc("siteName")}
       className="flex h-full items-stretch gap-6 sm:gap-7"
     >
       {TABS.map((tab) => {
@@ -94,14 +93,7 @@ export default function AppHeader() {
         {tc("skipToContent")}
       </a>
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:gap-8 sm:px-8 lg:px-12">
-        <Link
-          href="/"
-          aria-label={tc("siteName")}
-          className="tap-target relative flex shrink-0 items-center gap-2.5 font-kai text-xl whitespace-nowrap text-text"
-        >
-          <SealMark />
-          <span className="max-[359px]:hidden">{tc("siteName")}</span>
-        </Link>
+        <BrandLink />
         <div className="hidden h-full md:block">{tabs}</div>
         <div className="ml-auto flex min-w-0 items-center gap-0.5 sm:gap-1">
           {showRange && (

@@ -5,7 +5,6 @@ export interface Drink {
   shopId: number;
   /** Calendar day the drink belongs to, `YYYY-MM-DD` in the user's local time. */
   day: string;
-  /** When the entry was written, epoch seconds. */
   createdAt: number;
   name: string | null;
   priceCents: number | null;
@@ -26,7 +25,6 @@ export interface PublicUser {
   drinks: Drink[];
 }
 
-/** Fields a client may set on a drink. Omitted fields are left unchanged. */
 export interface DrinkInput {
   day?: string;
   shopId?: number;

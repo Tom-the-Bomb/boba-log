@@ -17,7 +17,6 @@ import {
 } from "react-aria-components";
 import { useTranslation } from "react-i18next";
 
-/** A floating panel anchored to its trigger. */
 export function Popover({
   className = "",
   ...props
@@ -58,7 +57,6 @@ interface ModalProps {
   className?: string;
 }
 
-/** A centred dialog over a scrim: focus is contained and Escape closes it. */
 export function Modal({
   isOpen,
   onOpenChange,
@@ -86,7 +84,7 @@ export function Modal({
             <Button
               slot="close"
               aria-label={t("close")}
-              className="tap-target relative -mr-2 grid size-9 shrink-0 place-items-center rounded-md text-text-2 outline-none hover:bg-hover hover:text-text data-focus-visible:focus-ring"
+              className="icon-btn -mr-2 size-9 shrink-0 outline-none data-focus-visible:focus-ring"
             >
               <X size={18} strokeWidth={1.5} />
             </Button>

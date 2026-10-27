@@ -16,18 +16,14 @@ import { useTranslation } from "react-i18next";
 import TeaDrop from "../sheet/tea-drop";
 import styles from "./hanging-scroll.module.css";
 
-// The roller hangs on the silk. Dropped, it falls under gravity (a full drop
-// takes FALL_SECONDS), kicks back off the taut silk and settles. Positions
-// are in scroll lengths: 0 hanging free, 1 rolled up to the stave.
+// Positions are in scroll lengths: 0 hanging free, 1 rolled up to the stave.
 const FALL_SECONDS = 0.6;
 const BOUNCE = 0.14;
 const GRAVITY = 2 / FALL_SECONDS ** 2;
 const FRAME_MS = 1000 / 60;
-/** A tap tugs the roller up a little. */
 const TUG_SPEED = 0.45;
 const MAX_FLICK_SPEED = 5;
 
-/** `--open` for each frame of a fall from `rolled` with upward `speed`. */
 function fall(rolled: number, speed: number) {
   const frames = [1 - rolled];
   let y = rolled;
@@ -62,7 +58,6 @@ const ARRIVAL_STYLE = {
   "--drop-ms": `${Math.round((ARRIVAL.length - 1) * FRAME_MS)}ms`,
 } as CSSProperties;
 
-// From the nail down to the stave, carrying on behind it.
 const CORD = "M264.5 110 L290 100 Q 392 60 500 2 Q 608 60 710 100 L735.5 110";
 
 const HANZI_DIGITS = "〇一二三四五六七八九";
@@ -87,8 +82,6 @@ interface Tip {
   y: number;
 }
 
-/** Wires up the roller: drag it up to roll the scroll and let go to drop
- *  it (a flick tosses it, a tap tugs it), or hold the up arrow to wind it. */
 function useRoller(
   rootRef: RefObject<HTMLElement | null>,
   lengthRef: RefObject<HTMLDivElement | null>,
@@ -104,11 +97,12 @@ function useRoller(
     }
     const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
 
-    // The grain turns as far as the roller travels.
-    const travel = new ResizeObserver(() =>
-      root.style.setProperty("--hs-travel", `${length.offsetHeight}px`),
-    );
-    travel.observe(length);
+    let travel = length.offsetHeight;
+    const resize = new ResizeObserver(() => {
+      travel = length.offsetHeight;
+      root.style.setProperty("--hs-travel", `${travel}px`);
+    });
+    resize.observe(length);
 
     const setRolled = (rolled: number) =>
       root.style.setProperty("--open", String(1 - rolled));
@@ -117,7 +111,6 @@ function useRoller(
       return Number.isNaN(open) ? 0 : 1 - open;
     };
 
-    // Where the roller is right now, mid-fall or not; stops it there.
     function grab() {
       const open = Number(getComputedStyle(root!).getPropertyValue("--open"));
       root!.getAnimations().forEach((animation) => animation.cancel());
@@ -138,9 +131,6 @@ function useRoller(
       );
     }
 
-    // Drag the roller up to roll the scroll; let go and it drops. A flick
-    // tosses it; a tap tugs it. One pointer at a time: a second finger that
-    // lands mid-drag is ignored.
     let drag: {
       pointerId: number;
       startY: number;
@@ -174,10 +164,7 @@ function useRoller(
       }
       const lifted = drag.startY - event.clientY;
       drag.moved ||= Math.abs(lifted) > 3;
-      drag.rolled = Math.min(
-        1,
-        Math.max(0, drag.from + lifted / length!.offsetHeight),
-      );
+      drag.rolled = Math.min(1, Math.max(0, drag.from + lifted / travel));
       setRolled(drag.rolled);
       drag.trail.push([event.timeStamp, event.clientY]);
       if (drag.trail.length > 6) {
@@ -185,9 +172,6 @@ function useRoller(
       }
     }
 
-    // Lets go of the roller. Only a real release can flick or tug it; a
-    // gesture the browser cancelled, a lost capture or a lost window just
-    // drops it from where it is.
     function release(event?: PointerEvent) {
       if (!drag || (event && event.pointerId !== drag.pointerId)) {
         return;
@@ -208,7 +192,7 @@ function useRoller(
       const stillMoving = event.timeStamp - trail[trail.length - 1][0] < 80;
       const speed =
         seconds > 0.005 && stillMoving
-          ? (startY - event.clientY) / seconds / length!.offsetHeight
+          ? (startY - event.clientY) / seconds / travel
           : 0;
       drop(
         rolled,
@@ -216,7 +200,6 @@ function useRoller(
       );
     }
 
-    // Keyboard: hold the up arrow to wind it up, let go to drop it.
     let winding = false;
     function onKeyDown(event: KeyboardEvent) {
       if (event.key !== "ArrowUp") {
@@ -233,7 +216,6 @@ function useRoller(
         drop(inlineRolled());
       }
     }
-    // Switching windows mid-gesture lets go of the roller and the arrow key.
     function onBlur() {
       release();
       if (winding) {
@@ -241,7 +223,6 @@ function useRoller(
         drop(inlineRolled());
       }
     }
-    // Enter or Space tugs it; pointer taps are handled on release.
     function onClick(event: MouseEvent) {
       if (event.detail === 0) {
         drop(grab(), TUG_SPEED);
@@ -258,7 +239,7 @@ function useRoller(
     roller.addEventListener("keyup", onKeyUp);
     roller.addEventListener("click", onClick);
     return () => {
-      travel.disconnect();
+      resize.disconnect();
       roller.removeEventListener("pointerdown", onPointerDown);
       roller.removeEventListener("pointermove", onPointerMove);
       roller.removeEventListener("pointerup", release);
@@ -272,7 +253,6 @@ function useRoller(
   }, [rootRef, lengthRef, rollerRef, onGrab]);
 }
 
-/** The silk cord from the nail down to the stave. */
 function Cord() {
   return (
     <svg
@@ -309,10 +289,6 @@ function Cord() {
   );
 }
 
-/**
- * The sample year mounted as a small hanging scroll. Visitors can drag the
- * roller up to roll it, and let go to watch it drop open again.
- */
 export default function HangingScroll({ className = "" }) {
   const { t, i18n } = useTranslation("landing");
   const { t: td } = useTranslation("dashboard");
@@ -366,8 +342,8 @@ export default function HangingScroll({ className = "" }) {
         <div ref={lengthRef} className={styles.length}>
           <div className={styles.silk}>
             <div aria-hidden="true" className={styles.tian}>
-              <i className={styles.ribbon} style={{ left: "34%" }} />
-              <i className={styles.ribbon} style={{ left: "66%" }} />
+              <i className={`${styles.ribbon} left-[34%]`} />
+              <i className={`${styles.ribbon} left-[66%]`} />
             </div>
             <div className={styles.paperWrap}>
               <div className={styles.paper}>
@@ -404,7 +380,7 @@ export default function HangingScroll({ className = "" }) {
                           );
                         })}
                       </div>
-                      <span className={`${styles.monthTotal} num`}>
+                      <span className={`${styles.monthTotal} tabular-nums`}>
                         {total}
                       </span>
                     </div>

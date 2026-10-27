@@ -3,10 +3,9 @@ import type React from "react";
 
 export function waitForToken(
   ref: React.RefObject<TurnstileInstance | null>,
-  current: string,
   timeout = 10000,
 ): Promise<string> {
-  const existing = current || ref.current?.getResponse();
+  const existing = ref.current?.getResponse();
   if (existing) {
     return Promise.resolve(existing);
   }

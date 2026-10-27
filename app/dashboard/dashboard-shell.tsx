@@ -13,7 +13,6 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
   const { user, isLoadingUser, loadFailed, retryLoad } = useUser();
   const { t } = useTranslation("common");
 
-  // Only a missing session goes to sign in; a failed load stays here to retry.
   if (!isLoadingUser && !user && !loadFailed) {
     redirect("/auth");
   }

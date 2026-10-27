@@ -1,5 +1,5 @@
-// Days are plain `YYYY-MM-DD` strings. Arithmetic runs on UTC midnights so a
-// day never shifts with the viewer's time zone or daylight saving.
+// Days are `YYYY-MM-DD` strings; arithmetic runs on UTC midnights so a day
+// never shifts with the time zone or daylight saving.
 
 const DAY_MS = 86_400_000;
 const DAY_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
@@ -12,11 +12,10 @@ export function dayFromUTCDate(date: Date): string {
   return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}`;
 }
 
-export function dayToUTCDate(day: string): Date {
+function dayToUTCDate(day: string): Date {
   return new Date(`${day}T00:00:00.000Z`);
 }
 
-/** The calendar day of a moment in the viewer's own time zone. */
 export function dayFromLocalDate(date: Date): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
@@ -67,6 +66,21 @@ export function intlLocale(language: string) {
   return language === "zh" ? "zh-CN" : "en-US";
 }
 
+const dateFormats = new Map<string, Intl.DateTimeFormat>();
+
+function dateFormat(language: string, options: Intl.DateTimeFormatOptions) {
+  const key = language + JSON.stringify(options);
+  let format = dateFormats.get(key);
+  if (!format) {
+    format = new Intl.DateTimeFormat(intlLocale(language), {
+      ...options,
+      timeZone: "UTC",
+    });
+    dateFormats.set(key, format);
+  }
+  return format;
+}
+
 export function formatDay(
   day: string,
   language: string,
@@ -76,10 +90,7 @@ export function formatDay(
     year: "numeric",
   },
 ): string {
-  return new Intl.DateTimeFormat(intlLocale(language), {
-    ...options,
-    timeZone: "UTC",
-  }).format(dayToUTCDate(day));
+  return dateFormat(language, options).format(dayToUTCDate(day));
 }
 
 export function monthName(
@@ -87,10 +98,9 @@ export function monthName(
   language: string,
   width: "short" | "long" = "short",
 ): string {
-  return new Intl.DateTimeFormat(intlLocale(language), {
-    month: width,
-    timeZone: "UTC",
-  }).format(new Date(Date.UTC(2000, month, 1)));
+  return dateFormat(language, { month: width }).format(
+    new Date(Date.UTC(2000, month, 1)),
+  );
 }
 
 export function weekdayName(
@@ -99,8 +109,7 @@ export function weekdayName(
   width: "narrow" | "short" | "long" = "short",
 ): string {
   // 2000-01-02 was a Sunday.
-  return new Intl.DateTimeFormat(intlLocale(language), {
-    weekday: width,
-    timeZone: "UTC",
-  }).format(new Date(Date.UTC(2000, 0, 2 + weekday)));
+  return dateFormat(language, { weekday: width }).format(
+    new Date(Date.UTC(2000, 0, 2 + weekday)),
+  );
 }

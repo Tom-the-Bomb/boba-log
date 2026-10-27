@@ -17,26 +17,22 @@ interface YearSheetProps {
   year: number;
   counts: ReadonlyMap<string, number>;
   today: string;
-  /** Days outside the range recede. */
   range?: DayRange;
   selectedDay?: string | null;
-  /** Makes each day a button. */
   onSelectDay?: (day: string) => void;
   label: string;
   tileLabel: (day: string, count: number) => string;
-  /** Sizes each drop from its value (e.g. money spent) instead of by count;
-   *  drops then carry no numerals. */
   levelOf?: (value: number) => number;
-  /** Writes the month totals, e.g. as money. */
   formatTotal?: (value: number) => string;
 }
 
 const DAY_HEADS = new Set([1, 5, 10, 15, 20, 25, 31]);
 const MONTHS = Array.from({ length: 12 }, (_, month) => month);
 const DATES = Array.from({ length: 31 }, (_, index) => index + 1);
+const ROW =
+  "grid grid-cols-[1.75rem_1fr_1.5rem] gap-x-1.5 sm:grid-cols-[2.75rem_1fr_2.5rem] sm:gap-x-3";
+const DAY_GRID = "grid grid-cols-31 gap-px sm:gap-1";
 
-/** Where an arrow, Home or End key moves from `day`: a day, null past the
- *  first or last month, or undefined for any other key. */
 function keyTarget(key: string, day: string, year: number) {
   const { month, date } = dayParts(day);
   switch (key) {
@@ -72,8 +68,6 @@ interface DayTileProps {
   levelOf?: (value: number) => number;
 }
 
-/** A tile's ring: the selected day, else today, else none. Days outside the
- *  range recede. */
 function tileClass(
   day: string,
   today: string,
@@ -94,7 +88,6 @@ function tileClass(
   ].join(" ");
 }
 
-/** A drop for a day with drinks, a faint dot for one without. */
 function TileMark({
   count,
   future,
@@ -117,7 +110,7 @@ function TileMark({
   return (
     <span
       aria-hidden="true"
-      className={`absolute top-1/2 left-1/2 size-[3px] -translate-1/2 rounded-full ${
+      className={`absolute top-1/2 left-1/2 size-0.75 -translate-1/2 rounded-full ${
         future ? "bg-text/10" : "bg-text/30"
       }`}
     />
@@ -170,7 +163,6 @@ interface MonthRowProps extends Omit<DayTileProps, "day" | "count"> {
   month: number;
   name: string;
   counts: ReadonlyMap<string, number>;
-  /** Another month is selected, so this one steps back. */
   recede: boolean;
   formatTotal?: (value: number) => string;
 }
@@ -192,12 +184,9 @@ function MonthRow({
   const fade = recede ? "opacity-55" : "";
 
   return (
-    <div className="grid grid-cols-[1.75rem_1fr_1.5rem] items-center gap-x-1.5 sm:grid-cols-[2.75rem_1fr_2.5rem] sm:gap-x-3">
+    <div className={`${ROW} items-center`}>
       <span className="text-xs text-text-2">{name}</span>
-      <div
-        data-month={month}
-        className={`grid grid-cols-31 gap-px sm:gap-1 ${fade}`}
-      >
+      <div data-month={month} className={`${DAY_GRID} ${fade}`}>
         {DATES.map((date) => {
           const day = days[date - 1];
           return day ? (
@@ -213,7 +202,7 @@ function MonthRow({
         })}
       </div>
       <span
-        className={`num min-h-5 text-right leading-5 ${total > 0 ? "text-text" : "text-text-3"} ${formatTotal ? "text-[11px] sm:text-[13px]" : "text-[13px]"} ${fade}`}
+        className={`min-h-5 text-right leading-5 tabular-nums ${total > 0 ? "text-text" : "text-text-3"} ${formatTotal ? "text-[11px] sm:text-[13px]" : "text-[13px]"} ${fade}`}
       >
         {isFuture ? "" : formatTotal ? formatTotal(total) : total}
       </span>
@@ -240,11 +229,10 @@ export default function YearSheet({
       ? dayParts(selectedDay).month
       : null;
 
-  // The hovered, focused or touched day, named in a small label above it.
   const [tip, setTip] = useState<{ text: string; x: number; y: number }>();
+  const [focusedDay, setFocusedDay] = useState<string | null>(null);
   const monthsRef = useRef<HTMLDivElement>(null);
 
-  /** Names `day` with its label's foot at `bottom`, centred near `x`. */
   function placeTip(day: string, x: number, bottom: number) {
     setTip({
       text: tileLabel(day, counts.get(day) ?? 0),
@@ -263,8 +251,6 @@ export default function YearSheet({
     placeTip(cell.dataset.day!, rect.left + rect.width / 2, rect.top - 8);
   }
 
-  /** The day under a point: the nearest month's row, then its column, up to
-   *  today. Gaps and the margins still land on a day. */
   function dayAt(x: number, y: number) {
     const rows =
       monthsRef.current?.querySelectorAll<HTMLElement>("[data-month]");
@@ -296,8 +282,6 @@ export default function YearSheet({
     return dayFromParts(year, month, 1) <= lastDay ? lastDay : null;
   }
 
-  // A finger slides along the sheet to find a day, named above the finger,
-  // and lifts to open it.
   const scrub = useTouchScrub({
     pick: dayAt,
     onPreview: (day, x) => {
@@ -315,18 +299,19 @@ export default function YearSheet({
     onCommit: (day) => onSelectDay?.(day),
   });
 
+  const hasTip = tip !== undefined;
   useEffect(() => {
-    if (!tip) {
+    if (!hasTip) {
       return;
     }
     const hide = () => setTip(undefined);
     window.addEventListener("scroll", hide, { passive: true });
     return () => window.removeEventListener("scroll", hide);
-  }, [tip]);
+  }, [hasTip]);
 
-  // One tile is tabbable at a time; arrow keys move between days.
-  const tabStop =
-    selectedDay && selectedDay.startsWith(`${year}-`) ? selectedDay : lastDay;
+  const inYear = (day?: string | null) =>
+    day?.startsWith(`${year}-`) && day <= lastDay ? day : null;
+  const tabStop = inYear(focusedDay) ?? inYear(selectedDay) ?? lastDay;
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     const day = (event.target as HTMLElement).dataset.day;
@@ -356,14 +341,16 @@ export default function YearSheet({
       aria-label={label}
       onKeyDown={handleKeyDown}
       onPointerOver={(event) => {
-        // Touch opens the day instead; the label is for pointers and keys.
         if (event.pointerType !== "touch") {
           showTip(event.target);
         }
       }}
       onPointerLeave={() => setTip(undefined)}
       onFocus={(event) => {
-        // A tap focuses its tile too; only keyboard focus names the day.
+        const day = (event.target as HTMLElement).dataset.day;
+        if (day) {
+          setFocusedDay(day);
+        }
         if (event.target.matches(":focus-visible")) {
           showTip(event.target);
         }
@@ -380,12 +367,9 @@ export default function YearSheet({
           {tip.text}
         </div>
       )}
-      <div
-        aria-hidden="true"
-        className="mb-2 grid grid-cols-[1.75rem_1fr_1.5rem] gap-x-1.5 sm:grid-cols-[2.75rem_1fr_2.5rem] sm:gap-x-3"
-      >
+      <div aria-hidden="true" className={`${ROW} mb-2`}>
         <span />
-        <div className="grid grid-cols-31 gap-px sm:gap-1">
+        <div className={DAY_GRID}>
           {DATES.map((date) => (
             <span
               key={date}
@@ -401,7 +385,7 @@ export default function YearSheet({
       <div
         ref={monthsRef}
         {...(onSelectDay ? scrub : {})}
-        className={`space-y-[5px] sm:space-y-1.5 ${onSelectDay ? "touch-pan-y touch-pinch-zoom" : ""}`}
+        className={`space-y-1.25 sm:space-y-1.5 ${onSelectDay ? "touch-pan-y touch-pinch-zoom" : ""}`}
       >
         {MONTHS.map((month) => (
           <MonthRow

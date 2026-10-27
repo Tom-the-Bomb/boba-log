@@ -1,6 +1,7 @@
 export const SITE_URL = "https://boba.tomthebomb.dev";
 export const SITE_NAME = "Boba Log";
 export const AUTHOR_NAME = "Tom the Bomb";
+export const REPO_URL = "https://github.com/Tom-the-Bomb/boba-log";
 
 export const DEFAULT_SEO_TITLE = "Boba Log | Bubble Tea Tracker";
 export const DEFAULT_SEO_DESCRIPTION =

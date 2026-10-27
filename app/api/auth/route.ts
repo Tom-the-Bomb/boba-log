@@ -1,133 +1,76 @@
+import { comparePassword, hashPassword, setAuthCookie } from "@/lib/api/auth";
 import {
-  AUTH_COOKIE_MAX_AGE,
-  AUTH_COOKIE_NAME,
-  AUTH_COOKIE_OPTIONS,
-  comparePassword,
-  hashPassword,
-  signToken,
-} from "@/lib/api/auth";
-import { verifyTurnstileToken } from "@/lib/api/turnstile";
-import { createUser, getPublicUser, getUserByUsername } from "@/lib/api/users";
-import type { AuthMode } from "@/lib/types";
+  errorResponse,
+  invalidRequestResponse,
+  readJsonObject,
+  serverErrorResponse,
+} from "@/lib/api/responses";
+import { checkTurnstile } from "@/lib/api/turnstile";
+import { createUser, getUserByUsername } from "@/lib/api/users";
+import { MAX_USERNAME_LENGTH } from "@/lib/drinks";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as Record<string, unknown>;
+    const body = await readJsonObject(request);
+    if (!body) {
+      return invalidRequestResponse();
+    }
+
+    const turnstileError = await checkTurnstile(request, body.turnstileToken);
+    if (turnstileError) {
+      return turnstileError;
+    }
+
     const username = String(body.username ?? "")
       .trim()
       .toLowerCase();
     const password = String(body.password ?? "");
-    const mode = String(body.mode ?? "login") as AuthMode;
-    const turnstileToken = String(body.turnstileToken ?? "");
-
-    if (!turnstileToken) {
-      return NextResponse.json(
-        { error: "Verification is required.", code: "turnstileRequired" },
-        { status: 400 },
-      );
-    }
-
-    const ip = request.headers.get("cf-connecting-ip");
-    const turnstileResult = await verifyTurnstileToken(turnstileToken, ip);
-    if (!turnstileResult.success) {
-      return NextResponse.json(
-        { error: "Verification failed.", code: "turnstileFailed" },
-        { status: 403 },
-      );
-    }
-
     if (!username || !password) {
-      return NextResponse.json(
-        {
-          error: "Username and password are required.",
-          code: "fieldsRequired",
-        },
-        { status: 400 },
+      return errorResponse(
+        "fieldsRequired",
+        "Username and password are required.",
+        400,
       );
     }
 
-    if (mode === "signup") {
+    if (body.mode === "signup") {
       if (username.length < 3) {
-        return NextResponse.json(
-          {
-            error: "Username must be at least 3 characters.",
-            code: "usernameMinLength",
-          },
-          { status: 400 },
+        return errorResponse(
+          "usernameMinLength",
+          "Username must be at least 3 characters.",
+          400,
+        );
+      }
+      if (username.length > MAX_USERNAME_LENGTH) {
+        return errorResponse(
+          "usernameMaxLength",
+          `Username must be at most ${MAX_USERNAME_LENGTH} characters.`,
+          400,
         );
       }
       if (password.length < 6) {
-        return NextResponse.json(
-          {
-            error: "Password must be at least 6 characters.",
-            code: "passwordMinLength",
-          },
-          { status: 400 },
+        return errorResponse(
+          "passwordMinLength",
+          "Password must be at least 6 characters.",
+          400,
         );
       }
+      if (!(await createUser(username, await hashPassword(password)))) {
+        return errorResponse("accountExists", "Account already exists.", 409);
+      }
+      return setAuthCookie(NextResponse.json({ success: true }), username);
     }
 
     const existing = await getUserByUsername(username);
-
-    if (mode === "signup") {
-      if (existing) {
-        return NextResponse.json(
-          {
-            error: "Account already exists. Please login.",
-            code: "accountExists",
-          },
-          { status: 409 },
-        );
-      }
-
-      const hashedPassword = await hashPassword(password);
-      const user = await createUser(username, hashedPassword);
-      const token = await signToken({ username: user.username });
-      const response = NextResponse.json({ user });
-      response.cookies.set(AUTH_COOKIE_NAME, token, {
-        ...AUTH_COOKIE_OPTIONS,
-        maxAge: AUTH_COOKIE_MAX_AGE,
-      });
-      return response;
-    }
-
     if (!existing) {
-      return NextResponse.json(
-        {
-          error: "No account found. Please sign up.",
-          code: "accountNotFound",
-        },
-        { status: 404 },
-      );
+      return errorResponse("accountNotFound", "No account found.", 404);
     }
-
-    const matches = await comparePassword(password, existing.hashed_password);
-    if (!matches) {
-      return NextResponse.json(
-        {
-          error: "Invalid password.",
-          code: "invalidPassword",
-        },
-        { status: 401 },
-      );
+    if (!(await comparePassword(password, existing.hashed_password))) {
+      return errorResponse("invalidPassword", "Invalid password.", 401);
     }
-
-    const token = await signToken({ username });
-    const user = await getPublicUser(username);
-    const response = NextResponse.json({ user });
-    response.cookies.set(AUTH_COOKIE_NAME, token, {
-      ...AUTH_COOKIE_OPTIONS,
-      maxAge: AUTH_COOKIE_MAX_AGE,
-    });
-    return response;
+    return setAuthCookie(NextResponse.json({ success: true }), username);
   } catch {
-    return NextResponse.json(
-      {
-        error: "Something went wrong.",
-        code: "somethingWentWrong",
-      },
-      { status: 500 },
-    );
+    return serverErrorResponse();
   }
 }

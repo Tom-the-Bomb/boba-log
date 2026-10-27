@@ -15,7 +15,6 @@ interface ShopRowProps {
   count: number;
   todayCount: number;
   lastDay: string | null;
-  /** This shop's share of the range, 0–1. */
   share: number;
   onLog: () => void;
   onLogWithDetails: () => void;
@@ -67,19 +66,19 @@ export default function ShopRow({
           className="mt-2 block h-0.5 max-w-36 rounded-full bg-rule"
         >
           <span
-            className="steep block h-full rounded-full bg-glaze-2"
+            className="block h-full rounded-full bg-glaze-2 steep"
             style={{ width: `${Math.round(share * 100)}%` }}
           />
         </span>
       </div>
-      <span className="num min-w-12 text-right font-kai text-3xl leading-none text-text">
+      <span className="min-w-12 text-right font-kai text-3xl leading-none text-text tabular-nums">
         {count}
       </span>
       <div className="flex items-center gap-1">
         <MenuTrigger>
           <Button
             aria-label={t("shopMenuAria", { name })}
-            className="tap-target relative grid size-10 place-items-center rounded-md text-text-3 outline-none hover:bg-hover hover:text-text data-focus-visible:focus-ring sm:size-9"
+            className="icon-btn size-10 text-text-3 outline-none data-focus-visible:focus-ring sm:size-9"
           >
             <MoreHorizontal size={17} strokeWidth={1.5} />
           </Button>
@@ -112,7 +111,7 @@ export default function ShopRow({
             onLog();
           }}
           aria-label={t("logDrinkAria", { name })}
-          className={`steep tap-target relative grid size-11 place-items-center rounded-md border border-transparent text-sm sm:size-10 ${
+          className={`tap-target relative grid size-11 place-items-center rounded-md border border-transparent text-sm steep sm:size-10 ${
             justLogged
               ? "bg-glaze-4 text-on-accent"
               : "bg-band text-text hover:bg-glaze-1"

@@ -5,13 +5,14 @@ import { MAX_SHOP_NAME_LENGTH } from "@/lib/drinks";
 import { failureCode } from "@/lib/network";
 import { waitForToken } from "@/lib/turnstile";
 import type { BobaShop, ShopMutationResponse } from "@/lib/types";
-import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
+import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import { ImagePlus, X } from "lucide-react";
 import Image from "next/image";
 import type React from "react";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import useShopDraft from "../../hooks/use-shop-draft";
+import InvisibleTurnstile from "../invisible-turnstile";
 import { Modal } from "../ui/overlays";
 import DefaultShopsSection from "./default-shops-section";
 
@@ -44,7 +45,6 @@ export default function AddShopDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [nameError, setNameError] = useState("");
-  const turnstileTokenRef = useRef("");
 
   function handleClose() {
     onClose();
@@ -61,7 +61,7 @@ export default function AddShopDialog({
       return;
     }
 
-    if (trimmedShopName.length > 100) {
+    if (trimmedShopName.length > MAX_SHOP_NAME_LENGTH) {
       setNameError(t("shopNameTooLong"));
       return;
     }
@@ -70,7 +70,7 @@ export default function AddShopDialog({
     setError("");
 
     try {
-      const token = await waitForToken(turnstileRef, turnstileTokenRef.current);
+      const token = await waitForToken(turnstileRef);
       if (!token) {
         setError(t("couldNotAddShop"));
         return;
@@ -100,7 +100,6 @@ export default function AddShopDialog({
       setError(t(failureCode("couldNotAddShop")));
     } finally {
       setIsSubmitting(false);
-      turnstileTokenRef.current = "";
       turnstileRef.current?.reset();
     }
   }
@@ -152,8 +151,6 @@ export default function AddShopDialog({
           <span id="add-shop-avatar-label" className="label">
             {t("avatarImage")}
           </span>
-          {/* The native picker only does the work; the button below is the
-              control people and assistive tech use. */}
           <input
             ref={fileInputRef}
             id="add-shop-avatar"
@@ -197,7 +194,7 @@ export default function AddShopDialog({
               <button
                 type="button"
                 onClick={clearAvatar}
-                className="tap-target relative grid size-9 place-items-center rounded-md text-text-2 hover:bg-hover hover:text-danger"
+                className="icon-btn size-9 hover:text-danger"
                 aria-label={t("removeAvatar")}
               >
                 <X size={16} strokeWidth={1.5} />
@@ -208,18 +205,7 @@ export default function AddShopDialog({
           </div>
         </div>
 
-        {/* Runs unseen and never needs a person, so it stays out of the tab order. */}
-        <div inert>
-          <Turnstile
-            ref={turnstileRef}
-            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-            onSuccess={(token) => (turnstileTokenRef.current = token)}
-            onError={() => (turnstileTokenRef.current = "")}
-            onExpire={() => (turnstileTokenRef.current = "")}
-            options={{ size: "invisible" }}
-            className="h-0 overflow-hidden"
-          />
-        </div>
+        <InvisibleTurnstile ref={turnstileRef} />
 
         {error && (
           <p className="text-sm text-danger" role="alert">

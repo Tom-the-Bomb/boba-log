@@ -22,9 +22,6 @@ export default function DayPanel() {
   const panelRef = useRef<HTMLElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
 
-  // Bring the panel into view whenever a day or drink is chosen. Chosen from
-  // elsewhere (the sheet, the scroll, recent drinks), focus follows to its
-  // heading so the day is announced; stepping days inside keeps focus put.
   useEffect(() => {
     if (!focus) {
       return;
@@ -39,7 +36,6 @@ export default function DayPanel() {
     }
   }, [focus]);
 
-  // A new focus (another day, or a drink to edit) resets the editor.
   if (focus !== focusKey) {
     setFocusKey(focus);
     setEditingId(focus?.drinkId ?? null);
@@ -60,7 +56,6 @@ export default function DayPanel() {
 
   const shopsById = new Map(user.shops.map((shop) => [shop.id, shop]));
 
-  // Closed from the keyboard, focus goes back to the day on the sheet.
   function close(fromKeyboard: boolean) {
     const tile = fromKeyboard
       ? document.querySelector<HTMLElement>(`[data-day="${day}"]`)
@@ -75,7 +70,6 @@ export default function DayPanel() {
       id="day-panel"
       aria-labelledby="day-panel-heading"
       onKeyDown={(event) => {
-        // Escape closes the day, unless an open list or a field inside has it.
         if (
           event.key === "Escape" &&
           !event.defaultPrevented &&
@@ -102,13 +96,12 @@ export default function DayPanel() {
             year: day.slice(0, 4) === today.slice(0, 4) ? undefined : "numeric",
           })}
         </h3>
-        {/* Stepping a day either way mends a near miss on the sheet. */}
         <div className="-mr-2 flex shrink-0 items-center gap-1">
           <button
             type="button"
             disabled={day <= EARLIEST_DAY}
             onClick={() => setFocus({ day: addDays(day, -1) })}
-            className="tap-target relative grid size-9 place-items-center rounded-md text-text-2 hover:bg-hover hover:text-text disabled:opacity-30"
+            className="icon-btn size-9 disabled:opacity-30"
             aria-label={t("previousDay")}
           >
             <ChevronLeft size={17} strokeWidth={1.5} />
@@ -117,7 +110,7 @@ export default function DayPanel() {
             type="button"
             disabled={day >= today}
             onClick={() => setFocus({ day: addDays(day, 1) })}
-            className="tap-target relative grid size-9 place-items-center rounded-md text-text-2 hover:bg-hover hover:text-text disabled:opacity-30"
+            className="icon-btn size-9 disabled:opacity-30"
             aria-label={t("nextDay")}
           >
             <ChevronRight size={17} strokeWidth={1.5} />
@@ -125,7 +118,7 @@ export default function DayPanel() {
           <button
             type="button"
             onClick={(event) => close(event.detail === 0)}
-            className="tap-target relative ml-2 grid size-9 place-items-center rounded-md text-text-2 hover:bg-hover hover:text-text"
+            className="icon-btn ml-2 size-9"
             aria-label={t("closeDay")}
           >
             <X size={18} strokeWidth={1.5} />

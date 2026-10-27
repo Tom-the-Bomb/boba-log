@@ -5,7 +5,6 @@ import TeaDrop from "./tea-drop";
 
 const COUNT_LABELS = ["1", "2", "3", "4+"];
 
-/** The four drop sizes, labelled by drinks a day unless told otherwise. */
 export default function DropLegend({
   caption,
   labels = COUNT_LABELS,
@@ -19,7 +18,7 @@ export default function DropLegend({
     <ul className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-text-2">
       <li className="text-text-3">{caption ?? t("drinksADay")}</li>
       {labels.map((label, index) => (
-        <li key={index} className="num flex items-center gap-1.5">
+        <li key={index} className="flex items-center gap-1.5 tabular-nums">
           <span className="size-5">
             <TeaDrop count={index + 1} showCount={false} />
           </span>

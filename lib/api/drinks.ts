@@ -47,7 +47,6 @@ export async function listDrinks(username: string): Promise<Drink[]> {
   return results.map(toDrink);
 }
 
-/** Returns null when the shop does not exist or belongs to someone else. */
 export async function createDrink(
   username: string,
   shopId: number,
@@ -72,10 +71,6 @@ export async function createDrink(
   return row ? toDrink(row) : null;
 }
 
-/**
- * Applies the given fields to one of the user's drinks. Moving a drink to
- * another shop requires that shop to be the user's too.
- */
 export async function updateDrink(
   username: string,
   drinkId: number,
@@ -123,7 +118,7 @@ export async function deleteDrink(
   return result.meta.changes > 0;
 }
 
-async function getDrink(
+export async function getDrink(
   username: string,
   drinkId: number,
 ): Promise<Drink | null> {

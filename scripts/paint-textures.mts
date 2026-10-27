@@ -225,7 +225,6 @@ function paint({
     const ink = canvas(width, height);
     const random = rng(seed);
 
-    // Midpoint displacement, raised into a few dominant peaks.
     function profile(n: number, rough: number, peaks: Peak[]) {
       const points = new Array<number>(n + 1).fill(0);
       points[0] = random();
@@ -269,7 +268,6 @@ function paint({
       const { element: layer, context } = canvas(width, height);
       context.save();
       context.clip(path);
-      // Body wash: darkest under the ridge line, dissolving downwards.
       for (let i = 0; i <= n; i++) {
         const x = (i / n) * width;
         const y = ys[i];
@@ -280,7 +278,6 @@ function paint({
         context.fillStyle = gradient;
         context.fillRect(x - 1, y - 2, width / n + 2, ridge.depth + 4);
       }
-      // Cun (皴) texture strokes.
       const strokes = Math.round((900 * width) / 2880);
       for (let s = 0; s < strokes; s++) {
         const i = Math.floor(random() * n);
@@ -295,7 +292,6 @@ function paint({
       }
       context.restore();
 
-      // Wet edge: pigment pooling along the ridge line.
       context.filter = "blur(2.5px)";
       context.strokeStyle = `rgba(0,0,0,${Math.min(1, ridge.alpha * 0.9)})`;
       context.lineWidth = 3;
@@ -306,7 +302,6 @@ function paint({
       context.stroke();
       context.filter = "none";
 
-      // Granulation: tiny flecks lifted out of the wash.
       context.globalCompositeOperation = "destination-out";
       const flecks = Math.round((26000 * width * height) / (2880 * 640));
       for (let f = 0; f < flecks; f++) {
@@ -325,7 +320,6 @@ function paint({
       ink.context.filter = "none";
     }
 
-    // Mist between the ridges, then the foot fading into the paper.
     ink.context.globalCompositeOperation = "destination-out";
     for (const [bandY, bandHeight, alpha] of mist) {
       for (let x = -200; x < width + 200; x += 260) {

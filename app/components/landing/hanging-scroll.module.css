@@ -36,7 +36,6 @@
   --hs-cord: #7c3528;
   --hs-cord-hi: #c46a55;
   --hs-wall: rgb(43 41 37 / 0.3);
-  /* Horizontal wood grain shared by the stave and roller. */
   --hs-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1400' height='60'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.004 0.35' numOctaves='4' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.06 0 0 0 0 0.03 0 0 0 2.2 -0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
   position: relative;
   margin: 0;
@@ -60,7 +59,6 @@
   --hs-wall: rgb(0 0 0 / 0.65);
 }
 
-/* It arrives rolled up and drops open; the easing is the fall itself. */
 @media (prefers-reduced-motion: no-preference) {
   .scroll {
     animation: unroll var(--drop-ms) var(--drop-easing) 250ms both;
@@ -113,7 +111,6 @@
   transform: translate(5px, 10px);
 }
 
-/* The cord runs on past the stave's top edge and disappears behind it. */
 .cord {
   position: absolute;
   top: calc(-1 * var(--hs-cord-h));
@@ -186,7 +183,6 @@
   height: var(--hs-di);
 }
 
-/* The two hanging strips (惊燕) at the top of the mount. */
 .ribbon {
   position: absolute;
   top: -1px;
@@ -343,7 +339,6 @@
   box-shadow: 0 7px 9px -5px rgb(0 0 0 / 0.45);
 }
 
-/* A larger grip than the rod itself; larger again for a finger. */
 .roller::after {
   content: "";
   position: absolute;

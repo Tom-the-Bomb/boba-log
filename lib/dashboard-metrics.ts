@@ -23,7 +23,6 @@ export const RANGE_PRESET_KEYS: Record<RangePreset, string> = {
   custom: "rangeCustom",
 };
 
-/** The first day worth showing: the earlier of sign-up and the oldest drink. */
 export function earliestDay(drinks: readonly Drink[], createdAt: number) {
   let earliest = dayFromLocalDate(new Date(createdAt * 1000));
   for (const drink of drinks) {
@@ -58,8 +57,7 @@ export function drinksInRange(
   return drinks.filter((drink) => drink.day >= start && drink.day <= end);
 }
 
-/** What one drink adds to a total: the drink itself, or what it cost. */
-export type Weigh = (drink: Drink) => number;
+type Weigh = (drink: Drink) => number;
 const oneEach: Weigh = () => 1;
 export const priceOf: Weigh = (drink) => drink.priceCents ?? 0;
 
@@ -79,20 +77,17 @@ export function countsByDay(drinks: readonly Drink[], weigh = oneEach) {
   return counts;
 }
 
-/** Where a day's spending steps up a drop size: about one, two and three
- *  drinks' worth of the typical price, in whole currency units. */
+// About one, two and three typical drinks' worth, in whole currency units.
 export function spendSteps(typical: number) {
   return [1.5, 2.5, 3.5].map((step) =>
     Math.max(100, Math.round((step * typical) / 100) * 100),
   );
 }
 
-/** A day's drop size, 1 to 4, from what was spent. */
 export function spendLevel(cents: number, steps: readonly number[]) {
   return 1 + steps.filter((step) => cents > step).length;
 }
 
-/** The middle price of the priced drinks, or null when none have one. */
 export function typicalPrice(drinks: readonly Drink[]) {
   const prices = drinks
     .flatMap((drink) => (drink.priceCents === null ? [] : [drink.priceCents]))
@@ -136,7 +131,6 @@ export function perWeek(count: number, { start, end }: DayRange) {
   return (count / days) * 7;
 }
 
-/** Newest first: by day, then by when the entry was written. */
 export function sortNewestFirst(drinks: readonly Drink[]) {
   return [...drinks].sort(
     (a, b) =>
@@ -152,7 +146,6 @@ export function countsByMonth(drinks: readonly Drink[], weigh = oneEach) {
   return counts;
 }
 
-/** Totals per calendar year, for every year the range touches. */
 export function countsByYear(
   drinks: readonly Drink[],
   { start, end }: DayRange,

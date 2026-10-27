@@ -16,7 +16,6 @@ export function invalidRequestResponse() {
   return errorResponse("invalidRequest", "Invalid request.", 400);
 }
 
-/** Reads a JSON object body, or returns null when the body is not one. */
 export async function readJsonObject(
   request: Request,
 ): Promise<Record<string, unknown> | null> {

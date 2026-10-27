@@ -1,20 +1,11 @@
 import type { BobaShop, Drink, PublicUser } from "@/lib/types";
 import { useReducer } from "react";
 
-/** Why the account did not load, as a message key in the common namespace. */
-export type LoadFailure =
-  | "loadFailedOffline"
-  | "tooManyRequests"
-  | "loadFailedBody";
+export type LoadFailure = "offline" | "tooManyRequests" | "loadFailedBody";
 
 interface UserState {
-  username: string | null;
-  createdAt: number | null;
-  currency: string;
-  shops: BobaShop[];
-  drinks: Drink[];
+  user: PublicUser | null;
   isLoading: boolean;
-  /** Set when the account could not be loaded. */
   loadFailed: LoadFailure | null;
 }
 
@@ -32,27 +23,24 @@ type UserAction =
   | { type: "set_currency"; currency: string };
 
 const INITIAL_USER_STATE: UserState = {
-  username: null,
-  createdAt: null,
-  currency: "USD",
-  shops: [],
-  drinks: [],
+  user: null,
   isLoading: true,
   loadFailed: null,
 };
 
+function withUser(
+  state: UserState,
+  update: (user: PublicUser) => Partial<PublicUser>,
+): UserState {
+  return state.user
+    ? { ...state, user: { ...state.user, ...update(state.user) } }
+    : state;
+}
+
 function userReducer(state: UserState, action: UserAction): UserState {
   switch (action.type) {
     case "loaded":
-      return {
-        ...state,
-        username: action.user.username,
-        createdAt: action.user.createdAt,
-        currency: action.user.currency,
-        shops: action.user.shops,
-        drinks: action.user.drinks,
-        loadFailed: null,
-      };
+      return { ...state, user: action.user, loadFailed: null };
     case "loading":
       return { ...state, isLoading: true, loadFailed: null };
     case "load_failed":
@@ -62,29 +50,30 @@ function userReducer(state: UserState, action: UserAction): UserState {
     case "done_loading":
       return { ...state, isLoading: false };
     case "add_shop":
-      return { ...state, shops: [...state.shops, action.shop] };
+      return withUser(state, ({ shops }) => ({
+        shops: [...shops, action.shop],
+      }));
     case "remove_shop":
-      return {
-        ...state,
-        shops: state.shops.filter((shop) => shop.id !== action.shopId),
-        drinks: state.drinks.filter((drink) => drink.shopId !== action.shopId),
-      };
+      return withUser(state, ({ shops, drinks }) => ({
+        shops: shops.filter((shop) => shop.id !== action.shopId),
+        drinks: drinks.filter((drink) => drink.shopId !== action.shopId),
+      }));
     case "add_drink":
-      return { ...state, drinks: [...state.drinks, action.drink] };
+      return withUser(state, ({ drinks }) => ({
+        drinks: [...drinks, action.drink],
+      }));
     case "replace_drink":
-      return {
-        ...state,
-        drinks: state.drinks.map((drink) =>
+      return withUser(state, ({ drinks }) => ({
+        drinks: drinks.map((drink) =>
           drink.id === action.id ? action.drink : drink,
         ),
-      };
+      }));
     case "remove_drink":
-      return {
-        ...state,
-        drinks: state.drinks.filter((drink) => drink.id !== action.id),
-      };
+      return withUser(state, ({ drinks }) => ({
+        drinks: drinks.filter((drink) => drink.id !== action.id),
+      }));
     case "set_currency":
-      return { ...state, currency: action.currency };
+      return withUser(state, () => ({ currency: action.currency }));
   }
 }
 

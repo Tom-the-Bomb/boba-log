@@ -7,13 +7,44 @@ import { Pencil, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import ShopAvatar from "./shop-avatar";
 
-interface DrinkItemProps {
+interface DrinkActionsProps {
   drink: Drink;
+  onEdit: () => void;
+  onRemove: (fromKeyboard: boolean) => void;
+}
+
+export function DrinkActions({ drink, onEdit, onRemove }: DrinkActionsProps) {
+  const { t } = useTranslation("dashboard");
+  const saving = drink.id < 0;
+
+  return (
+    <div className="flex shrink-0 justify-end">
+      <button
+        type="button"
+        disabled={saving}
+        onClick={onEdit}
+        className="icon-btn size-10 text-text-3 sm:size-9"
+        aria-label={t("editDrinkAria")}
+      >
+        <Pencil size={15} strokeWidth={1.5} />
+      </button>
+      <button
+        type="button"
+        data-remove
+        disabled={saving}
+        onClick={(event) => onRemove(event.detail === 0)}
+        className="icon-btn size-10 text-text-3 hover:text-danger sm:size-9"
+        aria-label={t("removeDrinkAria")}
+      >
+        <Trash2 size={15} strokeWidth={1.5} />
+      </button>
+    </div>
+  );
+}
+
+interface DrinkItemProps extends DrinkActionsProps {
   shop: BobaShop | undefined;
   currency: string;
-  onEdit: () => void;
-  /** Whether the keyboard pressed it, so focus can follow. */
-  onRemove: (fromKeyboard: boolean) => void;
 }
 
 export default function DrinkItem({
@@ -23,7 +54,7 @@ export default function DrinkItem({
   onEdit,
   onRemove,
 }: DrinkItemProps) {
-  const { t, i18n } = useTranslation("dashboard");
+  const { i18n } = useTranslation("dashboard");
   const shopName = shop ? translateShopName(shop.name, i18n.language) : "";
 
   return (
@@ -39,29 +70,11 @@ export default function DrinkItem({
         )}
       </div>
       {drink.priceCents !== null && (
-        <span className="num text-sm text-text">
+        <span className="text-sm text-text tabular-nums">
           {formatMoney(drink.priceCents, currency, i18n.language)}
         </span>
       )}
-      <div className="flex items-center">
-        <button
-          type="button"
-          onClick={onEdit}
-          className="tap-target relative grid size-10 place-items-center rounded-md text-text-3 hover:bg-hover hover:text-text sm:size-9"
-          aria-label={t("editDrinkAria")}
-        >
-          <Pencil size={15} strokeWidth={1.5} />
-        </button>
-        <button
-          type="button"
-          data-remove
-          onClick={(event) => onRemove(event.detail === 0)}
-          className="tap-target relative grid size-10 place-items-center rounded-md text-text-3 hover:bg-hover hover:text-danger sm:size-9"
-          aria-label={t("removeDrinkAria")}
-        >
-          <Trash2 size={15} strokeWidth={1.5} />
-        </button>
-      </div>
+      <DrinkActions drink={drink} onEdit={onEdit} onRemove={onRemove} />
     </div>
   );
 }

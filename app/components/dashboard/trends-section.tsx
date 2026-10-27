@@ -1,33 +1,30 @@
 "use client";
 
 import {
-  countsByDay,
   countsByMonth,
   countsByShop,
   countsByWeekday,
   countsByYear,
   priceOf,
-  spendLevel,
-  spendSteps,
   spendSummary,
-  typicalPrice,
 } from "@/lib/dashboard-metrics";
-import { formatDay, monthName, weekdayName } from "@/lib/date";
+import { monthName, weekdayName } from "@/lib/date";
 import { translateShopName } from "@/lib/default-shops";
 import { formatMoney, formatMoneyShort } from "@/lib/drinks";
 import type { Drink } from "@/lib/types";
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDashboard } from "../../dashboard/dashboard-context";
+import useDayValues, { type Measure } from "../../hooks/use-day-values";
 import { useUser } from "../../providers/user-provider";
 import InkBars, { type InkBar } from "../sheet/ink-bars";
 import InkScroll from "../sheet/ink-scroll";
 import { Segmented } from "../ui/fields";
+import MeasureToggle from "./measure-toggle";
 import { useRangeLabel } from "./range-picker";
 import ShopAvatar from "./shop-avatar";
 
 type TrendMode = "day" | "month" | "weekday" | "year" | "shop";
-type Measure = "drinks" | "spent";
 
 const MODES: readonly { value: TrendMode; key: string }[] = [
   { value: "day", key: "trendDay" },
@@ -37,18 +34,16 @@ const MODES: readonly { value: TrendMode; key: string }[] = [
   { value: "shop", key: "trendShop" },
 ];
 
+const DATE_FORMAT: Intl.DateTimeFormatOptions = {
+  month: "short",
+  day: "numeric",
+};
+
 interface TrendsSectionProps {
-  /** Every drink, for the day-by-day handscroll of the sheet's year. */
   drinks: readonly Drink[];
-  /** Drinks inside the selected range, for the totals. */
   inRange: readonly Drink[];
 }
 
-/**
- * The year painted as ink: day by day as a handscroll, or totals by month,
- * weekday, year or shop as columns of ink wash; in drinks, or in what the
- * priced ones cost.
- */
 export default function TrendsSection({ drinks, inRange }: TrendsSectionProps) {
   const { user } = useUser();
   const { today, sheetYear, setFocus, range } = useDashboard();
@@ -56,36 +51,9 @@ export default function TrendsSection({ drinks, inRange }: TrendsSectionProps) {
   const rangeLabel = useRangeLabel();
   const [mode, setMode] = useState<TrendMode>("day");
   const [measure, setMeasure] = useState<Measure>("drinks");
-  const typical = useMemo(() => typicalPrice(drinks), [drinks]);
-  const spent = measure === "spent" && typical !== null;
-  const counts = useMemo(
-    () => countsByDay(drinks, spent ? priceOf : undefined),
-    [drinks, spent],
-  );
-  const steps = typical === null ? [] : spendSteps(typical);
+  const { canSpend, spent, counts, levelOf, tileLabel, currency } =
+    useDayValues(drinks, measure, DATE_FORMAT);
   const spend = useMemo(() => spendSummary(inRange), [inRange]);
-  const currency = user?.currency ?? "USD";
-
-  const dayLabel = useCallback(
-    (day: string, value: number) => {
-      const date = formatDay(day, i18n.language, {
-        month: "short",
-        day: "numeric",
-      });
-      if (spent) {
-        return value > 0
-          ? t("tileSpent", {
-              date,
-              amount: formatMoney(value, currency, i18n.language),
-            })
-          : t("tileSpentNone", { date });
-      }
-      return value > 0
-        ? t("tileLabel", { date, count: value })
-        : t("tileLabelNone", { date });
-    },
-    [spent, currency, i18n.language, t],
-  );
 
   const bars = useMemo<InkBar[]>(() => {
     const weigh = spent ? priceOf : undefined;
@@ -143,32 +111,21 @@ export default function TrendsSection({ drinks, inRange }: TrendsSectionProps) {
 
   return (
     <section aria-labelledby="trends-heading">
-      {/* Title, then the switches on a row of their own, so changing view
-          never moves the graph. */}
       <div className="mb-5 space-y-3">
         <div className="flex items-baseline gap-3">
           <h2 id="trends-heading" className="font-kai text-xl text-text">
             {t("trends")}
           </h2>
-          <span className="num text-xs text-text-2">
+          <span className="text-xs text-text-2 tabular-nums">
             {mode === "day"
               ? sheetYear
               : `${rangeLabel.start} – ${rangeLabel.end}`}
           </span>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Segmented
-            compact
-            label={t("trendMeasure")}
-            value={spent ? "spent" : "drinks"}
-            options={[
-              { value: "drinks", label: t("trendDrinks") },
-              {
-                value: "spent",
-                label: t("trendSpent"),
-                disabled: typical === null,
-              },
-            ]}
+          <MeasureToggle
+            spent={spent}
+            canSpend={canSpend}
             onChange={setMeasure}
           />
           <Segmented
@@ -192,8 +149,8 @@ export default function TrendsSection({ drinks, inRange }: TrendsSectionProps) {
             today={today}
             label={t("inkScrollLabel", { year: sheetYear })}
             todayLabel={t("today")}
-            tileLabel={dayLabel}
-            levelOf={spent ? (cents) => spendLevel(cents, steps) : undefined}
+            tileLabel={tileLabel}
+            levelOf={levelOf}
             onSelectDay={(day) => setFocus({ day })}
           />
         ) : spent && spend.priced === 0 ? (

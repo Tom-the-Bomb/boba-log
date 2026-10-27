@@ -1,9 +1,5 @@
-import {
-  AUTH_COOKIE_NAME,
-  AUTH_COOKIE_OPTIONS,
-  comparePassword,
-} from "@/lib/api/auth";
-import { deleteAvatarsFromR2 } from "@/lib/api/r2";
+import { clearAuthCookie, comparePassword } from "@/lib/api/auth";
+import { deleteAvatars } from "@/lib/api/r2";
 import { getUsernameFromRequest } from "@/lib/api/request-auth";
 import {
   errorResponse,
@@ -12,7 +8,7 @@ import {
   serverErrorResponse,
   unauthorizedResponse,
 } from "@/lib/api/responses";
-import { listShopIds } from "@/lib/api/shops";
+import { listShopRows } from "@/lib/api/shops";
 import { deleteUser, getUserByUsername } from "@/lib/api/users";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -35,23 +31,16 @@ export async function DELETE(request: NextRequest) {
 
     const password = String(body.password ?? "");
     if (!(await comparePassword(password, existing.hashed_password))) {
-      return errorResponse("invalidPassword", "Invalid password.", 401);
+      return errorResponse("invalidPassword", "Invalid password.", 403);
     }
 
-    const shopIds = await listShopIds(username);
+    const shops = await listShopRows(username);
     await deleteUser(username);
     try {
-      await deleteAvatarsFromR2(shopIds);
-    } catch {
-      // The account is gone; orphaned avatars are unreachable and harmless.
-    }
+      await deleteAvatars(shops.map((shop) => shop.id));
+    } catch {}
 
-    const response = NextResponse.json({ success: true });
-    response.cookies.set(AUTH_COOKIE_NAME, "", {
-      ...AUTH_COOKIE_OPTIONS,
-      maxAge: 0,
-    });
-    return response;
+    return clearAuthCookie(NextResponse.json({ success: true }));
   } catch {
     return serverErrorResponse();
   }

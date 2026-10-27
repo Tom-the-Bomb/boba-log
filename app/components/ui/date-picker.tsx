@@ -17,7 +17,6 @@ interface DatePickerProps {
   onChange: (day: string) => void;
 }
 
-/** A field-styled button that opens the calendar to pick one day. */
 export default function DatePicker({
   label,
   value,
@@ -35,7 +34,9 @@ export default function DatePicker({
           aria-label={`${label}: ${formatDay(value, i18n.language)}`}
           className="field flex items-center justify-between gap-3 text-left outline-none data-focus-visible:field-focus"
         >
-          <span className="num">{formatDay(value, i18n.language)}</span>
+          <span className="tabular-nums">
+            {formatDay(value, i18n.language)}
+          </span>
           <CalendarDays size={15} strokeWidth={1.5} className="text-text-2" />
         </Button>
         <Popover placement="bottom start" className="w-72 p-4">

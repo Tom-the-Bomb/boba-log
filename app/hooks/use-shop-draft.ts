@@ -6,46 +6,50 @@ import type { ChangeEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-function revokeObjectUrlIfNeeded(url: string) {
-  if (url.startsWith("blob:")) {
-    URL.revokeObjectURL(url);
-  }
-}
-
 export default function useShopDraft() {
   const { i18n } = useTranslation();
   const [shopName, setShopName] = useState("");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState("");
-  const presetAbortRef = useRef<AbortController | null>(null);
+  const avatarRequest = useRef<AbortController | null>(null);
 
   useEffect(() => {
     return () => {
-      revokeObjectUrlIfNeeded(avatarPreview);
+      if (avatarPreview.startsWith("blob:")) {
+        URL.revokeObjectURL(avatarPreview);
+      }
     };
   }, [avatarPreview]);
+
+  function startAvatarRequest() {
+    avatarRequest.current?.abort();
+    avatarRequest.current = new AbortController();
+    return avatarRequest.current.signal;
+  }
+
+  function setAvatar(file: File | null, preview: string) {
+    setAvatarFile(file);
+    setAvatarPreview(preview);
+  }
 
   async function handleAvatarInputChange(
     event: ChangeEvent<HTMLInputElement>,
   ): Promise<string | null> {
     const file = event.target.files?.[0];
+    event.target.value = "";
     if (!file) {
       return null;
     }
-
     if (file.type && !file.type.toLowerCase().startsWith("image/")) {
       return "invalidAvatarFormat";
     }
 
-    presetAbortRef.current?.abort();
-    presetAbortRef.current = null;
-
+    const signal = startAvatarRequest();
     try {
       const resized = await resizeImageToWebP(file);
-      revokeObjectUrlIfNeeded(avatarPreview);
-      const nextPreview = URL.createObjectURL(resized);
-      setAvatarFile(resized);
-      setAvatarPreview(nextPreview);
+      if (!signal.aborted) {
+        setAvatar(resized, URL.createObjectURL(resized));
+      }
       return null;
     } catch (error) {
       return error instanceof DOMException || error instanceof TypeError
@@ -54,57 +58,38 @@ export default function useShopDraft() {
     }
   }
 
-  async function selectPreset(
-    preset: DefaultShopPresetOption,
-    setName: boolean = true,
-  ) {
-    presetAbortRef.current?.abort();
-    const controller = new AbortController();
-    presetAbortRef.current = controller;
-
-    revokeObjectUrlIfNeeded(avatarPreview);
+  async function selectPreset(preset: DefaultShopPresetOption, setName = true) {
+    const signal = startAvatarRequest();
     if (setName) {
       setShopName(preset[i18n.language as keyof DefaultShopPresetOption]);
     }
-    setAvatarPreview(preset.avatar);
+    setAvatar(null, preset.avatar);
 
     try {
-      const response = await fetch(preset.avatar, {
-        signal: controller.signal,
-      });
+      const response = await fetch(preset.avatar, { signal });
       if (!response.ok) {
         throw new Error(`Preset avatar returned ${response.status}`);
       }
       const blob = await response.blob();
-      if (controller.signal.aborted) {
-        return;
+      if (!signal.aborted) {
+        const name = preset.avatar.split("/").pop() ?? "avatar.webp";
+        setAvatarFile(new File([blob], name, { type: "image/webp" }));
       }
-      const file = new File(
-        [blob],
-        preset.avatar.split("/").pop() ?? "avatar.webp",
-        { type: "image/webp" },
-      );
-      setAvatarFile(file);
     } catch {
-      if (!controller.signal.aborted) {
-        setAvatarFile(null);
+      if (!signal.aborted) {
+        setAvatar(null, "");
       }
     }
   }
 
   function clearAvatar() {
-    presetAbortRef.current?.abort();
-    presetAbortRef.current = null;
-    revokeObjectUrlIfNeeded(avatarPreview);
-    setAvatarFile(null);
-    setAvatarPreview("");
+    avatarRequest.current?.abort();
+    setAvatar(null, "");
   }
 
   function resetDraft() {
-    revokeObjectUrlIfNeeded(avatarPreview);
+    clearAvatar();
     setShopName("");
-    setAvatarFile(null);
-    setAvatarPreview("");
   }
 
   return {

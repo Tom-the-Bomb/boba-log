@@ -11,37 +11,22 @@ import type {
 } from "@/lib/types";
 import {
   createContext,
-  ReactNode,
   useCallback,
   useContext,
   useEffect,
   useMemo,
   useRef,
+  type ReactNode,
 } from "react";
 import useUserReducer, { type LoadFailure } from "../reducers/user-reducer";
 
-interface PublicUserResponse {
-  user: PublicUser;
-}
-
-interface UserSession {
-  username: string;
-  createdAt: number;
-  currency: string;
-  shops: BobaShop[];
-  drinks: Drink[];
-}
-
-/** Resolves to null on success, or to the API error code. */
 type MutationResult = Promise<string | null>;
 
 interface UserContextValue {
-  user: UserSession | null;
+  user: PublicUser | null;
   isLoadingUser: boolean;
-  /** The account could not be loaded; `retryLoad` tries again. */
   loadFailed: LoadFailure | null;
   retryLoad: () => Promise<void>;
-  login: () => Promise<void>;
   logout: () => Promise<void>;
   addShop: (shop: BobaShop) => void;
   removeShop: (shopId: number) => void;
@@ -50,18 +35,12 @@ interface UserContextValue {
     input: DrinkInput & { day: string },
   ) => Promise<Drink | string>;
   updateDrink: (id: number, input: DrinkInput) => MutationResult;
-  removeDrink: (id: number) => MutationResult;
+  removeDrink: (drink: Drink) => MutationResult;
   setCurrency: (currency: string) => MutationResult;
 }
 
 const UserContext = createContext<UserContextValue | null>(null);
 
-interface UserProviderProps {
-  children: ReactNode;
-  skipHydration?: boolean;
-}
-
-/** The session is gone (expired, or signed out on another device). */
 class SessionExpiredError extends Error {}
 class RateLimitedError extends Error {}
 
@@ -81,38 +60,15 @@ async function sendJson<T extends ApiErrorResponse>(
   return { ok: response.ok, data: (await response.json()) as T };
 }
 
-export default function UserProvider({
-  children,
-  skipHydration = false,
-}: UserProviderProps) {
+export default function UserProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useUserReducer();
   // Optimistic drinks carry negative ids until the server answers.
   const nextTempId = useRef(-1);
-  const pendingDrinks = useRef(new Map<number, Promise<Drink | string>>());
-
-  const loadUser = useCallback(async () => {
-    const response = await fetch("/api/user");
-
-    if (response.status === 401) {
-      throw new SessionExpiredError();
-    }
-    if (response.status === 429) {
-      throw new RateLimitedError();
-    }
-    if (!response.ok) {
-      throw new Error("Could not load account.");
-    }
-
-    const data = (await response.json()) as PublicUserResponse;
-    dispatch({ type: "loaded", user: data.user });
-  }, [dispatch]);
 
   const logout = useCallback(async () => {
     await fetch("/api/auth/logout", { method: "POST" });
   }, []);
 
-  // A dead session clears its cookie and signs out, so the dashboard sends the
-  // visitor to sign in without bouncing back.
   const expire = useCallback(async () => {
     try {
       await logout();
@@ -120,7 +76,6 @@ export default function UserProvider({
     dispatch({ type: "signed_out" });
   }, [dispatch, logout]);
 
-  /** Turns a failed request into an error code, signing out if the session died. */
   const failure = useCallback(
     (error: unknown, fallback: string) => {
       if (error instanceof SessionExpiredError) {
@@ -132,17 +87,41 @@ export default function UserProvider({
     [expire],
   );
 
-  const login = useCallback(async () => {
+  const hydrate = useCallback(async () => {
     dispatch({ type: "loading" });
     try {
-      await loadUser();
-    } catch {
-      await logout();
-      throw new Error("Could not load account.");
+      const response = await fetch("/api/user");
+      if (response.status === 401) {
+        throw new SessionExpiredError();
+      }
+      if (response.status === 429) {
+        throw new RateLimitedError();
+      }
+      if (!response.ok) {
+        throw new Error("Could not load account.");
+      }
+      const data = (await response.json()) as { user: PublicUser };
+      dispatch({ type: "loaded", user: data.user });
+    } catch (error) {
+      if (error instanceof SessionExpiredError) {
+        await expire();
+      } else {
+        dispatch({
+          type: "load_failed",
+          reason:
+            error instanceof RateLimitedError
+              ? "tooManyRequests"
+              : failureCode("loadFailedBody"),
+        });
+      }
     } finally {
       dispatch({ type: "done_loading" });
     }
-  }, [dispatch, loadUser, logout]);
+  }, [dispatch, expire]);
+
+  useEffect(() => {
+    void hydrate();
+  }, [hydrate]);
 
   const addShop = useCallback(
     (shop: BobaShop) => dispatch({ type: "add_shop", shop }),
@@ -155,7 +134,7 @@ export default function UserProvider({
   );
 
   const logDrink = useCallback(
-    (shopId: number, input: DrinkInput & { day: string }) => {
+    async (shopId: number, input: DrinkInput & { day: string }) => {
       const tempId = nextTempId.current--;
       dispatch({
         type: "add_drink",
@@ -169,57 +148,36 @@ export default function UserProvider({
           note: input.note ?? null,
         },
       });
-
-      const request = (async () => {
-        try {
-          const { ok, data } = await sendJson<DrinkMutationResponse>(
-            `/api/shops/${shopId}/drinks`,
-            "POST",
-            input,
-          );
-          if (ok && data.drink) {
-            dispatch({ type: "replace_drink", id: tempId, drink: data.drink });
-            return data.drink;
-          }
-          dispatch({ type: "remove_drink", id: tempId });
-          return data.code ?? "couldNotLog";
-        } catch (error) {
-          dispatch({ type: "remove_drink", id: tempId });
-          return failure(error, "couldNotLog");
-        } finally {
-          pendingDrinks.current.delete(tempId);
+      try {
+        const { ok, data } = await sendJson<DrinkMutationResponse>(
+          `/api/shops/${shopId}/drinks`,
+          "POST",
+          input,
+        );
+        if (ok && data.drink) {
+          dispatch({ type: "replace_drink", id: tempId, drink: data.drink });
+          return data.drink;
         }
-      })();
-
-      pendingDrinks.current.set(tempId, request);
-      return request;
+        dispatch({ type: "remove_drink", id: tempId });
+        return data.code ?? "couldNotLog";
+      } catch (error) {
+        dispatch({ type: "remove_drink", id: tempId });
+        return failure(error, "couldNotLog");
+      }
     },
     [dispatch, failure],
   );
 
-  // Waits for an optimistic drink to land so edits target its real id.
-  const resolveDrinkId = useCallback(async (id: number) => {
-    if (id > 0) {
-      return id;
-    }
-    const pending = await pendingDrinks.current.get(id);
-    return pending && typeof pending !== "string" ? pending.id : null;
-  }, []);
-
   const updateDrink = useCallback(
     async (id: number, input: DrinkInput) => {
-      const realId = await resolveDrinkId(id);
-      if (!realId) {
-        return "drinkNotFound";
-      }
       try {
         const { ok, data } = await sendJson<DrinkMutationResponse>(
-          `/api/drinks/${realId}`,
+          `/api/drinks/${id}`,
           "PATCH",
           input,
         );
         if (ok && data.drink) {
-          dispatch({ type: "replace_drink", id: realId, drink: data.drink });
+          dispatch({ type: "replace_drink", id, drink: data.drink });
           return null;
         }
         return data.code ?? "couldNotSave";
@@ -227,37 +185,28 @@ export default function UserProvider({
         return failure(error, "couldNotSave");
       }
     },
-    [dispatch, resolveDrinkId, failure],
+    [dispatch, failure],
   );
 
   const removeDrink = useCallback(
-    async (id: number) => {
-      const realId = await resolveDrinkId(id);
-      if (!realId) {
-        return null;
-      }
-      const removed = state.drinks.find((drink) => drink.id === realId);
-      dispatch({ type: "remove_drink", id: realId });
+    async (drink: Drink) => {
+      dispatch({ type: "remove_drink", id: drink.id });
       try {
         const { ok, data } = await sendJson<ApiErrorResponse>(
-          `/api/drinks/${realId}`,
+          `/api/drinks/${drink.id}`,
           "DELETE",
         );
         if (ok || data.code === "drinkNotFound") {
           return null;
         }
-        if (removed) {
-          dispatch({ type: "add_drink", drink: removed });
-        }
+        dispatch({ type: "add_drink", drink });
         return data.code ?? "couldNotRemove";
       } catch (error) {
-        if (removed) {
-          dispatch({ type: "add_drink", drink: removed });
-        }
+        dispatch({ type: "add_drink", drink });
         return failure(error, "couldNotRemove");
       }
     },
-    [dispatch, resolveDrinkId, state.drinks, failure],
+    [dispatch, failure],
   );
 
   const setCurrency = useCallback(
@@ -280,67 +229,12 @@ export default function UserProvider({
     [dispatch, failure],
   );
 
-  // A missing or dead session signs out; anything else (offline, a server
-  // error) is a failed load the visitor can retry, never a sign-out.
-  const hydrate = useCallback(async () => {
-    dispatch({ type: "loading" });
-    try {
-      await loadUser();
-    } catch (error) {
-      if (error instanceof SessionExpiredError) {
-        await expire();
-      } else {
-        dispatch({
-          type: "load_failed",
-          reason:
-            error instanceof RateLimitedError
-              ? "tooManyRequests"
-              : navigator.onLine === false
-                ? "loadFailedOffline"
-                : "loadFailedBody",
-        });
-      }
-    } finally {
-      dispatch({ type: "done_loading" });
-    }
-  }, [dispatch, loadUser, expire]);
-
-  useEffect(() => {
-    if (skipHydration) {
-      dispatch({ type: "done_loading" });
-      return;
-    }
-
-    void hydrate();
-  }, [dispatch, hydrate, skipHydration]);
-
-  const user = useMemo<UserSession | null>(() => {
-    if (!state.username || !state.createdAt) {
-      return null;
-    }
-
-    return {
-      username: state.username,
-      createdAt: state.createdAt,
-      currency: state.currency,
-      shops: state.shops,
-      drinks: state.drinks,
-    };
-  }, [
-    state.username,
-    state.createdAt,
-    state.currency,
-    state.shops,
-    state.drinks,
-  ]);
-
   const value = useMemo<UserContextValue>(
     () => ({
-      user,
+      user: state.user,
       isLoadingUser: state.isLoading,
       loadFailed: state.loadFailed,
       retryLoad: hydrate,
-      login,
       logout,
       addShop,
       removeShop,
@@ -350,11 +244,8 @@ export default function UserProvider({
       setCurrency,
     }),
     [
-      user,
-      state.isLoading,
-      state.loadFailed,
+      state,
       hydrate,
-      login,
       logout,
       addShop,
       removeShop,

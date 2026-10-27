@@ -1,11 +1,4 @@
-import {
-  AUTH_COOKIE_MAX_AGE,
-  AUTH_COOKIE_NAME,
-  AUTH_COOKIE_OPTIONS,
-  comparePassword,
-  hashPassword,
-  signToken,
-} from "@/lib/api/auth";
+import { comparePassword, hashPassword, setAuthCookie } from "@/lib/api/auth";
 import { getUsernameFromRequest } from "@/lib/api/request-auth";
 import {
   errorResponse,
@@ -46,18 +39,13 @@ export async function POST(request: NextRequest) {
     }
 
     if (!(await comparePassword(currentPassword, existing.hashed_password))) {
-      return errorResponse("invalidPassword", "Invalid password.", 401);
+      return errorResponse("invalidPassword", "Invalid password.", 403);
     }
 
     await updatePassword(username, await hashPassword(newPassword));
 
-    // Other devices are now signed out; keep this one signed in.
-    const response = NextResponse.json({ success: true });
-    response.cookies.set(AUTH_COOKIE_NAME, await signToken({ username }), {
-      ...AUTH_COOKIE_OPTIONS,
-      maxAge: AUTH_COOKIE_MAX_AGE,
-    });
-    return response;
+    // Other devices are now signed out; this one gets a fresh token.
+    return setAuthCookie(NextResponse.json({ success: true }), username);
   } catch {
     return serverErrorResponse();
   }

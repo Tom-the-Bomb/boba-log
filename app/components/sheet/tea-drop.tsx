@@ -2,14 +2,9 @@ const RADIUS = [0, 6.4, 7.8, 8.8, 9.6];
 
 interface TeaDropProps {
   count: number;
-  /** Writes the count inside from two drinks up. */
   showCount?: boolean;
 }
 
-/**
- * A dried drop of tea: the more cups that day, the larger and deeper the
- * drop, with a darker rim where the tea pooled as it dried.
- */
 export default function TeaDrop({ count, showCount = true }: TeaDropProps) {
   const level = Math.min(count, 4);
   const r = RADIUS[level];
@@ -44,7 +39,7 @@ export default function TeaDrop({ count, showCount = true }: TeaDropProps) {
           fontSize={count > 9 ? 10 : 12.5}
           fontWeight="400"
           fill={`var(--drop-num-${level})`}
-          className="num @max-[40rem]:hidden"
+          className="tabular-nums @max-[40rem]:hidden"
         >
           {count}
         </text>

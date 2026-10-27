@@ -7,10 +7,6 @@ interface ErrorScreenProps {
   onAction: () => void;
 }
 
-/**
- * A calm full page for when the log or a whole page cannot show: the 茶 seal,
- * a title, the reason in plain words and one way forward.
- */
 export default function ErrorScreen({
   title,
   body,

@@ -10,7 +10,7 @@ export default function LanguageToggle() {
     <button
       type="button"
       onClick={() => i18n.changeLanguage(isEnglish ? "zh" : "en")}
-      className="tap-target relative grid h-10 min-w-10 place-items-center rounded-md px-2 text-sm whitespace-nowrap text-text-2 hover:bg-hover hover:text-text sm:h-9 sm:min-w-9"
+      className="icon-btn h-10 min-w-10 px-2 text-sm whitespace-nowrap sm:h-9 sm:min-w-9"
       aria-label={t("switchLanguage")}
       title={t("switchLanguage")}
       lang={isEnglish ? "zh" : "en"}

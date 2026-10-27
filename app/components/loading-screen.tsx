@@ -4,12 +4,6 @@ import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import SealMark from "./brand/seal-mark";
 
-/**
- * The seal and "Loading…" while the log loads. If loading stalls, as when a
- * script fails to arrive, a plain Reload link appears after a while; it is
- * revealed by CSS and is an ordinary link, so it works even if scripts never
- * run.
- */
 export default function LoadingScreen() {
   const { t } = useTranslation("common");
   const pathname = usePathname();

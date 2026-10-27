@@ -17,7 +17,6 @@ import { Popover } from "./overlays";
 interface Option<K extends string> {
   value: K;
   label: string;
-  /** Shown but not selectable, e.g. spend before any drink has a price. */
   disabled?: boolean;
 }
 
@@ -88,7 +87,6 @@ export function Select<K extends string>({
 
 interface SegmentedProps<K extends string> {
   label: string;
-  /** Smaller buttons for toolbars. */
   compact?: boolean;
   value: K;
   options: readonly Option<K>[];
@@ -96,7 +94,6 @@ interface SegmentedProps<K extends string> {
   className?: string;
 }
 
-/** A row of mutually exclusive choices; one is always selected. */
 export function Segmented<K extends string>({
   label,
   value,

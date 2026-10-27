@@ -3,7 +3,6 @@ import { APP_ICON_ALT, SITE_URL, SOCIAL_IMAGE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import JsonLd from "../components/seo/json-ld";
-import UserProvider from "../providers/user-provider";
 
 export const metadata: Metadata = {
   title: "Sign In",
@@ -34,9 +33,9 @@ export const metadata: Metadata = {
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <UserProvider skipHydration>
+    <>
       <JsonLd data={AUTH_JSONLD} />
       {children}
-    </UserProvider>
+    </>
   );
 }

@@ -12,7 +12,6 @@ export default function NotFound() {
       <SiteHeader />
       <main className="grid flex-1 place-items-center px-4 pb-24">
         <section className="flex max-w-sm flex-col items-center text-center">
-          {/* The ring a cup leaves behind, with nothing poured. */}
           <svg aria-hidden="true" viewBox="0 0 64 64" className="size-16">
             <circle
               cx="32"

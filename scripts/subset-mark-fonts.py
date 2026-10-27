@@ -40,7 +40,6 @@ MARKS = [
 
 
 def slices(package: str, weight: int) -> Iterator[tuple[str, set[int]]]:
-    """Yields each @font-face slice of a weight: its file and its code points."""
     css = (FONTSOURCE / package / f"{weight}.css").read_text(encoding="utf-8")
     for block in re.findall(r"@font-face\s*{([^}]*)}", css):
         src = re.search(r"url\(\./files/([^)]+\.woff2)\)", block)
@@ -69,7 +68,6 @@ def subset_slice(path: Path, text: str) -> TTFont:
 
 
 def subset_weight(package: str, weight: int, chars: str, dest: Path) -> None:
-    """Cuts the chars out of the slices that hold them, merged into one WOFF2."""
     table = list(slices(package, weight))
     by_slice: dict[str, str] = {}
     for char in chars:

@@ -1,15 +1,16 @@
 import jwt from "@tsndr/cloudflare-worker-jwt";
+import type { NextResponse } from "next/server";
 
 export const AUTH_COOKIE_NAME = "boba_jwt";
 
-export const AUTH_COOKIE_OPTIONS = {
+const AUTH_COOKIE_OPTIONS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
   sameSite: "lax" as const,
   path: "/",
 };
 
-export const AUTH_COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
+const AUTH_COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
 
 const encoder = new TextEncoder();
 
@@ -26,7 +27,6 @@ interface AuthTokenPayload {
 }
 
 interface VerifiedToken extends AuthTokenPayload {
-  /** Epoch seconds the token was issued. */
   issuedAt: number;
 }
 
@@ -70,7 +70,7 @@ export async function comparePassword(
   return constantTimeEqual(hash, hexToBuf(hashHex));
 }
 
-export async function signToken(payload: AuthTokenPayload): Promise<string> {
+async function signToken(payload: AuthTokenPayload): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   return jwt.sign(
     { ...payload, iat: now, exp: now + AUTH_COOKIE_MAX_AGE },
@@ -79,12 +79,8 @@ export async function signToken(payload: AuthTokenPayload): Promise<string> {
 }
 
 export async function verifyToken(token: string): Promise<VerifiedToken> {
-  const isValid = await jwt.verify(token, getJwtSecret());
-  if (!isValid) {
-    throw new Error("Invalid token.");
-  }
-
-  const { payload } = jwt.decode<AuthTokenPayload>(token);
+  const payload = (await jwt.verify<AuthTokenPayload>(token, getJwtSecret()))
+    ?.payload;
   if (!payload || typeof payload.username !== "string") {
     throw new Error("Invalid token payload.");
   }
@@ -93,6 +89,22 @@ export async function verifyToken(token: string): Promise<VerifiedToken> {
   const issuedAt = payload.iat ?? (payload.exp ?? 0) - AUTH_COOKIE_MAX_AGE;
 
   return { username: payload.username, issuedAt };
+}
+
+export async function setAuthCookie(response: NextResponse, username: string) {
+  response.cookies.set(AUTH_COOKIE_NAME, await signToken({ username }), {
+    ...AUTH_COOKIE_OPTIONS,
+    maxAge: AUTH_COOKIE_MAX_AGE,
+  });
+  return response;
+}
+
+export function clearAuthCookie(response: NextResponse) {
+  response.cookies.set(AUTH_COOKIE_NAME, "", {
+    ...AUTH_COOKIE_OPTIONS,
+    maxAge: 0,
+  });
+  return response;
 }
 
 function bufToHex(buf: Uint8Array): string {

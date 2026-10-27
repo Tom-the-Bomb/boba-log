@@ -16,7 +16,6 @@ import ShopAvatar from "./shop-avatar";
 
 type Field = "name" | "price" | "note";
 
-/** The field an error code is about, so it can be marked and focused. */
 const FIELD_OF_CODE: Partial<Record<string, Field>> = {
   invalidPrice: "price",
   drinkNameTooLong: "name",
@@ -26,7 +25,6 @@ const FIELD_OF_CODE: Partial<Record<string, Field>> = {
 interface DrinkFormProps {
   shops: readonly BobaShop[];
   currency: string;
-  /** Editing an existing drink; omitted when adding. */
   drink?: Drink;
   initialShopId?: number;
   showDate?: boolean;
@@ -78,7 +76,6 @@ export default function DrinkForm({
     }
   }
 
-  /** Marks the field an error is about and points it at the message. */
   const invalid = (field: Field) =>
     errorField === field
       ? { "aria-invalid": true, "aria-describedby": errorId }
@@ -178,7 +175,7 @@ export default function DrinkForm({
           <input
             id={`${id}-price`}
             {...invalid("price")}
-            className="field num"
+            className="field tabular-nums"
             value={price}
             inputMode="decimal"
             placeholder="6.50"

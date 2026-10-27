@@ -1,11 +1,10 @@
 "use client";
 
 import { dayFromParts, daysInMonth, monthName } from "@/lib/date";
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import useTouchScrub from "../../hooks/use-touch-scrub";
 
-/** Drawn at the width it is shown, so text stays its real size on phones. */
 const DEFAULT_WIDTH = 760;
 const BASE = 150;
 const NEAR_HEIGHT = 92;
@@ -20,7 +19,6 @@ interface InkScrollProps {
   todayLabel: string;
   onSelectDay?: (day: string) => void;
   tileLabel: (day: string, count: number) => string;
-  /** Dot size 1–4 from a day's value; by default the drink count. */
   levelOf?: (value: number) => number;
 }
 
@@ -28,7 +26,6 @@ function xAt(index: number, total: number, width: number) {
   return (index / (total - 1)) * width;
 }
 
-/** A Catmull-Rom spline through the points, as one smooth cubic path. */
 function smoothCurve(points: readonly (readonly [number, number])[]) {
   const sampled = points.filter(
     (_, index) => index % 3 === 0 || index === points.length - 1,
@@ -66,12 +63,6 @@ function gaussianSmooth(values: readonly number[], sigma: number) {
   });
 }
 
-/**
- * The year painted as a handscroll (手卷): soft ink-wash ridges rise with
- * busy stretches, the paper fibre showing through the wash, and a row of ink
- * dots below marks each day a drink was logged. Pure vector, so it stays
- * crisp at any size.
- */
 export default function InkScroll({
   year,
   counts,
@@ -88,14 +79,14 @@ export default function InkScroll({
   const boxRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(DEFAULT_WIDTH);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const box = boxRef.current;
     if (!box) {
       return;
     }
-    const observer = new ResizeObserver(([entry]) =>
-      setWidth(Math.max(1, Math.round(entry.contentRect.width))),
-    );
+    const measure = () => setWidth(Math.max(1, Math.round(box.clientWidth)));
+    measure();
+    const observer = new ResizeObserver(measure);
     observer.observe(box);
     return () => observer.disconnect();
   }, []);
@@ -121,7 +112,6 @@ export default function InkScroll({
   }, [year, counts, today]);
 
   const x = (index: number) => xAt(index, days.length, width);
-  // Narrow screens label every other month so the names don't collide.
   const monthStep = width / 12 < 44 ? 2 : 1;
 
   const ridges = useMemo(() => {
@@ -138,18 +128,17 @@ export default function InkScroll({
         (value, index) =>
           [px(index), BASE - lift - (value / peak) * height] as const,
       );
-    const near_ = smoothCurve(toPoints(near, NEAR_HEIGHT, 0));
-    const far_ = smoothCurve(toPoints(far, FAR_HEIGHT, FAR_LIFT));
+    const nearLine = smoothCurve(toPoints(near, NEAR_HEIGHT, 0));
+    const farLine = smoothCurve(toPoints(far, FAR_HEIGHT, FAR_LIFT));
     const foot = ` L${px(lastIndex).toFixed(1)} ${BASE} L0 ${BASE} Z`;
     return {
-      far: far_ + foot,
-      near: near_ + foot,
-      farLine: far_,
-      nearLine: near_,
+      far: farLine + foot,
+      near: nearLine + foot,
+      farLine,
+      nearLine,
     };
   }, [values, lastIndex, width]);
 
-  /** The day under a point on screen, up to today. */
   function indexAt(clientX: number) {
     const box = boxRef.current!.getBoundingClientRect();
     const ratio = (clientX - box.left) / box.width;
@@ -157,8 +146,6 @@ export default function InkScroll({
     return Math.max(0, Math.min(lastIndex, index));
   }
 
-  // A day is a pixel or two wide on a phone: a finger slides along the
-  // scroll to find one, named above the ridges, and lifts to open it.
   const scrub = useTouchScrub({
     pick: (clientX) => (lastIndex >= 0 ? indexAt(clientX) : null),
     onPreview: (index) => setHover(index),
@@ -205,7 +192,6 @@ export default function InkScroll({
             <stop offset="0.45" stopColor="currentColor" stopOpacity="0.15" />
             <stop offset="1" stopColor="currentColor" stopOpacity="0" />
           </linearGradient>
-          {/* The wash thins into mist over the last stretch before today. */}
           <linearGradient
             id={`${id}-mist-fade`}
             gradientUnits="userSpaceOnUse"
@@ -282,17 +268,16 @@ export default function InkScroll({
 
         {monthStarts.map((start, month) =>
           month % monthStep ? null : (
-            <g key={month}>
-              <text
-                x={x(start) + 2}
-                y={BASE + 36}
-                fontSize="12"
-                fill="var(--text-2)"
-                className="font-kai"
-              >
-                {monthName(month, i18n.language)}
-              </text>
-            </g>
+            <text
+              key={month}
+              x={x(start) + 2}
+              y={BASE + 36}
+              fontSize="12"
+              fill="var(--text-2)"
+              className="font-kai"
+            >
+              {monthName(month, i18n.language)}
+            </text>
           ),
         )}
 

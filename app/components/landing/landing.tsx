@@ -1,6 +1,7 @@
 "use client";
 
 import { SAMPLE, SAMPLE_SHOPS } from "@/lib/sample-year";
+import { REPO_URL } from "@/lib/site";
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
@@ -36,7 +37,7 @@ export default function Landing({ signedIn = false }) {
       <main className="flex-1">
         <div className="relative isolate">
           <InkMountains className="absolute inset-x-0 bottom-0 -z-10 h-[clamp(14rem,58vw,22rem)] w-full sm:h-56 lg:h-72" />
-          <section className="mx-auto grid max-w-7xl gap-y-12 px-4 pt-8 pb-[clamp(14rem,58vw,22rem)] sm:px-8 sm:pt-12 sm:pb-60 lg:px-12 xl:grid-cols-[minmax(0,420px)_minmax(0,1fr)] xl:items-start xl:gap-x-14 xl:gap-y-0 xl:pt-5 xl:pb-[300px]">
+          <section className="mx-auto grid max-w-7xl gap-y-12 px-4 pt-8 pb-[clamp(14rem,58vw,22rem)] sm:px-8 sm:pt-12 sm:pb-60 lg:px-12 xl:grid-cols-[minmax(0,420px)_minmax(0,1fr)] xl:items-start xl:gap-x-14 xl:gap-y-0 xl:pt-5 xl:pb-75">
             <div className="xl:row-span-2 xl:self-center">
               <h1 className="font-kai text-5xl leading-[1.12] text-text sm:text-6xl xl:text-7xl">
                 {t("headingLine1")}
@@ -54,7 +55,7 @@ export default function Landing({ signedIn = false }) {
                   {t(signedIn ? "openLog" : "getStarted")}
                 </Link>
                 <a
-                  href="https://github.com/Tom-the-Bomb/boba-log"
+                  href={REPO_URL}
                   target="_blank"
                   rel="noreferrer"
                   className="tap-target relative inline-flex items-center gap-1 text-sm text-text-2 hover:text-text hover:underline"
@@ -65,21 +66,20 @@ export default function Landing({ signedIn = false }) {
               </div>
             </div>
 
-            <HangingScroll className="hidden w-full max-w-[624px] sm:block xl:col-start-2 xl:row-start-1 xl:justify-self-end" />
+            <HangingScroll className="hidden w-full max-w-156 sm:block xl:col-start-2 xl:row-start-1 xl:justify-self-end" />
 
-            <ul className="grid w-full max-w-[624px] grid-cols-3 gap-x-3 sm:-mt-2 sm:flex sm:flex-wrap sm:gap-x-6 sm:gap-y-3 sm:pl-1 xl:col-start-2 xl:row-start-2 xl:mt-10 xl:justify-self-end">
+            <ul className="grid w-full max-w-156 grid-cols-3 gap-x-3 sm:-mt-2 sm:flex sm:flex-wrap sm:gap-x-6 sm:gap-y-3 sm:pl-1 xl:col-start-2 xl:row-start-2 xl:mt-10 xl:justify-self-end">
               {SAMPLE_SHOPS.map((shop, index) => (
                 <li
                   key={shop.name}
                   className="flex min-w-0 items-center gap-2 sm:gap-2.5"
                 >
                   <ShopAvatar src={shop.avatar} name={shop.name} size={28} />
-                  {/* Name over count on phones, side by side from sm. */}
                   <span className="flex min-w-0 flex-col leading-tight sm:flex-row sm:items-center sm:gap-2.5">
                     <span className="truncate text-[13px] whitespace-nowrap text-text sm:text-sm">
                       {shop.name}
                     </span>
-                    <span className="num font-kai text-base text-text sm:text-lg">
+                    <span className="font-kai text-base text-text tabular-nums sm:text-lg">
                       {SAMPLE.shopTotals[index]}
                     </span>
                   </span>

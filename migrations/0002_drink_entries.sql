@@ -15,6 +15,12 @@ CREATE TABLE IF NOT EXISTS drinks (
 
 CREATE INDEX IF NOT EXISTS idx_drinks_shop_day ON drinks(shop_id, day);
 
+ALTER TABLE users ADD COLUMN currency TEXT NOT NULL DEFAULT 'USD';
+
+-- Session tokens issued before this time (epoch seconds) are rejected. Bumped
+-- on password change so other devices are signed out.
+ALTER TABLE users ADD COLUMN sessions_valid_after INTEGER NOT NULL DEFAULT 0;
+
 -- Expand every (shop, day, count) row into `count` individual entries.
 INSERT INTO drinks (shop_id, day, created_at)
 WITH RECURSIVE expanded(shop_id, date_key, remaining) AS (
@@ -23,12 +29,6 @@ WITH RECURSIVE expanded(shop_id, date_key, remaining) AS (
   SELECT shop_id, date_key, remaining - 1 FROM expanded WHERE remaining > 1
 )
 SELECT shop_id, date(date_key, 'unixepoch'), date_key FROM expanded;
-
-ALTER TABLE users ADD COLUMN currency TEXT NOT NULL DEFAULT 'USD';
-
--- Session tokens issued before this time (epoch seconds) are rejected. Bumped
--- on password change so other devices are signed out.
-ALTER TABLE users ADD COLUMN sessions_valid_after INTEGER NOT NULL DEFAULT 0;
 
 -- shop_dates and shops.total are no longer read or written. They stay until a
 -- later migration drops them, so the previous release keeps working while this

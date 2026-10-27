@@ -34,7 +34,7 @@ export default function RangePicker() {
     <DialogTrigger isOpen={isOpen} onOpenChange={setIsOpen}>
       <Button className="tap-target relative flex h-9 items-center gap-2 rounded-md border border-rule px-3 text-sm whitespace-nowrap text-text outline-none hover:border-rule-strong data-focus-visible:focus-ring">
         <span className="text-text-2">{t(RANGE_PRESET_KEYS[preset])}</span>
-        <span className="num ml-1 hidden sm:max-md:inline lg:inline">
+        <span className="ml-1 hidden tabular-nums sm:max-md:inline lg:inline">
           {label.start} – {label.end}
         </span>
         <ChevronDown

@@ -9,10 +9,6 @@ import notFoundMessages from "./messages/not-found.json";
 
 import type { Locale } from "./locale";
 
-/**
- * A fresh i18next instance in the given language. One per render tree, so
- * server renders for different visitors never share a language.
- */
 export function createI18n(locale: Locale): I18n {
   const instance = createInstance();
   instance.use(initReactI18next).init({
@@ -36,7 +32,6 @@ export function createI18n(locale: Locale): I18n {
     fallbackLng: "en",
     defaultNS: "common",
     fallbackNS: "common",
-    // Resources are bundled, so initialise synchronously for server renders.
     initAsync: false,
     interpolation: {
       escapeValue: false,

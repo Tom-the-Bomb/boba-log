@@ -16,50 +16,38 @@ export async function getUserByUsername(username: string) {
     .first<{ hashed_password: string }>();
 }
 
-export async function createUser(
-  username: string,
-  hashedPassword: string,
-): Promise<PublicUser> {
-  const row = await getDb()
-    .prepare(
-      `INSERT INTO users (username, hashed_password, created_at) VALUES (?, ?, ?)
-       RETURNING username, created_at, currency`,
-    )
-    .bind(username, hashedPassword, Math.floor(Date.now() / 1000))
-    .first<UserRow>();
-
-  if (!row) {
-    throw new Error("Could not create user.");
-  }
-
-  return {
-    username: row.username,
-    createdAt: row.created_at,
-    currency: row.currency,
-    shops: [],
-    drinks: [],
-  };
-}
-
-export async function getPublicUser(
-  username: string,
-): Promise<PublicUser | null> {
-  const row = await getDb()
+export async function getUserRow(username: string) {
+  return getDb()
     .prepare(
       "SELECT username, created_at, currency FROM users WHERE username = ?",
     )
     .bind(username)
     .first<UserRow>();
+}
 
-  if (!row) {
-    return null;
-  }
+export async function createUser(username: string, hashedPassword: string) {
+  const row = await getDb()
+    .prepare(
+      `INSERT INTO users (username, hashed_password, created_at) VALUES (?, ?, ?)
+       ON CONFLICT (username) DO NOTHING
+       RETURNING username`,
+    )
+    .bind(username, hashedPassword, Math.floor(Date.now() / 1000))
+    .first<{ username: string }>();
+  return row !== null;
+}
 
-  const [shops, drinks] = await Promise.all([
+export async function getPublicUser(
+  username: string,
+): Promise<PublicUser | null> {
+  const [row, shops, drinks] = await Promise.all([
+    getUserRow(username),
     listShops(username),
     listDrinks(username),
   ]);
-
+  if (!row) {
+    return null;
+  }
   return {
     username: row.username,
     createdAt: row.created_at,
@@ -85,7 +73,6 @@ export async function getSessionWindow(username: string) {
     .first<{ created_at: number; sessions_valid_after: number }>();
 }
 
-/** Sets a new password and invalidates every session issued before now. */
 export async function updatePassword(username: string, hashedPassword: string) {
   await getDb()
     .prepare(
@@ -95,11 +82,9 @@ export async function updatePassword(username: string, hashedPassword: string) {
     .run();
 }
 
-/** Deletes the user; shops and drinks go with it through ON DELETE CASCADE. */
-export async function deleteUser(username: string): Promise<boolean> {
-  const result = await getDb()
+export async function deleteUser(username: string) {
+  await getDb()
     .prepare("DELETE FROM users WHERE username = ?")
     .bind(username)
     .run();
-  return result.meta.changes > 0;
 }

@@ -9,11 +9,11 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   if (pathname.startsWith("/api/")) {
-    const { success } = await env[
-      pathname.startsWith("/api/auth")
-        ? "AUTH_RATE_LIMIT"
-        : "GENERAL_RATE_LIMIT"
-    ].limit({ key: ip });
+    const limiter =
+      pathname.startsWith("/api/auth") && pathname !== "/api/auth/logout"
+        ? env.AUTH_RATE_LIMIT
+        : env.GENERAL_RATE_LIMIT;
+    const { success } = await limiter.limit({ key: ip });
     if (!success) {
       return NextResponse.json(
         {

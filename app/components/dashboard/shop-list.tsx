@@ -1,12 +1,8 @@
 "use client";
 
-import {
-  countsByShop,
-  drinksInRange,
-  lastDayByShop,
-} from "@/lib/dashboard-metrics";
+import { countsByShop, lastDayByShop } from "@/lib/dashboard-metrics";
 import { translateShopName } from "@/lib/default-shops";
-import type { BobaShop } from "@/lib/types";
+import type { BobaShop, Drink } from "@/lib/types";
 import { Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -18,9 +14,9 @@ import DeleteShopDialog from "./delete-shop-dialog";
 import LoggedToast from "./logged-toast";
 import ShopRow from "./shop-row";
 
-export default function ShopList() {
+export default function ShopList({ inRange }: { inRange: readonly Drink[] }) {
   const { user, logDrink, removeDrink, addShop, removeShop } = useUser();
-  const { today, range, setFocus } = useDashboard();
+  const { today, setFocus } = useDashboard();
   const { t, i18n } = useTranslation("dashboard");
   const [isAdding, setIsAdding] = useState(false);
   const [deleting, setDeleting] = useState<BobaShop | null>(null);
@@ -30,15 +26,15 @@ export default function ShopList() {
 
   const { rangeCounts, todayCounts, lastDays, totalCounts, max } =
     useMemo(() => {
-      const inRange = countsByShop(drinksInRange(drinks, range));
+      const rangeCounts = countsByShop(inRange);
       return {
-        rangeCounts: inRange,
+        rangeCounts,
         todayCounts: countsByShop(drinks.filter((d) => d.day === today)),
         lastDays: lastDayByShop(drinks),
         totalCounts: countsByShop(drinks),
-        max: Math.max(1, ...inRange.values()),
+        max: Math.max(1, ...rangeCounts.values()),
       };
-    }, [drinks, range, today]);
+    }, [drinks, inRange, today]);
 
   async function handleLog(shop: BobaShop) {
     const name = translateShopName(shop.name, i18n.language);
@@ -52,7 +48,7 @@ export default function ShopList() {
             toast.dismiss(id);
             const result = await pending;
             if (typeof result !== "string") {
-              const error = await removeDrink(result.id);
+              const error = await removeDrink(result);
               if (error) {
                 toast.error(t(error));
               }

@@ -28,39 +28,17 @@ export default function DefaultShopsSection({
     }
 
     const measure = () => {
-      const items = Array.from(container.children) as HTMLElement[];
-      if (items.length === 0) {
-        dispatch({ type: "measured", isCollapsible: false });
-        return;
-      }
-
-      const firstTop = items[0].offsetTop;
-      let hasMultipleRows = false;
-
-      for (const item of items) {
-        if (item.offsetTop > firstTop + 1) {
-          hasMultipleRows = true;
-          break;
-        }
-      }
-
-      dispatch({ type: "measured", isCollapsible: hasMultipleRows });
+      const items = [...container.children] as HTMLElement[];
+      const firstTop = items[0]?.offsetTop ?? 0;
+      dispatch({
+        type: "measured",
+        isCollapsible: items.some((item) => item.offsetTop > firstTop + 1),
+      });
     };
-
-    const initialMeasureFrame = requestAnimationFrame(measure);
 
     const observer = new ResizeObserver(measure);
     observer.observe(container);
-    for (const child of Array.from(container.children)) {
-      observer.observe(child);
-    }
-
-    addEventListener("resize", measure);
-    return () => {
-      cancelAnimationFrame(initialMeasureFrame);
-      observer.disconnect();
-      removeEventListener("resize", measure);
-    };
+    return () => observer.disconnect();
   }, [dispatch]);
 
   return (

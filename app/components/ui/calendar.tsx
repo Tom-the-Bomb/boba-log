@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  getLocalTimeZone,
-  today as todayDate,
-  type DateValue,
-} from "@internationalized/date";
+import type { DateValue } from "@internationalized/date";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   Calendar as AriaCalendar,
@@ -73,15 +69,13 @@ function CalendarBody({ range = false }) {
                 isDisabled,
                 isUnavailable,
                 isFocusVisible,
-                date: cellDate,
+                isToday,
               }) => {
                 const isEndpoint =
                   isSelected && (!range || isSelectionStart || isSelectionEnd);
-                const isToday =
-                  cellDate.compare(todayDate(getLocalTimeZone())) === 0;
                 return (
                   <span
-                    className={`num mx-auto grid size-9 cursor-pointer place-items-center rounded-full ${
+                    className={`mx-auto grid size-9 cursor-pointer place-items-center rounded-full tabular-nums ${
                       isEndpoint
                         ? "forced-selected bg-accent text-on-accent"
                         : isDisabled || isUnavailable
@@ -103,7 +97,6 @@ function CalendarBody({ range = false }) {
   );
 }
 
-/** A month grid for choosing a span of days, start and end drawn as filled circles joined by a band. */
 export function RangeCalendar<T extends DateValue>(
   props: RangeCalendarProps<T>,
 ) {
