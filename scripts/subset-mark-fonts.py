@@ -3,7 +3,7 @@ scroll's title and the language toggle) out of the fontsource slices, so those
 pages never fetch the large CJK slices.
 
 Writes app/fonts/marks/*.woff2 with their OFL licences, and app/fonts/marks.css.
-Needs fontTools and brotli: pip install fonttools brotli
+Needs fontTools and brotli: pip install -r scripts/requirements.txt
 """
 
 import re

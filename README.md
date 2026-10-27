@@ -139,6 +139,10 @@ The legacy `shop_dates` table and `shops.total` column are unused but kept for r
 ### Schema
 
 ```mermaid
+---
+config:
+  theme: redux-dark-color
+---
 erDiagram
   users ||--o{ shops : "owns"
   shops ||--o{ drinks : "has"
@@ -219,20 +223,20 @@ bun run deploy
 
 ## Scripts
 
-- `bun run dev` — Next.js dev server with local Cloudflare bindings
-- `bun run build` — Production build
-- `bun run preview` — OpenNext Cloudflare preview with remote bindings
-- `bun run deploy` — OpenNext Cloudflare build, remote D1 migrations, then deploy
-- `bun run db:migrate` — Apply pending D1 migrations to the remote database
-- `bun run db:migrate:local` — Apply pending D1 migrations to the local database
-- `bun run assets:process` — Normalize `public/default-shops` images to `256x256` WebP
-- `bun run assets:textures` — Regenerate the paper and mountain textures in `public/textures`
-- `bun run assets:fonts` — Regenerate the subset Chinese fonts in `app/fonts` (needs Python with `fonttools` and `brotli`)
-- `bun run i18n:upload` — Dry run upload translations to SimpleLocalize
-- `bun run i18n:upload:confirm` — Upload translations to SimpleLocalize
-- `bun run i18n:download` — Download translations from SimpleLocalize
-- `bun run lint` — ESLint + Prettier check + TypeScript no-emit
-- `bun run lint:fix` — ESLint fix + Prettier write + TypeScript no-emit
-- `bun run format` — Prettier write
-- `bun run format:check` — Prettier check
-- `bun run doctor` — Run [react-doctor](https://github.com/millionco/react-doctor)
+- `bun run dev`: Next.js dev server with local Cloudflare bindings
+- `bun run build`: Production build
+- `bun run preview`: OpenNext Cloudflare preview with remote bindings
+- `bun run deploy`: OpenNext Cloudflare build, remote D1 migrations, then deploy
+- `bun run db:migrate`: Apply pending D1 migrations to the remote database
+- `bun run db:migrate:local`: Apply pending D1 migrations to the local database
+- `bun run assets:process`: Normalize `public/default-shops` images to `256x256` WebP
+- `bun run assets:textures`: Regenerate the paper and mountain textures in `public/textures`
+- `bun run assets:fonts`: Regenerate the subset Chinese fonts in `app/fonts` (run `pip install -r scripts/requirements.txt` first)
+- `bun run i18n:upload`: Dry run upload translations to SimpleLocalize
+- `bun run i18n:upload:confirm`: Upload translations to SimpleLocalize
+- `bun run i18n:download`: Download translations from SimpleLocalize
+- `bun run lint`: ESLint + Prettier check + TypeScript no-emit
+- `bun run lint:fix`: ESLint fix + Prettier write + TypeScript no-emit
+- `bun run format`: Prettier write
+- `bun run format:check`: Prettier check
+- `bun run doctor`: Run [react-doctor](https://github.com/millionco/react-doctor)
