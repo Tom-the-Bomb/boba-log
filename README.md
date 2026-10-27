@@ -1,6 +1,11 @@
+<div align="center">
+  <img src="public/favicon.svg" alt="Boba Log" width="88" />
+
 # [Boba Log](https://boba.tomthebomb.dev)
 
 [![React Doctor](https://www.react.doctor/share/badge?p=boba-log&s=100)](https://www.react.doctor/share?p=boba-log&s=100)
+
+</div>
 
 Boba Log is a Next.js app for logging bubble tea drinks, deployed to Cloudflare Workers.
 
