@@ -5,6 +5,8 @@ import { SAMPLE, SAMPLE_YEAR } from "@/lib/sample-year";
 import {
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
+  type RefObject,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -85,23 +87,14 @@ interface Tip {
   y: number;
 }
 
-/**
- * The sample year mounted as a small hanging scroll. Visitors can drag the
- * roller up to roll it, and let go to watch it drop open again.
- */
-export default function HangingScroll({ className = "" }) {
-  const { t, i18n } = useTranslation("landing");
-  const { t: td } = useTranslation("dashboard");
-  const rootRef = useRef<HTMLElement>(null);
-  const lengthRef = useRef<HTMLDivElement>(null);
-  const rollerRef = useRef<HTMLButtonElement>(null);
-  const [tip, setTip] = useState<Tip | null>(null);
-
-  const monthNames = useMemo(
-    () => MONTHS.map(({ month }) => monthName(month, i18n.language)),
-    [i18n.language],
-  );
-
+/** Wires up the roller: drag it up to roll the scroll and let go to drop
+ *  it (a flick tosses it, a tap tugs it), or hold the up arrow to wind it. */
+function useRoller(
+  rootRef: RefObject<HTMLElement | null>,
+  lengthRef: RefObject<HTMLDivElement | null>,
+  rollerRef: RefObject<HTMLButtonElement | null>,
+  onGrab: () => void,
+) {
   useEffect(() => {
     const root = rootRef.current;
     const length = lengthRef.current;
@@ -163,7 +156,7 @@ export default function HangingScroll({ className = "" }) {
       }
       roller!.setPointerCapture(event.pointerId);
       root!.dataset.grabbing = "";
-      setTip(null);
+      onGrab();
       const from = grab();
       drag = {
         pointerId: event.pointerId,
@@ -276,7 +269,65 @@ export default function HangingScroll({ className = "" }) {
       roller.removeEventListener("keyup", onKeyUp);
       roller.removeEventListener("click", onClick);
     };
-  }, []);
+  }, [rootRef, lengthRef, rollerRef, onGrab]);
+}
+
+/** The silk cord from the nail down to the stave. */
+function Cord() {
+  return (
+    <svg
+      aria-hidden="true"
+      className={styles.cord}
+      viewBox="0 0 1000 100"
+      preserveAspectRatio="none"
+    >
+      <path
+        d={CORD}
+        fill="none"
+        stroke="rgb(0 0 0 / 0.18)"
+        strokeWidth="3"
+        vectorEffect="non-scaling-stroke"
+        transform="translate(4 6)"
+      />
+      <path
+        d={CORD}
+        fill="none"
+        stroke="var(--hs-cord)"
+        strokeWidth="2.6"
+        strokeLinecap="round"
+        vectorEffect="non-scaling-stroke"
+      />
+      <path
+        d={CORD}
+        fill="none"
+        stroke="var(--hs-cord-hi)"
+        strokeWidth="1"
+        strokeDasharray="1.6 2.6"
+        vectorEffect="non-scaling-stroke"
+      />
+    </svg>
+  );
+}
+
+/**
+ * The sample year mounted as a small hanging scroll. Visitors can drag the
+ * roller up to roll it, and let go to watch it drop open again.
+ */
+export default function HangingScroll({ className = "" }) {
+  const { t, i18n } = useTranslation("landing");
+  const { t: td } = useTranslation("dashboard");
+  const rootRef = useRef<HTMLElement>(null);
+  const lengthRef = useRef<HTMLDivElement>(null);
+  const rollerRef = useRef<HTMLButtonElement>(null);
+  const [tip, setTip] = useState<Tip | null>(null);
+  const hideTip = useCallback(() => setTip(null), []);
+
+  const monthNames = useMemo(
+    () => MONTHS.map(({ month }) => monthName(month, i18n.language)),
+    [i18n.language],
+  );
+
+  useRoller(rootRef, lengthRef, rollerRef, hideTip);
 
   function showTip(event: ReactPointerEvent) {
     const cell = (event.target as Element).closest<HTMLElement>("[data-day]");
@@ -310,37 +361,7 @@ export default function HangingScroll({ className = "" }) {
       <i aria-hidden="true" className={styles.nail} />
       <div className={styles.hang}>
         <div aria-hidden="true" className={styles.wallShadow} />
-        <svg
-          aria-hidden="true"
-          className={styles.cord}
-          viewBox="0 0 1000 100"
-          preserveAspectRatio="none"
-        >
-          <path
-            d={CORD}
-            fill="none"
-            stroke="rgb(0 0 0 / 0.18)"
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            transform="translate(4 6)"
-          />
-          <path
-            d={CORD}
-            fill="none"
-            stroke="var(--hs-cord)"
-            strokeWidth="2.6"
-            strokeLinecap="round"
-            vectorEffect="non-scaling-stroke"
-          />
-          <path
-            d={CORD}
-            fill="none"
-            stroke="var(--hs-cord-hi)"
-            strokeWidth="1"
-            strokeDasharray="1.6 2.6"
-            vectorEffect="non-scaling-stroke"
-          />
-        </svg>
+        <Cord />
         <div aria-hidden="true" className={styles.stave} />
         <div ref={lengthRef} className={styles.length}>
           <div className={styles.silk}>

@@ -7,6 +7,7 @@ import {
   parsePriceInput,
   priceInputValue,
 } from "@/lib/drinks";
+import { failureCode } from "@/lib/network";
 import type { BobaShop, Drink, DrinkInput } from "@/lib/types";
 import { useId, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
@@ -59,7 +60,7 @@ export default function DrinkForm({
   );
   const [day, setDay] = useState(drink?.day ?? initialDay);
   const [name, setName] = useState(drink?.name ?? "");
-  const [price, setPrice] = useState(
+  const [price, setPrice] = useState(() =>
     priceInputValue(drink?.priceCents ?? null),
   );
   const [note, setNote] = useState(drink?.note ?? "");
@@ -98,13 +99,19 @@ export default function DrinkForm({
     setIsSaving(true);
     setError("");
     setErrorField(null);
-    const code = await onSubmit(shopId, {
-      day,
-      name: name.trim() || null,
-      priceCents,
-      note: note.trim() || null,
-    });
-    setIsSaving(false);
+    let code: string | null;
+    try {
+      code = await onSubmit(shopId, {
+        day,
+        name: name.trim() || null,
+        priceCents,
+        note: note.trim() || null,
+      });
+    } catch {
+      code = failureCode("couldNotSave");
+    } finally {
+      setIsSaving(false);
+    }
     if (code) {
       fail(code);
     } else if (!drink) {

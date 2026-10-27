@@ -203,7 +203,7 @@ export default function TrendsSection({ drinks, inRange }: TrendsSectionProps) {
         ) : (
           <InkBars
             bars={bars}
-            label={t(MODES.find((m) => m.value === mode)!.key)}
+            label={t(MODES.find((m) => m.value === mode)?.key ?? MODES[0].key)}
           />
         )}
       </div>

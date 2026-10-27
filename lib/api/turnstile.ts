@@ -27,6 +27,9 @@ export async function verifyTurnstileToken(
     body,
   });
 
+  if (!response.ok) {
+    return { success: false };
+  }
   const data = (await response.json()) as TurnstileVerifyResponse;
-  return { success: data.success };
+  return { success: data.success === true };
 }

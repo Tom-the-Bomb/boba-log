@@ -2,11 +2,11 @@
 
 import { failureCode } from "@/lib/network";
 import { waitForToken } from "@/lib/turnstile";
-import type { ApiErrorResponse } from "@/lib/types";
+import type { ApiErrorResponse, AuthMode } from "@/lib/types";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
-import type { SubmitEventHandler } from "react";
+import type { ChangeEvent, SubmitEventHandler } from "react";
 import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import SiteFooter from "../components/site-footer";
@@ -15,6 +15,82 @@ import { Segmented } from "../components/ui/fields";
 import { useUser } from "../providers/user-provider";
 import useAuthFormReducer from "../reducers/auth-form-reducer";
 
+/** The message key for what's wrong with a username, or null. */
+function usernameProblem(value: string, mode: AuthMode) {
+  const normalized = value.trim();
+  if (!normalized) {
+    return "usernameRequired";
+  }
+  return mode === "signup" && normalized.length < 3
+    ? "usernameMinLength"
+    : null;
+}
+
+/** The message key for what's wrong with a password, or null. */
+function passwordProblem(value: string, mode: AuthMode) {
+  if (!value) {
+    return "passwordRequired";
+  }
+  return mode === "signup" && value.length < 6 ? "passwordMinLength" : null;
+}
+
+function FieldError({ id, message }: { id: string; message: string }) {
+  if (!message) {
+    return null;
+  }
+  return (
+    <p id={id} className="mt-2 text-sm text-danger" role="alert">
+      {message}
+    </p>
+  );
+}
+
+interface PasswordInputProps {
+  value: string;
+  visible: boolean;
+  autoComplete: string;
+  error: string;
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  onToggle: () => void;
+}
+
+function PasswordInput({
+  value,
+  visible,
+  autoComplete,
+  error,
+  onChange,
+  onToggle,
+}: PasswordInputProps) {
+  const { t } = useTranslation("auth");
+  const Icon = visible ? EyeOff : Eye;
+
+  return (
+    <div className="relative">
+      <input
+        id="auth-password"
+        type={visible ? "text" : "password"}
+        value={value}
+        autoComplete={autoComplete}
+        onChange={onChange}
+        className="field h-11 pr-11"
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? "auth-password-error" : undefined}
+      />
+      {value && (
+        <button
+          type="button"
+          onClick={onToggle}
+          className="tap-target absolute top-1/2 right-1 grid size-9 -translate-y-1/2 place-items-center rounded-md text-text-2 hover:text-text"
+          aria-label={visible ? t("hidePassword") : t("showPassword")}
+        >
+          <Icon size={17} strokeWidth={1.5} />
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function AuthPage() {
   const router = useRouter();
   const { login } = useUser();
@@ -22,41 +98,20 @@ export default function AuthPage() {
   const [form, dispatch] = useAuthFormReducer();
   const turnstileRef = useRef<TurnstileInstance>(null);
 
-  function validateUsername(value: string) {
-    const normalized = value.trim();
-    if (!normalized) {
-      return t("usernameRequired");
-    }
-    if (form.mode === "signup" && normalized.length < 3) {
-      return t("usernameMinLength");
-    }
-    return "";
-  }
-
-  function validatePassword(value: string) {
-    if (!value) {
-      return t("passwordRequired");
-    }
-    if (form.mode === "signup" && value.length < 6) {
-      return t("passwordMinLength");
-    }
-    return "";
-  }
-
   async function handleSubmit(
     event: Parameters<SubmitEventHandler<HTMLFormElement>>[0],
   ) {
     event.preventDefault();
 
-    const nextUsernameError = validateUsername(form.username);
-    const nextPasswordError = validatePassword(form.password);
+    const usernameKey = usernameProblem(form.username, form.mode);
+    const passwordKey = passwordProblem(form.password, form.mode);
     dispatch({
       type: "set_validation",
-      usernameError: nextUsernameError,
-      passwordError: nextPasswordError,
+      usernameError: usernameKey ? t(usernameKey) : "",
+      passwordError: passwordKey ? t(passwordKey) : "",
     });
 
-    if (nextUsernameError || nextPasswordError) {
+    if (usernameKey || passwordKey) {
       return;
     }
 
@@ -143,64 +198,29 @@ export default function AuthPage() {
                   form.usernameError ? "auth-username-error" : undefined
                 }
               />
-              {form.usernameError && (
-                <p
-                  id="auth-username-error"
-                  className="mt-2 text-sm text-danger"
-                  role="alert"
-                >
-                  {form.usernameError}
-                </p>
-              )}
+              <FieldError
+                id="auth-username-error"
+                message={form.usernameError}
+              />
             </div>
             <div>
               <label htmlFor="auth-password" className="label">
                 {t("password")}
               </label>
-              <div className="relative">
-                <input
-                  id="auth-password"
-                  type={form.showPassword ? "text" : "password"}
-                  value={form.password}
-                  autoComplete={isLogin ? "current-password" : "new-password"}
-                  onChange={(event) =>
-                    dispatch({
-                      type: "set_password",
-                      value: event.target.value,
-                    })
-                  }
-                  className="field h-11 pr-11"
-                  aria-invalid={form.passwordError ? true : undefined}
-                  aria-describedby={
-                    form.passwordError ? "auth-password-error" : undefined
-                  }
-                />
-                {form.password && (
-                  <button
-                    type="button"
-                    onClick={() => dispatch({ type: "toggle_password" })}
-                    className="tap-target absolute top-1/2 right-1 grid size-9 -translate-y-1/2 place-items-center rounded-md text-text-2 hover:text-text"
-                    aria-label={
-                      form.showPassword ? t("hidePassword") : t("showPassword")
-                    }
-                  >
-                    {form.showPassword ? (
-                      <EyeOff size={17} strokeWidth={1.5} />
-                    ) : (
-                      <Eye size={17} strokeWidth={1.5} />
-                    )}
-                  </button>
-                )}
-              </div>
-              {form.passwordError && (
-                <p
-                  id="auth-password-error"
-                  className="mt-2 text-sm text-danger"
-                  role="alert"
-                >
-                  {form.passwordError}
-                </p>
-              )}
+              <PasswordInput
+                value={form.password}
+                visible={form.showPassword}
+                autoComplete={isLogin ? "current-password" : "new-password"}
+                error={form.passwordError}
+                onChange={(event) =>
+                  dispatch({ type: "set_password", value: event.target.value })
+                }
+                onToggle={() => dispatch({ type: "toggle_password" })}
+              />
+              <FieldError
+                id="auth-password-error"
+                message={form.passwordError}
+              />
             </div>
 
             {/* Runs unseen and never needs a person, so it stays out of the tab order. */}
@@ -229,11 +249,13 @@ export default function AuthPage() {
               disabled={form.isSubmitting}
               className="btn btn-primary h-11 w-full"
             >
-              {form.isSubmitting
-                ? t("pleaseWait")
-                : isLogin
-                  ? t("signInButton")
-                  : t("createAccountButton")}
+              {t(
+                form.isSubmitting
+                  ? "pleaseWait"
+                  : isLogin
+                    ? "signInButton"
+                    : "createAccountButton",
+              )}
             </button>
           </form>
         </section>

@@ -72,6 +72,9 @@ export default function useShopDraft() {
       const response = await fetch(preset.avatar, {
         signal: controller.signal,
       });
+      if (!response.ok) {
+        throw new Error(`Preset avatar returned ${response.status}`);
+      }
       const blob = await response.blob();
       if (controller.signal.aborted) {
         return;

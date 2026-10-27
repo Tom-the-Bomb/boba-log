@@ -39,7 +39,9 @@ function AccountMenu() {
           aria-label={tc("account")}
           onAction={async () => {
             await logout();
-            window.location.href = "/auth";
+            // A full load drops the signed-out account from memory, and
+            // replacing the entry keeps Back off a dashboard that would bounce.
+            window.location.replace("/auth");
           }}
         >
           <MenuItem id="logout">

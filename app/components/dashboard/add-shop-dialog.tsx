@@ -44,7 +44,7 @@ export default function AddShopDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [nameError, setNameError] = useState("");
-  const [turnstileToken, setTurnstileToken] = useState("");
+  const turnstileTokenRef = useRef("");
 
   function handleClose() {
     onClose();
@@ -70,7 +70,7 @@ export default function AddShopDialog({
     setError("");
 
     try {
-      const token = await waitForToken(turnstileRef, turnstileToken);
+      const token = await waitForToken(turnstileRef, turnstileTokenRef.current);
       if (!token) {
         setError(t("couldNotAddShop"));
         return;
@@ -100,7 +100,7 @@ export default function AddShopDialog({
       setError(t(failureCode("couldNotAddShop")));
     } finally {
       setIsSubmitting(false);
-      setTurnstileToken("");
+      turnstileTokenRef.current = "";
       turnstileRef.current?.reset();
     }
   }
@@ -213,9 +213,9 @@ export default function AddShopDialog({
           <Turnstile
             ref={turnstileRef}
             siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-            onSuccess={setTurnstileToken}
-            onError={() => setTurnstileToken("")}
-            onExpire={() => setTurnstileToken("")}
+            onSuccess={(token) => (turnstileTokenRef.current = token)}
+            onError={() => (turnstileTokenRef.current = "")}
+            onExpire={() => (turnstileTokenRef.current = "")}
             options={{ size: "invisible" }}
             className="h-0 overflow-hidden"
           />

@@ -42,11 +42,8 @@ async function postJson(url: string, method: string, body: unknown) {
   return response.ok ? null : (data.code ?? "somethingWentWrong");
 }
 
-export default function SettingsClient() {
-  const { user, setCurrency } = useUser();
-  const { t, i18n } = useTranslation("dashboard");
-  const { resolvedTheme, setTheme } = useTheme();
-
+function PasswordSection({ username }: { username: string }) {
+  const { t } = useTranslation("dashboard");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -55,15 +52,6 @@ export default function SettingsClient() {
     null,
   );
   const [isChanging, setIsChanging] = useState(false);
-
-  const [deletePassword, setDeletePassword] = useState("");
-  const [deleteError, setDeleteError] = useState("");
-  const [deletePasswordWrong, setDeletePasswordWrong] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  if (!user) {
-    return null;
-  }
 
   function passwordFail(code: string) {
     const field =
@@ -107,11 +95,87 @@ export default function SettingsClient() {
     }
   }
 
+  return (
+    <Section title={t("password")}>
+      <form onSubmit={handlePasswordChange} noValidate className="space-y-4">
+        <input
+          type="text"
+          autoComplete="username"
+          value={username}
+          readOnly
+          hidden
+        />
+        <div>
+          <label htmlFor="settings-current-password" className="label">
+            {t("currentPassword")}
+          </label>
+          <input
+            id="settings-current-password"
+            aria-invalid={passwordField === "current" || undefined}
+            aria-describedby={
+              passwordField === "current"
+                ? "settings-password-error"
+                : undefined
+            }
+            type="password"
+            autoComplete="current-password"
+            value={currentPassword}
+            onChange={(event) => setCurrentPassword(event.target.value)}
+            className="field"
+          />
+        </div>
+        <div>
+          <label htmlFor="settings-new-password" className="label">
+            {t("newPassword")}
+          </label>
+          <input
+            id="settings-new-password"
+            aria-invalid={passwordField === "new" || undefined}
+            aria-describedby={
+              passwordField === "new" ? "settings-password-error" : undefined
+            }
+            type="password"
+            autoComplete="new-password"
+            value={newPassword}
+            onChange={(event) => setNewPassword(event.target.value)}
+            className="field"
+          />
+        </div>
+        {passwordError && (
+          <p
+            id="settings-password-error"
+            className="text-sm text-danger"
+            role="alert"
+          >
+            {passwordError}
+          </p>
+        )}
+        <button
+          type="submit"
+          disabled={isChanging || !currentPassword || !newPassword}
+          className="btn btn-quiet"
+        >
+          {isChanging ? t("saving") : t("changePassword")}
+        </button>
+      </form>
+    </Section>
+  );
+}
+
+function DeleteAccountSection() {
+  const { t } = useTranslation("dashboard");
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteError, setDeleteError] = useState("");
+  const [deletePasswordWrong, setDeletePasswordWrong] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   async function handleDelete(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsDeleting(true);
     setDeleteError("");
     setDeletePasswordWrong(false);
+    // Stays busy while the page unloads, so the button can't fire again.
+    let leaving = false;
     try {
       const code = await postJson("/api/auth/account", "DELETE", {
         password: deletePassword,
@@ -119,17 +183,75 @@ export default function SettingsClient() {
       if (code) {
         setDeleteError(t(code));
         setDeletePasswordWrong(code === "invalidPassword");
-        setIsDeleting(false);
         if (code === "invalidPassword") {
           document.getElementById("settings-delete-password")?.focus();
         }
         return;
       }
-      window.location.href = "/";
+      leaving = true;
+      // A full load drops the deleted account from memory, and replacing the
+      // entry keeps Back off a dashboard that would bounce.
+      window.location.replace("/");
     } catch {
       setDeleteError(t(failureCode("couldNotDeleteAccount")));
-      setIsDeleting(false);
+    } finally {
+      if (!leaving) {
+        setIsDeleting(false);
+      }
     }
+  }
+
+  return (
+    <Section title={t("deleteAccount")} tone="danger">
+      <form onSubmit={handleDelete} noValidate className="space-y-4">
+        <p className="text-sm leading-relaxed text-text-2">
+          {t("deleteAccountHint")}
+        </p>
+        <div>
+          <label htmlFor="settings-delete-password" className="label">
+            {t("confirmWithPassword")}
+          </label>
+          <input
+            id="settings-delete-password"
+            aria-invalid={deletePasswordWrong || undefined}
+            aria-describedby={
+              deletePasswordWrong ? "settings-delete-error" : undefined
+            }
+            type="password"
+            autoComplete="current-password"
+            value={deletePassword}
+            onChange={(event) => setDeletePassword(event.target.value)}
+            className="field"
+          />
+        </div>
+        {deleteError && (
+          <p
+            id="settings-delete-error"
+            className="text-sm text-danger"
+            role="alert"
+          >
+            {deleteError}
+          </p>
+        )}
+        <button
+          type="submit"
+          disabled={isDeleting || !deletePassword}
+          className="btn btn-danger"
+        >
+          {isDeleting ? t("deleting") : t("deleteAccountButton")}
+        </button>
+      </form>
+    </Section>
+  );
+}
+
+export default function SettingsClient() {
+  const { user, setCurrency } = useUser();
+  const { t, i18n } = useTranslation("dashboard");
+  const { resolvedTheme, setTheme } = useTheme();
+
+  if (!user) {
+    return null;
   }
 
   return (
@@ -185,69 +307,7 @@ export default function SettingsClient() {
         </div>
       </Section>
 
-      <Section title={t("password")}>
-        <form onSubmit={handlePasswordChange} noValidate className="space-y-4">
-          <input
-            type="text"
-            autoComplete="username"
-            value={user.username}
-            readOnly
-            hidden
-          />
-          <div>
-            <label htmlFor="settings-current-password" className="label">
-              {t("currentPassword")}
-            </label>
-            <input
-              id="settings-current-password"
-              aria-invalid={passwordField === "current" || undefined}
-              aria-describedby={
-                passwordField === "current"
-                  ? "settings-password-error"
-                  : undefined
-              }
-              type="password"
-              autoComplete="current-password"
-              value={currentPassword}
-              onChange={(event) => setCurrentPassword(event.target.value)}
-              className="field"
-            />
-          </div>
-          <div>
-            <label htmlFor="settings-new-password" className="label">
-              {t("newPassword")}
-            </label>
-            <input
-              id="settings-new-password"
-              aria-invalid={passwordField === "new" || undefined}
-              aria-describedby={
-                passwordField === "new" ? "settings-password-error" : undefined
-              }
-              type="password"
-              autoComplete="new-password"
-              value={newPassword}
-              onChange={(event) => setNewPassword(event.target.value)}
-              className="field"
-            />
-          </div>
-          {passwordError && (
-            <p
-              id="settings-password-error"
-              className="text-sm text-danger"
-              role="alert"
-            >
-              {passwordError}
-            </p>
-          )}
-          <button
-            type="submit"
-            disabled={isChanging || !currentPassword || !newPassword}
-            className="btn btn-quiet"
-          >
-            {isChanging ? t("saving") : t("changePassword")}
-          </button>
-        </form>
-      </Section>
+      <PasswordSection username={user.username} />
 
       <Section title={t("data")}>
         <p className="text-sm leading-relaxed text-text-2">{t("exportHint")}</p>
@@ -257,46 +317,7 @@ export default function SettingsClient() {
         </a>
       </Section>
 
-      <Section title={t("deleteAccount")} tone="danger">
-        <form onSubmit={handleDelete} noValidate className="space-y-4">
-          <p className="text-sm leading-relaxed text-text-2">
-            {t("deleteAccountHint")}
-          </p>
-          <div>
-            <label htmlFor="settings-delete-password" className="label">
-              {t("confirmWithPassword")}
-            </label>
-            <input
-              id="settings-delete-password"
-              aria-invalid={deletePasswordWrong || undefined}
-              aria-describedby={
-                deletePasswordWrong ? "settings-delete-error" : undefined
-              }
-              type="password"
-              autoComplete="current-password"
-              value={deletePassword}
-              onChange={(event) => setDeletePassword(event.target.value)}
-              className="field"
-            />
-          </div>
-          {deleteError && (
-            <p
-              id="settings-delete-error"
-              className="text-sm text-danger"
-              role="alert"
-            >
-              {deleteError}
-            </p>
-          )}
-          <button
-            type="submit"
-            disabled={isDeleting || !deletePassword}
-            className="btn btn-danger"
-          >
-            {isDeleting ? t("deleting") : t("deleteAccountButton")}
-          </button>
-        </form>
-      </Section>
+      <DeleteAccountSection />
     </main>
   );
 }

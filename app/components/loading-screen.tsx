@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import SealMark from "./brand/seal-mark";
 
@@ -11,6 +12,7 @@ import SealMark from "./brand/seal-mark";
  */
 export default function LoadingScreen() {
   const { t } = useTranslation("common");
+  const pathname = usePathname();
 
   return (
     <main
@@ -24,7 +26,7 @@ export default function LoadingScreen() {
         </h1>
         <p role="status" className="reveal-late mt-4 text-sm text-text-2">
           {t("slowLoad")}{" "}
-          <a href="" className="link">
+          <a href={pathname} className="link">
             {t("reload")}
           </a>
         </p>
