@@ -129,3 +129,22 @@ export function Segmented<K extends string>({
     </ToggleButtonGroup>
   );
 }
+
+export function FormError({
+  id,
+  message,
+  className = "",
+}: {
+  id?: string;
+  message: string;
+  className?: string;
+}) {
+  if (!message) {
+    return null;
+  }
+  return (
+    <p id={id} role="alert" className={`text-sm text-danger ${className}`}>
+      {message}
+    </p>
+  );
+}

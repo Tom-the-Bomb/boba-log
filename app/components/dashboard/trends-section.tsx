@@ -24,15 +24,16 @@ import MeasureToggle from "./measure-toggle";
 import { useRangeLabel } from "./range-picker";
 import ShopAvatar from "./shop-avatar";
 
-type TrendMode = "day" | "month" | "weekday" | "year" | "shop";
+const MODES = ["day", "month", "weekday", "year", "shop"] as const;
+type TrendMode = (typeof MODES)[number];
 
-const MODES: readonly { value: TrendMode; key: string }[] = [
-  { value: "day", key: "trendDay" },
-  { value: "month", key: "trendMonth" },
-  { value: "weekday", key: "trendWeekday" },
-  { value: "year", key: "trendYear" },
-  { value: "shop", key: "trendShop" },
-];
+const MODE_LABELS: Record<TrendMode, string> = {
+  day: "trendDay",
+  month: "trendMonth",
+  weekday: "trendWeekday",
+  year: "trendYear",
+  shop: "trendShop",
+};
 
 const DATE_FORMAT: Intl.DateTimeFormatOptions = {
   month: "short",
@@ -132,9 +133,9 @@ export default function TrendsSection({ drinks, inRange }: TrendsSectionProps) {
             compact
             label={t("trends")}
             value={mode}
-            options={MODES.map((option) => ({
-              value: option.value,
-              label: t(option.key),
+            options={MODES.map((value) => ({
+              value,
+              label: t(MODE_LABELS[value]),
             }))}
             onChange={setMode}
           />
@@ -158,10 +159,7 @@ export default function TrendsSection({ drinks, inRange }: TrendsSectionProps) {
             {t("spentEmpty")}
           </p>
         ) : (
-          <InkBars
-            bars={bars}
-            label={t(MODES.find((m) => m.value === mode)?.key ?? MODES[0].key)}
-          />
+          <InkBars bars={bars} label={t(MODE_LABELS[mode])} />
         )}
       </div>
     </section>

@@ -12,6 +12,9 @@ interface DrinkRow {
 }
 
 const DRINK_COLUMNS = "id, shop_id, day, created_at, name, price_cents, note";
+const SELECT_USER_DRINKS = `SELECT d.id, d.shop_id, d.day, d.created_at, d.name, d.price_cents, d.note
+  FROM drinks d JOIN shops s ON s.id = d.shop_id
+  WHERE s.username = ?`;
 
 const UPDATABLE_COLUMNS = {
   day: "day",
@@ -35,13 +38,7 @@ function toDrink(row: DrinkRow): Drink {
 
 export async function listDrinks(username: string): Promise<Drink[]> {
   const { results } = await getDb()
-    .prepare(
-      `SELECT d.id, d.shop_id, d.day, d.created_at, d.name, d.price_cents, d.note
-       FROM drinks d
-       JOIN shops s ON s.id = d.shop_id
-       WHERE s.username = ?
-       ORDER BY d.day, d.created_at, d.id`,
-    )
+    .prepare(`${SELECT_USER_DRINKS} ORDER BY d.day, d.created_at, d.id`)
     .bind(username)
     .all<DrinkRow>();
   return results.map(toDrink);
@@ -123,13 +120,8 @@ export async function getDrink(
   drinkId: number,
 ): Promise<Drink | null> {
   const row = await getDb()
-    .prepare(
-      `SELECT d.id, d.shop_id, d.day, d.created_at, d.name, d.price_cents, d.note
-       FROM drinks d
-       JOIN shops s ON s.id = d.shop_id
-       WHERE d.id = ? AND s.username = ?`,
-    )
-    .bind(drinkId, username)
+    .prepare(`${SELECT_USER_DRINKS} AND d.id = ?`)
+    .bind(username, drinkId)
     .first<DrinkRow>();
   return row ? toDrink(row) : null;
 }

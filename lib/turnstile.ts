@@ -1,8 +1,8 @@
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
-import type React from "react";
+import type { RefObject } from "react";
 
 export function waitForToken(
-  ref: React.RefObject<TurnstileInstance | null>,
+  ref: RefObject<TurnstileInstance | null>,
   timeout = 10000,
 ): Promise<string> {
   const existing = ref.current?.getResponse();

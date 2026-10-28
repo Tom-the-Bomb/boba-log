@@ -78,7 +78,7 @@ export default function ShopRow({
         <MenuTrigger>
           <Button
             aria-label={t("shopMenuAria", { name })}
-            className="icon-btn size-10 text-text-3 outline-none data-focus-visible:focus-ring sm:size-9"
+            className="icon-btn size-10 text-text-3 outline-none hover:text-text data-focus-visible:focus-ring sm:size-9"
           >
             <MoreHorizontal size={17} strokeWidth={1.5} />
           </Button>

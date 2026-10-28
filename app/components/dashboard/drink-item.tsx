@@ -23,7 +23,7 @@ export function DrinkActions({ drink, onEdit, onRemove }: DrinkActionsProps) {
         type="button"
         disabled={saving}
         onClick={onEdit}
-        className="icon-btn size-10 text-text-3 sm:size-9"
+        className="icon-btn size-10 text-text-3 hover:text-text sm:size-9"
         aria-label={t("editDrinkAria")}
       >
         <Pencil size={15} strokeWidth={1.5} />

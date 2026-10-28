@@ -1,8 +1,8 @@
 "use client";
 
 import { translateShopName } from "@/lib/default-shops";
-import { failureCode } from "@/lib/network";
-import type { ApiErrorResponse, BobaShop } from "@/lib/types";
+import { failureCode, sendJson } from "@/lib/network";
+import type { BobaShop } from "@/lib/types";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -36,11 +36,8 @@ export default function DeleteShopDialog({
     busyRef.current = true;
     setIsDeleting(true);
     try {
-      const response = await fetch(`/api/shops/${shop.id}`, {
-        method: "DELETE",
-      });
-      const data = (await response.json()) as ApiErrorResponse;
-      if (!response.ok) {
+      const { ok, data } = await sendJson(`/api/shops/${shop.id}`, "DELETE");
+      if (!ok) {
         toast.error(t(data.code ?? "couldNotDeleteShop"));
         return;
       }

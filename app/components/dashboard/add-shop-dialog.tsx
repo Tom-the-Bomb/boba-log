@@ -8,11 +8,11 @@ import type { BobaShop, ShopMutationResponse } from "@/lib/types";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import { ImagePlus, X } from "lucide-react";
 import Image from "next/image";
-import type React from "react";
-import { useRef, useState } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import useShopDraft from "../../hooks/use-shop-draft";
 import InvisibleTurnstile from "../invisible-turnstile";
+import { FormError } from "../ui/fields";
 import { Modal } from "../ui/overlays";
 import DefaultShopsSection from "./default-shops-section";
 
@@ -53,7 +53,7 @@ export default function AddShopDialog({
     setNameError("");
   }
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const trimmedShopName = shopName.trim();
     if (!trimmedShopName) {
@@ -140,11 +140,11 @@ export default function AddShopDialog({
             aria-invalid={nameError ? true : undefined}
             aria-describedby={nameError ? "add-shop-name-error" : undefined}
           />
-          {nameError && (
-            <p id="add-shop-name-error" className="mt-2 text-sm text-danger">
-              {nameError}
-            </p>
-          )}
+          <FormError
+            id="add-shop-name-error"
+            message={nameError}
+            className="mt-2"
+          />
         </div>
 
         <div>
@@ -207,11 +207,7 @@ export default function AddShopDialog({
 
         <InvisibleTurnstile ref={turnstileRef} />
 
-        {error && (
-          <p className="text-sm text-danger" role="alert">
-            {error}
-          </p>
-        )}
+        <FormError message={error} />
 
         <div className="flex items-center justify-end gap-3 border-t border-rule pt-5">
           <button type="button" onClick={handleClose} className="btn btn-quiet">

@@ -12,6 +12,7 @@ import type { BobaShop, Drink, DrinkInput } from "@/lib/types";
 import { useId, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import DatePicker from "../ui/date-picker";
+import { FormError } from "../ui/fields";
 import ShopAvatar from "./shop-avatar";
 
 type Field = "name" | "price" | "note";
@@ -213,11 +214,7 @@ export default function DrinkForm({
         )}
       </div>
 
-      {error && (
-        <p id={errorId} className="text-sm text-danger" role="alert">
-          {error}
-        </p>
-      )}
+      <FormError id={errorId} message={error} />
 
       <div className="flex items-center justify-end gap-3">
         {onCancel && (

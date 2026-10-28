@@ -1,19 +1,18 @@
 "use client";
 
 import { MAX_USERNAME_LENGTH } from "@/lib/drinks";
-import { failureCode } from "@/lib/network";
+import { failureCode, sendJson } from "@/lib/network";
 import { waitForToken } from "@/lib/turnstile";
-import type { ApiErrorResponse, AuthMode } from "@/lib/types";
+import type { AuthMode } from "@/lib/types";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
-import type { ChangeEvent, SubmitEventHandler } from "react";
-import { useRef } from "react";
+import { useRef, type ChangeEvent, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import InvisibleTurnstile from "../components/invisible-turnstile";
 import SiteFooter from "../components/site-footer";
 import SiteHeader from "../components/site-header";
-import { Segmented } from "../components/ui/fields";
+import { FormError, Segmented } from "../components/ui/fields";
 import useAuthFormReducer from "../reducers/auth-form-reducer";
 
 function usernameProblem(value: string, mode: AuthMode) {
@@ -35,17 +34,6 @@ function passwordProblem(value: string, mode: AuthMode) {
     return "passwordRequired";
   }
   return mode === "signup" && value.length < 6 ? "passwordMinLength" : null;
-}
-
-function FieldError({ id, message }: { id: string; message: string }) {
-  if (!message) {
-    return null;
-  }
-  return (
-    <p id={id} className="mt-2 text-sm text-danger" role="alert">
-      {message}
-    </p>
-  );
 }
 
 interface PasswordInputProps {
@@ -100,9 +88,7 @@ export default function AuthPage() {
   const [form, dispatch] = useAuthFormReducer();
   const turnstileRef = useRef<TurnstileInstance>(null);
 
-  async function handleSubmit(
-    event: Parameters<SubmitEventHandler<HTMLFormElement>>[0],
-  ) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const usernameKey = usernameProblem(form.username, form.mode);
@@ -125,19 +111,13 @@ export default function AuthPage() {
         dispatch({ type: "set_error", error: t("turnstileTimeout") });
         return;
       }
-      const response = await fetch("/api/auth", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          mode: form.mode,
-          username: form.username,
-          password: form.password,
-          turnstileToken: token,
-        }),
+      const { ok, data } = await sendJson("/api/auth", "POST", {
+        mode: form.mode,
+        username: form.username,
+        password: form.password,
+        turnstileToken: token,
       });
-
-      if (!response.ok) {
-        const data = (await response.json()) as ApiErrorResponse;
+      if (!ok) {
         dispatch({ type: "set_error", error: t(data.code ?? "authFailed") });
         return;
       }
@@ -192,9 +172,10 @@ export default function AuthPage() {
                   form.usernameError ? "auth-username-error" : undefined
                 }
               />
-              <FieldError
+              <FormError
                 id="auth-username-error"
                 message={form.usernameError}
+                className="mt-2"
               />
             </div>
             <div>
@@ -211,19 +192,16 @@ export default function AuthPage() {
                 }
                 onToggle={() => dispatch({ type: "toggle_password" })}
               />
-              <FieldError
+              <FormError
                 id="auth-password-error"
                 message={form.passwordError}
+                className="mt-2"
               />
             </div>
 
             <InvisibleTurnstile ref={turnstileRef} />
 
-            {form.error && (
-              <p className="text-sm text-danger" role="alert">
-                {form.error}
-              </p>
-            )}
+            <FormError message={form.error} />
 
             <button
               type="submit"

@@ -318,21 +318,18 @@ export default function YearSheet({
     if (!day || !onSelectDay) {
       return;
     }
-    let next = keyTarget(event.key, day, year);
+    const next = keyTarget(event.key, day, year);
     if (next === undefined) {
       return;
     }
-
     event.preventDefault();
-    if (!next || !next.startsWith(`${year}-`)) {
-      return;
+    if (next?.startsWith(`${year}-`)) {
+      event.currentTarget
+        .querySelector<HTMLElement>(
+          `[data-day="${next > lastDay ? lastDay : next}"]`,
+        )
+        ?.focus();
     }
-    if (next > lastDay) {
-      next = lastDay;
-    }
-    event.currentTarget
-      .querySelector<HTMLElement>(`[data-day="${next}"]`)
-      ?.focus();
   }
 
   return (
