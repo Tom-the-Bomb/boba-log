@@ -1,4 +1,4 @@
-import { avatarType, deleteAvatars, uploadAvatar } from "@/lib/api/r2";
+import { avatarType, uploadAvatar } from "@/lib/api/r2";
 import { getUsernameFromRequest } from "@/lib/api/request-auth";
 import {
   errorResponse,
@@ -50,15 +50,10 @@ export async function POST(request: NextRequest) {
     }
 
     const shop = await addShop(username, name);
-    try {
-      if (avatar && contentType) {
+    if (avatar && contentType) {
+      try {
         shop.avatar = await uploadAvatar(shop.id, avatar, contentType);
-      } else {
-        // Shop ids can be reused; clear any avatar an earlier shop left.
-        await deleteAvatars([shop.id]);
-      }
-    } catch {
-      if (avatar) {
+      } catch {
         await deleteShop(username, shop.id);
         return errorResponse(
           "avatarUploadFailed",

@@ -1,4 +1,4 @@
-import { deleteDrink, getDrink, updateDrink } from "@/lib/api/drinks";
+import { deleteDrink, updateDrink } from "@/lib/api/drinks";
 import { getUsernameFromRequest } from "@/lib/api/request-auth";
 import {
   errorResponse,
@@ -41,10 +41,7 @@ export async function PATCH(
 
     const drink = await updateDrink(username, drinkId, parsed.value);
     if (!drink) {
-      return parsed.value.shopId !== undefined &&
-        (await getDrink(username, drinkId))
-        ? errorResponse("shopNotFound", "Shop not found.", 404)
-        : drinkNotFoundResponse();
+      return drinkNotFoundResponse();
     }
 
     return NextResponse.json({ drink });

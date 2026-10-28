@@ -91,7 +91,7 @@ export async function deleteDrink(
   return result.meta.changes > 0;
 }
 
-export async function getDrink(
+async function getDrink(
   username: string,
   drinkId: number,
 ): Promise<Drink | null> {

@@ -30,14 +30,10 @@ export default function useDayValues(
     () => countsByDay(drinks, spent ? priceOf : undefined),
     [drinks, spent],
   );
-  const steps = useMemo(
-    () => (typical === null ? [] : spendSteps(typical)),
-    [typical],
-  );
-  const levelOf = useMemo(
-    () => (spent ? (cents: number) => spendLevel(cents, steps) : undefined),
-    [spent, steps],
-  );
+  const steps = typical === null ? [] : spendSteps(typical);
+  const levelOf = spent
+    ? (cents: number) => spendLevel(cents, steps)
+    : undefined;
 
   const tileLabel = useCallback(
     (day: string, value: number) => {
