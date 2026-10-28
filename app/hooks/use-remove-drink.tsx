@@ -22,6 +22,12 @@ function focusRemove(row: HTMLElement | null) {
   return Boolean(button);
 }
 
+export function focusEdit(id: number) {
+  requestAnimationFrame(() =>
+    visibleRow(id)?.querySelector<HTMLElement>("[data-edit]")?.focus(),
+  );
+}
+
 export default function useRemoveDrink() {
   const { removeDrink, logDrink } = useUser();
   const { t } = useTranslation("dashboard");
@@ -29,9 +35,7 @@ export default function useRemoveDrink() {
   return useCallback(
     async (drink: Drink, fromKeyboard = false) => {
       const row = visibleRow(drink.id);
-      const rows = [...(row?.parentElement?.children ?? [])].filter((el) =>
-        el.hasAttribute("data-drink-row"),
-      );
+      const rows = [...(row?.parentElement?.children ?? [])];
       const index = row ? rows.indexOf(row) : -1;
       const neighbour = (rows[index + 1] ?? rows[index - 1])?.getAttribute(
         "data-drink-row",
@@ -53,6 +57,9 @@ export default function useRemoveDrink() {
       const error = await pending;
       if (error) {
         toast.error(t(error));
+        if (fromKeyboard) {
+          requestAnimationFrame(() => focusRemove(visibleRow(drink.id)));
+        }
         return;
       }
       toast.custom(

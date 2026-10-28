@@ -17,9 +17,9 @@ interface YearSheetProps {
   year: number;
   counts: ReadonlyMap<string, number>;
   today: string;
-  range?: DayRange;
-  selectedDay?: string | null;
-  onSelectDay?: (day: string) => void;
+  range: DayRange;
+  selectedDay: string | null;
+  onSelectDay: (day: string) => void;
   label: string;
   tileLabel: (day: string, count: number) => string;
   levelOf?: (value: number) => number;
@@ -60,10 +60,10 @@ interface DayTileProps {
   day: string;
   count: number;
   today: string;
-  range?: DayRange;
-  selectedDay?: string | null;
+  range: DayRange;
+  selectedDay: string | null;
   tabStop: string;
-  onSelectDay?: (day: string) => void;
+  onSelectDay: (day: string) => void;
   tileLabel: (day: string, count: number) => string;
   levelOf?: (value: number) => number;
 }
@@ -71,10 +71,10 @@ interface DayTileProps {
 function tileClass(
   day: string,
   today: string,
-  selectedDay?: string | null,
-  range?: DayRange,
+  selectedDay: string | null,
+  range: DayRange,
 ) {
-  const outside = range !== undefined && (day < range.start || day > range.end);
+  const outside = day < range.start || day > range.end;
   const ring =
     day === selectedDay
       ? "outline-[1.5px] outline-offset-2 outline-text"
@@ -132,7 +132,7 @@ function DayTile({
   const className = tileClass(day, today, selectedDay, range);
   const content = <TileMark count={count} future={future} levelOf={levelOf} />;
 
-  if (onSelectDay && !future) {
+  if (!future) {
     return (
       <button
         type="button"
@@ -148,14 +148,7 @@ function DayTile({
     );
   }
 
-  return (
-    <span
-      className={className}
-      title={future ? undefined : tileLabel(day, count)}
-    >
-      {content}
-    </span>
-  );
+  return <span className={className}>{content}</span>;
 }
 
 interface MonthRowProps extends Omit<DayTileProps, "day" | "count"> {
@@ -296,7 +289,7 @@ export default function YearSheet({
       }
       placeTip(day, x, row.getBoundingClientRect().top - 28);
     },
-    onCommit: (day) => onSelectDay?.(day),
+    onCommit: onSelectDay,
   });
 
   const hasTip = tip !== undefined;
@@ -315,7 +308,7 @@ export default function YearSheet({
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     const day = (event.target as HTMLElement).dataset.day;
-    if (!day || !onSelectDay) {
+    if (!day) {
       return;
     }
     const next = keyTarget(event.key, day, year);
@@ -381,8 +374,8 @@ export default function YearSheet({
 
       <div
         ref={monthsRef}
-        {...(onSelectDay ? scrub : {})}
-        className={`space-y-1.25 sm:space-y-1.5 ${onSelectDay ? "touch-pan-y touch-pinch-zoom" : ""}`}
+        {...scrub}
+        className="touch-pan-y touch-pinch-zoom space-y-1.25 sm:space-y-1.5"
       >
         {MONTHS.map((month) => (
           <MonthRow

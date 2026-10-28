@@ -6,7 +6,7 @@ import {
   serverErrorResponse,
 } from "@/lib/api/responses";
 import { checkTurnstile } from "@/lib/api/turnstile";
-import { createUser, getUserByUsername } from "@/lib/api/users";
+import { createUser, getUser } from "@/lib/api/users";
 import { MAX_USERNAME_LENGTH } from "@/lib/drinks";
 import { NextResponse } from "next/server";
 
@@ -62,7 +62,7 @@ export async function POST(request: Request) {
       return setAuthCookie(NextResponse.json({ success: true }), username);
     }
 
-    const existing = await getUserByUsername(username);
+    const existing = await getUser(username);
     if (!existing) {
       return errorResponse("accountNotFound", "No account found.", 404);
     }

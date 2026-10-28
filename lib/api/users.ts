@@ -4,22 +4,16 @@ import { listDrinks } from "./drinks";
 import { listShops } from "./shops";
 
 interface UserRow {
-  username: string;
+  hashed_password: string;
   created_at: number;
   currency: string;
+  sessions_valid_after: number;
 }
 
-export async function getUserByUsername(username: string) {
-  return getDb()
-    .prepare("SELECT hashed_password FROM users WHERE username = ?")
-    .bind(username)
-    .first<{ hashed_password: string }>();
-}
-
-export async function getUserRow(username: string) {
+export async function getUser(username: string) {
   return getDb()
     .prepare(
-      "SELECT username, created_at, currency FROM users WHERE username = ?",
+      "SELECT hashed_password, created_at, currency, sessions_valid_after FROM users WHERE username = ?",
     )
     .bind(username)
     .first<UserRow>();
@@ -40,18 +34,18 @@ export async function createUser(username: string, hashedPassword: string) {
 export async function getPublicUser(
   username: string,
 ): Promise<PublicUser | null> {
-  const [row, shops, drinks] = await Promise.all([
-    getUserRow(username),
+  const [user, shops, drinks] = await Promise.all([
+    getUser(username),
     listShops(username),
     listDrinks(username),
   ]);
-  if (!row) {
+  if (!user) {
     return null;
   }
   return {
-    username: row.username,
-    createdAt: row.created_at,
-    currency: row.currency,
+    username,
+    createdAt: user.created_at,
+    currency: user.currency,
     shops,
     drinks,
   };
@@ -62,15 +56,6 @@ export async function updateCurrency(username: string, currency: string) {
     .prepare("UPDATE users SET currency = ? WHERE username = ?")
     .bind(currency, username)
     .run();
-}
-
-export async function getSessionWindow(username: string) {
-  return getDb()
-    .prepare(
-      "SELECT created_at, sessions_valid_after FROM users WHERE username = ?",
-    )
-    .bind(username)
-    .first<{ created_at: number; sessions_valid_after: number }>();
 }
 
 export async function updatePassword(username: string, hashedPassword: string) {

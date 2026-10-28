@@ -67,6 +67,7 @@ export default function RecentDrinks() {
               <li key={drink.id} className="border-b border-rule">
                 <button
                   type="button"
+                  disabled={drink.id < 0}
                   onClick={() => {
                     setFocus({ day: drink.day, drinkId: drink.id });
                   }}

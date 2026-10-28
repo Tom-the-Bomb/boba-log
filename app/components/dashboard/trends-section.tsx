@@ -89,7 +89,7 @@ export default function TrendsSection({ drinks, inRange }: TrendsSectionProps) {
         );
       case "shop": {
         const byShop = countsByShop(inRange, weigh);
-        return [...(user?.shops ?? [])]
+        return (user?.shops ?? [])
           .map((shop) => ({ shop, value: byShop.get(shop.id) ?? 0 }))
           .sort((a, b) => b.value - a.value)
           .map(({ shop, value }) => {

@@ -11,6 +11,7 @@ import { failureCode } from "@/lib/network";
 import type { BobaShop, Drink, DrinkInput } from "@/lib/types";
 import { useId, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
+import { useDashboard } from "../../dashboard/dashboard-context";
 import DatePicker from "../ui/date-picker";
 import { FormError } from "../ui/fields";
 import ShopAvatar from "./shop-avatar";
@@ -28,10 +29,7 @@ interface DrinkFormProps {
   currency: string;
   drink?: Drink;
   initialShopId?: number;
-  showDate?: boolean;
   initialDay: string;
-  maxDay: string;
-  submitLabel: string;
   onSubmit: (
     shopId: number,
     input: DrinkInput & { day: string },
@@ -44,15 +42,13 @@ export default function DrinkForm({
   currency,
   drink,
   initialShopId,
-  showDate = false,
   initialDay,
-  maxDay,
-  submitLabel,
   onSubmit,
   onCancel,
 }: DrinkFormProps) {
   const { t, i18n } = useTranslation("dashboard");
   const { t: tc } = useTranslation("common");
+  const { today } = useDashboard();
   const id = useId();
   const [shopId, setShopId] = useState(
     drink?.shopId ?? initialShopId ?? shops[0]?.id ?? 0,
@@ -63,15 +59,14 @@ export default function DrinkForm({
     priceInputValue(drink?.priceCents ?? null),
   );
   const [note, setNote] = useState(drink?.note ?? "");
-  const [error, setError] = useState("");
-  const [errorField, setErrorField] = useState<Field | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const errorId = `${id}-error`;
+  const errorField = error ? FIELD_OF_CODE[error] : undefined;
 
   function fail(code: string) {
-    const field = FIELD_OF_CODE[code] ?? null;
-    setError(t(code));
-    setErrorField(field);
+    const field = FIELD_OF_CODE[code];
+    setError(code);
     if (field) {
       document.getElementById(`${id}-${field}`)?.focus();
     }
@@ -95,8 +90,7 @@ export default function DrinkForm({
     }
 
     setIsSaving(true);
-    setError("");
-    setErrorField(null);
+    setError(null);
     let code: string | null;
     try {
       code = await onSubmit(shopId, {
@@ -187,7 +181,7 @@ export default function DrinkForm({
       </div>
 
       <div
-        className={`grid gap-3 ${showDate ? "sm:grid-cols-[minmax(0,1.6fr)_minmax(0,0.8fr)]" : ""}`}
+        className={`grid gap-3 ${drink ? "sm:grid-cols-[minmax(0,1.6fr)_minmax(0,0.8fr)]" : ""}`}
       >
         <div>
           <label htmlFor={`${id}-note`} className="label">
@@ -204,17 +198,17 @@ export default function DrinkForm({
             onChange={(event) => setNote(event.target.value)}
           />
         </div>
-        {showDate && (
+        {drink && (
           <DatePicker
             label={t("colDate")}
             value={day}
-            maxDay={maxDay}
+            maxDay={today}
             onChange={setDay}
           />
         )}
       </div>
 
-      <FormError id={errorId} message={error} />
+      <FormError id={errorId} message={error ? t(error) : ""} />
 
       <div className="flex items-center justify-end gap-3">
         {onCancel && (
@@ -223,7 +217,7 @@ export default function DrinkForm({
           </button>
         )}
         <button type="submit" disabled={isSaving} className="btn btn-primary">
-          {isSaving ? t("saving") : submitLabel}
+          {isSaving ? t("saving") : t(drink ? "save" : "addDrink")}
         </button>
       </div>
     </form>

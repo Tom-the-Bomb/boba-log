@@ -1,4 +1,5 @@
 import { AUTH_COOKIE_NAME } from "@/lib/api/auth";
+import { errorResponse } from "@/lib/api/responses";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
@@ -15,12 +16,10 @@ export async function middleware(request: NextRequest) {
         : env.GENERAL_RATE_LIMIT;
     const { success } = await limiter.limit({ key: ip });
     if (!success) {
-      return NextResponse.json(
-        {
-          error: "Too many requests. Please try again later.",
-          code: "tooManyRequests",
-        },
-        { status: 429 },
+      return errorResponse(
+        "tooManyRequests",
+        "Too many requests. Please try again later.",
+        429,
       );
     }
   }

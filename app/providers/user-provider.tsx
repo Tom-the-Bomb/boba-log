@@ -42,7 +42,6 @@ interface UserContextValue {
 const UserContext = createContext<UserContextValue | null>(null);
 
 class SessionExpiredError extends Error {}
-class RateLimitedError extends Error {}
 
 async function send<T extends ApiErrorResponse>(
   url: string,
@@ -86,32 +85,30 @@ export default function UserProvider({ children }: { children: ReactNode }) {
   const hydrate = useCallback(async () => {
     dispatch({ type: "loading" });
     try {
-      const response = await fetch("/api/user");
-      if (response.status === 401) {
-        throw new SessionExpiredError();
+      const { ok, data } = await send<ApiErrorResponse & { user: PublicUser }>(
+        "/api/user",
+        "GET",
+      );
+      if (ok) {
+        dispatch({ type: "loaded", user: data.user });
+      } else {
+        dispatch({
+          type: "load_failed",
+          reason:
+            data.code === "tooManyRequests"
+              ? "tooManyRequests"
+              : "loadFailedBody",
+        });
       }
-      if (response.status === 429) {
-        throw new RateLimitedError();
-      }
-      if (!response.ok) {
-        throw new Error("Could not load account.");
-      }
-      const data = (await response.json()) as { user: PublicUser };
-      dispatch({ type: "loaded", user: data.user });
     } catch (error) {
       if (error instanceof SessionExpiredError) {
         await expire();
       } else {
         dispatch({
           type: "load_failed",
-          reason:
-            error instanceof RateLimitedError
-              ? "tooManyRequests"
-              : failureCode("loadFailedBody"),
+          reason: failureCode("loadFailedBody"),
         });
       }
-    } finally {
-      dispatch({ type: "done_loading" });
     }
   }, [dispatch, expire]);
 

@@ -7,7 +7,6 @@ import {
   serverErrorResponse,
   unauthorizedResponse,
 } from "@/lib/api/responses";
-import type { DrinkIdParams } from "@/lib/api/types";
 import { parseDrinkInput, parseId } from "@/lib/api/validation";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -15,7 +14,10 @@ function drinkNotFoundResponse() {
   return errorResponse("drinkNotFound", "Drink not found.", 404);
 }
 
-export async function PATCH(request: NextRequest, { params }: DrinkIdParams) {
+export async function PATCH(
+  request: NextRequest,
+  { params }: RouteContext<"/api/drinks/[drinkId]">,
+) {
   try {
     const username = await getUsernameFromRequest(request);
     if (!username) {
@@ -51,7 +53,10 @@ export async function PATCH(request: NextRequest, { params }: DrinkIdParams) {
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: DrinkIdParams) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: RouteContext<"/api/drinks/[drinkId]">,
+) {
   try {
     const username = await getUsernameFromRequest(request);
     if (!username) {

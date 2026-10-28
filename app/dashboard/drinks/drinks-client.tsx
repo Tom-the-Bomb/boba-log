@@ -17,7 +17,7 @@ import DrinkForm from "../../components/dashboard/drink-form";
 import { DrinkActions } from "../../components/dashboard/drink-item";
 import ShopAvatar from "../../components/dashboard/shop-avatar";
 import { Select } from "../../components/ui/fields";
-import useRemoveDrink from "../../hooks/use-remove-drink";
+import useRemoveDrink, { focusEdit } from "../../hooks/use-remove-drink";
 import { useUser } from "../../providers/user-provider";
 import { useDashboard } from "../dashboard-context";
 
@@ -76,15 +76,16 @@ export default function DrinksClient() {
       shops={user.shops}
       currency={user.currency}
       drink={drink}
-      showDate
       initialDay={drink.day}
-      maxDay={today}
-      submitLabel={t("save")}
-      onCancel={() => setEditingId(null)}
+      onCancel={() => {
+        setEditingId(null);
+        focusEdit(drink.id);
+      }}
       onSubmit={async (shopId, input) => {
         const error = await updateDrink(drink.id, { ...input, shopId });
         if (!error) {
           setEditingId(null);
+          focusEdit(drink.id);
         }
         return error;
       }}

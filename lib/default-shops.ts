@@ -9,11 +9,11 @@ export interface DefaultShopPresetOption {
 export function findDefaultShop(
   name: string,
 ): DefaultShopPresetOption | undefined {
-  const nameLower = name.trim().toLocaleLowerCase();
-  return DEFAULT_SHOPS.find(
-    (preset) =>
-      preset.zh.trim().toLocaleLowerCase("zh") === nameLower ||
-      preset.en.trim().toLowerCase() === nameLower,
+  const key = name.trim().toLowerCase();
+  return DEFAULT_SHOPS.find((preset) =>
+    [preset.en, preset.zh].some(
+      (presetName) => presetName.toLowerCase() === key,
+    ),
   );
 }
 

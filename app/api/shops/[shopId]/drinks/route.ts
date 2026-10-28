@@ -7,11 +7,13 @@ import {
   serverErrorResponse,
   unauthorizedResponse,
 } from "@/lib/api/responses";
-import type { ShopIdParams } from "@/lib/api/types";
 import { parseDrinkInput, parseId } from "@/lib/api/validation";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(request: NextRequest, { params }: ShopIdParams) {
+export async function POST(
+  request: NextRequest,
+  { params }: RouteContext<"/api/shops/[shopId]/drinks">,
+) {
   try {
     const username = await getUsernameFromRequest(request);
     if (!username) {

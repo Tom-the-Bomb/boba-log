@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDashboard } from "../../dashboard/dashboard-context";
-import useRemoveDrink from "../../hooks/use-remove-drink";
+import useRemoveDrink, { focusEdit } from "../../hooks/use-remove-drink";
 import { useUser } from "../../providers/user-provider";
 import DrinkForm from "./drink-form";
 import DrinkItem from "./drink-item";
@@ -73,9 +73,7 @@ export default function DayPanel() {
         if (
           event.key === "Escape" &&
           !event.defaultPrevented &&
-          !(event.target as HTMLElement).closest(
-            "input, textarea, [role=spinbutton]",
-          )
+          !(event.target as HTMLElement).closest("input")
         ) {
           close(true);
         }
@@ -145,11 +143,11 @@ export default function DayPanel() {
                     shops={user.shops}
                     currency={user.currency}
                     drink={drink}
-                    showDate
                     initialDay={drink.day}
-                    maxDay={today}
-                    submitLabel={t("save")}
-                    onCancel={() => setEditingId(null)}
+                    onCancel={() => {
+                      setEditingId(null);
+                      focusEdit(drink.id);
+                    }}
                     onSubmit={async (shopId, input) => {
                       const error = await updateDrink(drink.id, {
                         ...input,
@@ -157,7 +155,9 @@ export default function DayPanel() {
                       });
                       if (!error) {
                         setEditingId(null);
-                        if (input.day !== day) {
+                        if (input.day === day) {
+                          focusEdit(drink.id);
+                        } else {
                           setFocus({ day: input.day });
                         }
                       }
@@ -188,10 +188,8 @@ export default function DayPanel() {
             currency={user.currency}
             initialShopId={focus?.shopId}
             initialDay={day}
-            maxDay={today}
-            submitLabel={t("addDrink")}
             onSubmit={async (shopId, input) => {
-              const result = await logDrink(shopId, { ...input, day });
+              const result = await logDrink(shopId, input);
               return typeof result === "string" ? result : null;
             }}
           />

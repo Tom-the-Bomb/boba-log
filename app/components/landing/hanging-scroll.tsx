@@ -306,8 +306,12 @@ export default function HangingScroll({ className = "" }) {
   useRoller(rootRef, lengthRef, rollerRef, hideTip);
 
   function showTip(event: ReactPointerEvent) {
+    if (rootRef.current?.dataset.grabbing !== undefined) {
+      return;
+    }
     const cell = (event.target as Element).closest<HTMLElement>("[data-day]");
-    if (!cell || rootRef.current?.dataset.grabbing !== undefined) {
+    if (!cell) {
+      setTip(null);
       return;
     }
     const day = cell.dataset.day!;
@@ -352,7 +356,6 @@ export default function HangingScroll({ className = "" }) {
                 </p>
                 <div
                   aria-hidden="true"
-                  className={styles.grid}
                   onPointerOver={showTip}
                   onPointerLeave={() => setTip(null)}
                 >

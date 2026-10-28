@@ -17,7 +17,7 @@ import {
 } from "react-aria-components";
 
 const NAV_BUTTON =
-  "relative tap-target grid size-8 place-items-center rounded-full text-text-2 outline-none hover:bg-hover hover:text-text data-disabled:opacity-30 data-focus-visible:focus-ring";
+  "icon-btn size-8 rounded-full outline-none data-disabled:opacity-30 data-focus-visible:focus-ring";
 
 function CalendarBody({ range = false }) {
   return (
@@ -31,7 +31,7 @@ function CalendarBody({ range = false }) {
           <ChevronRight size={16} strokeWidth={1.5} />
         </Button>
       </header>
-      <CalendarGrid weekdayStyle="short" className="w-full border-collapse">
+      <CalendarGrid weekdayStyle="short" className="w-full">
         <CalendarGridHeader>
           {(day) => (
             <CalendarHeaderCell className="h-8 text-[11px] font-normal text-text-3">
@@ -39,7 +39,7 @@ function CalendarBody({ range = false }) {
             </CalendarHeaderCell>
           )}
         </CalendarGridHeader>
-        <CalendarGridBody className="[&_td]:p-0 [&_td]:py-px">
+        <CalendarGridBody className="[&_td]:py-px">
           {(date) => (
             <CalendarCell
               date={date}
@@ -75,7 +75,7 @@ function CalendarBody({ range = false }) {
                   isSelected && (!range || isSelectionStart || isSelectionEnd);
                 return (
                   <span
-                    className={`mx-auto grid size-9 cursor-pointer place-items-center rounded-full tabular-nums ${
+                    className={`mx-auto grid size-9 place-items-center rounded-full tabular-nums ${
                       isEndpoint
                         ? "forced-selected bg-accent text-on-accent"
                         : isDisabled || isUnavailable

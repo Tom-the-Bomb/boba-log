@@ -26,10 +26,6 @@ interface AuthTokenPayload {
   username: string;
 }
 
-interface VerifiedToken extends AuthTokenPayload {
-  issuedAt: number;
-}
-
 async function pbkdf2(password: string, salt: Uint8Array): Promise<Uint8Array> {
   const keyMaterial = await crypto.subtle.importKey(
     "raw",
@@ -70,15 +66,7 @@ export async function comparePassword(
   return constantTimeEqual(hash, hexToBuf(hashHex));
 }
 
-async function signToken(payload: AuthTokenPayload): Promise<string> {
-  const now = Math.floor(Date.now() / 1000);
-  return jwt.sign(
-    { ...payload, iat: now, exp: now + AUTH_COOKIE_MAX_AGE },
-    getJwtSecret(),
-  );
-}
-
-export async function verifyToken(token: string): Promise<VerifiedToken> {
+export async function verifyToken(token: string) {
   const payload = (await jwt.verify<AuthTokenPayload>(token, getJwtSecret()))
     ?.payload;
   if (!payload || typeof payload.username !== "string") {
@@ -92,7 +80,12 @@ export async function verifyToken(token: string): Promise<VerifiedToken> {
 }
 
 export async function setAuthCookie(response: NextResponse, username: string) {
-  response.cookies.set(AUTH_COOKIE_NAME, await signToken({ username }), {
+  const now = Math.floor(Date.now() / 1000);
+  const token = await jwt.sign(
+    { username, iat: now, exp: now + AUTH_COOKIE_MAX_AGE },
+    getJwtSecret(),
+  );
+  response.cookies.set(AUTH_COOKIE_NAME, token, {
     ...AUTH_COOKIE_OPTIONS,
     maxAge: AUTH_COOKIE_MAX_AGE,
   });

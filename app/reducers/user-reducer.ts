@@ -12,7 +12,6 @@ interface UserState {
 type UserAction =
   | { type: "loaded"; user: PublicUser }
   | { type: "loading" }
-  | { type: "done_loading" }
   | { type: "load_failed"; reason: LoadFailure }
   | { type: "signed_out" }
   | { type: "add_shop"; shop: BobaShop }
@@ -40,15 +39,13 @@ function withUser(
 function userReducer(state: UserState, action: UserAction): UserState {
   switch (action.type) {
     case "loaded":
-      return { ...state, user: action.user, loadFailed: null };
+      return { user: action.user, isLoading: false, loadFailed: null };
     case "loading":
       return { ...state, isLoading: true, loadFailed: null };
     case "load_failed":
-      return { ...state, loadFailed: action.reason };
+      return { ...state, isLoading: false, loadFailed: action.reason };
     case "signed_out":
       return { ...INITIAL_USER_STATE, isLoading: false };
-    case "done_loading":
-      return { ...state, isLoading: false };
     case "add_shop":
       return withUser(state, ({ shops }) => ({
         shops: [...shops, action.shop],

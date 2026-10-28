@@ -1,20 +1,10 @@
 import type { Drink, DrinkInput } from "../types";
 import { getDb } from "./db";
 
-interface DrinkRow {
-  id: number;
-  shop_id: number;
-  day: string;
-  created_at: number;
-  name: string | null;
-  price_cents: number | null;
-  note: string | null;
-}
-
-const DRINK_COLUMNS = "id, shop_id, day, created_at, name, price_cents, note";
-const SELECT_USER_DRINKS = `SELECT d.id, d.shop_id, d.day, d.created_at, d.name, d.price_cents, d.note
-  FROM drinks d JOIN shops s ON s.id = d.shop_id
-  WHERE s.username = ?`;
+const DRINK_COLUMNS =
+  "id, shop_id AS shopId, day, created_at AS createdAt, name, price_cents AS priceCents, note";
+const SELECT_USER_DRINKS = `SELECT ${DRINK_COLUMNS} FROM drinks
+  WHERE shop_id IN (SELECT id FROM shops WHERE username = ?)`;
 
 const UPDATABLE_COLUMNS = {
   day: "day",
@@ -24,24 +14,12 @@ const UPDATABLE_COLUMNS = {
   note: "note",
 } as const satisfies Record<keyof DrinkInput, string>;
 
-function toDrink(row: DrinkRow): Drink {
-  return {
-    id: row.id,
-    shopId: row.shop_id,
-    day: row.day,
-    createdAt: row.created_at,
-    name: row.name,
-    priceCents: row.price_cents,
-    note: row.note,
-  };
-}
-
 export async function listDrinks(username: string): Promise<Drink[]> {
   const { results } = await getDb()
-    .prepare(`${SELECT_USER_DRINKS} ORDER BY d.day, d.created_at, d.id`)
+    .prepare(`${SELECT_USER_DRINKS} ORDER BY day, created_at, id`)
     .bind(username)
-    .all<DrinkRow>();
-  return results.map(toDrink);
+    .all<Drink>();
+  return results;
 }
 
 export async function createDrink(
@@ -49,7 +27,7 @@ export async function createDrink(
   shopId: number,
   input: DrinkInput & { day: string },
 ): Promise<Drink | null> {
-  const row = await getDb()
+  return getDb()
     .prepare(
       `INSERT INTO drinks (shop_id, day, created_at, name, price_cents, note)
        SELECT id, ?, ?, ?, ?, ? FROM shops WHERE id = ? AND username = ?
@@ -64,8 +42,7 @@ export async function createDrink(
       shopId,
       username,
     )
-    .first<DrinkRow>();
-  return row ? toDrink(row) : null;
+    .first<Drink>();
 }
 
 export async function updateDrink(
@@ -81,7 +58,7 @@ export async function updateDrink(
   const assignments = entries.map(([key]) => `${UPDATABLE_COLUMNS[key]} = ?`);
   const values = entries.map(([, value]) => value ?? null);
 
-  const row = await getDb()
+  return getDb()
     .prepare(
       `UPDATE drinks SET ${assignments.join(", ")}
        WHERE id = ?
@@ -97,8 +74,7 @@ export async function updateDrink(
       input.shopId ?? null,
       username,
     )
-    .first<DrinkRow>();
-  return row ? toDrink(row) : null;
+    .first<Drink>();
 }
 
 export async function deleteDrink(
@@ -119,9 +95,8 @@ export async function getDrink(
   username: string,
   drinkId: number,
 ): Promise<Drink | null> {
-  const row = await getDb()
-    .prepare(`${SELECT_USER_DRINKS} AND d.id = ?`)
+  return getDb()
+    .prepare(`${SELECT_USER_DRINKS} AND id = ?`)
     .bind(username, drinkId)
-    .first<DrinkRow>();
-  return row ? toDrink(row) : null;
+    .first<Drink>();
 }

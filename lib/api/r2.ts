@@ -37,7 +37,7 @@ export async function getAvatarUrl(shopId: number) {
     const object = await getR2().head(avatarKey(shopId));
     return rememberAvatar(shopId, object ? object.uploaded.getTime() : null);
   } catch {
-    return rememberAvatar(shopId, null);
+    return null;
   }
 }
 
@@ -69,10 +69,7 @@ export async function uploadAvatar(
   contentType: string,
 ) {
   const object = await getR2().put(avatarKey(shopId), body, {
-    httpMetadata: {
-      contentType,
-      cacheControl: "public, max-age=31536000, immutable",
-    },
+    httpMetadata: { contentType },
   });
   if (!object) {
     throw new Error("Avatar upload failed.");

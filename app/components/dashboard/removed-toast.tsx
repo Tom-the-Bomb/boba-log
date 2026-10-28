@@ -6,14 +6,14 @@ import { useTranslation } from "react-i18next";
 interface RemovedToastProps {
   onUndo: () => void;
   onDismiss: () => void;
-  autoFocus?: boolean;
-  onLeave?: () => void;
+  autoFocus: boolean;
+  onLeave: () => void;
 }
 
 export default function RemovedToast({
   onUndo,
   onDismiss,
-  autoFocus = false,
+  autoFocus,
   onLeave,
 }: RemovedToastProps) {
   const { t } = useTranslation("dashboard");
@@ -41,7 +41,7 @@ export default function RemovedToast({
         onBlur={(event) => {
           const toast = event.currentTarget.closest("[data-sonner-toast]");
           if (!toast?.contains(event.relatedTarget as Node | null)) {
-            onLeave?.();
+            onLeave();
           }
         }}
         className="tap-target relative h-8 shrink-0 rounded-md border border-rule px-2.5 hover:border-rule-strong"

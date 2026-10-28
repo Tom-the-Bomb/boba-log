@@ -6,11 +6,13 @@ import {
   unauthorizedResponse,
 } from "@/lib/api/responses";
 import { deleteShop } from "@/lib/api/shops";
-import type { ShopIdParams } from "@/lib/api/types";
 import { parseId } from "@/lib/api/validation";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function DELETE(request: NextRequest, { params }: ShopIdParams) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: RouteContext<"/api/shops/[shopId]">,
+) {
   try {
     const username = await getUsernameFromRequest(request);
     if (!username) {

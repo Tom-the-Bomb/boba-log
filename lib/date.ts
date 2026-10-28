@@ -2,7 +2,7 @@
 // never shifts with the time zone or daylight saving.
 
 const DAY_MS = 86_400_000;
-const DAY_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
+const DAY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 function pad(value: number) {
   return String(value).padStart(2, "0");
@@ -25,11 +25,9 @@ export function localToday(): string {
 }
 
 export function isValidDay(value: string): boolean {
-  const match = DAY_PATTERN.exec(value);
-  if (!match) {
-    return false;
-  }
-  return dayFromUTCDate(dayToUTCDate(value)) === value;
+  return (
+    DAY_PATTERN.test(value) && dayFromUTCDate(dayToUTCDate(value)) === value
+  );
 }
 
 export function addDays(day: string, amount: number): string {

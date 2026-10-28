@@ -38,7 +38,6 @@
   --hs-wall: rgb(43 41 37 / 0.3);
   --hs-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1400' height='60'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.004 0.35' numOctaves='4' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.06 0 0 0 0 0.03 0 0 0 2.2 -0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
   position: relative;
-  margin: 0;
   padding-top: var(--hs-cord-h);
 }
 
@@ -254,7 +253,6 @@
 
 .title {
   justify-self: center;
-  margin: 0;
   font-size: 17px;
   letter-spacing: 0.3em;
   color: var(--text);
@@ -263,7 +261,6 @@
 
 .month {
   display: grid;
-  grid-template-areas: "name days total";
   grid-template-columns: 30px minmax(0, 1fr) 22px;
   gap: 8px;
   align-items: center;
@@ -271,22 +268,18 @@
 }
 
 .monthName {
-  grid-area: name;
   font-size: 12px;
   font-weight: 300;
   color: var(--text-2);
 }
 
 .monthTotal {
-  grid-area: total;
   font-size: 12.5px;
   text-align: right;
   color: var(--text);
-  font-variant-numeric: tabular-nums;
 }
 
 .days {
-  grid-area: days;
   display: grid;
   grid-template-columns: repeat(31, minmax(0, 1fr));
   gap: 2px;
@@ -317,10 +310,7 @@
   right: 0;
   left: 0;
   z-index: 2;
-  display: block;
   height: var(--hs-roller-h);
-  padding: 0;
-  border: 0;
   border-radius: 3px;
   cursor: grab;
   touch-action: none;

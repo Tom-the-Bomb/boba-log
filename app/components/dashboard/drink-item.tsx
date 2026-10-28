@@ -21,6 +21,7 @@ export function DrinkActions({ drink, onEdit, onRemove }: DrinkActionsProps) {
     <div className="flex shrink-0 justify-end">
       <button
         type="button"
+        data-edit
         disabled={saving}
         onClick={onEdit}
         className="icon-btn size-10 text-text-3 hover:text-text sm:size-9"

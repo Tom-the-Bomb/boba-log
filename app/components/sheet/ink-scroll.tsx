@@ -17,7 +17,7 @@ interface InkScrollProps {
   today: string;
   label: string;
   todayLabel: string;
-  onSelectDay?: (day: string) => void;
+  onSelectDay: (day: string) => void;
   tileLabel: (day: string, count: number) => string;
   levelOf?: (value: number) => number;
 }
@@ -149,7 +149,7 @@ export default function InkScroll({
   const scrub = useTouchScrub({
     pick: (clientX) => (lastIndex >= 0 ? indexAt(clientX) : null),
     onPreview: (index) => setHover(index),
-    onCommit: (index) => onSelectDay?.(days[index]),
+    onCommit: (index) => onSelectDay(days[index]),
   });
 
   const hoverDay = hover !== null ? days[hover] : null;
@@ -160,7 +160,7 @@ export default function InkScroll({
     <div ref={boxRef} className="h-full">
       <svg
         viewBox={`0 0 ${width} ${BASE + 52}`}
-        className={`h-full w-full touch-pan-y touch-pinch-zoom overflow-visible text-ink ${onSelectDay ? "cursor-pointer" : ""}`}
+        className="h-full w-full cursor-pointer touch-pan-y touch-pinch-zoom overflow-visible text-ink"
         role="img"
         aria-label={label}
         onPointerDown={scrub.onPointerDown}
@@ -176,7 +176,7 @@ export default function InkScroll({
         onPointerLeave={() => setHover(null)}
         onClickCapture={scrub.onClickCapture}
         onClick={(event) => {
-          if (onSelectDay && lastIndex >= 0) {
+          if (lastIndex >= 0) {
             onSelectDay(days[indexAt(event.clientX)]);
           }
         }}

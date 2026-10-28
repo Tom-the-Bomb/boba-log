@@ -31,25 +31,24 @@ function Section({
   );
 }
 
+const PASSWORD_FIELD: Partial<Record<string, "current" | "new">> = {
+  invalidPassword: "current",
+  passwordMinLength: "new",
+};
+
 function PasswordSection({ username }: { username: string }) {
   const { t } = useTranslation("dashboard");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [passwordField, setPasswordField] = useState<"current" | "new" | null>(
-    null,
-  );
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const [isChanging, setIsChanging] = useState(false);
+  const passwordField = passwordError
+    ? PASSWORD_FIELD[passwordError]
+    : undefined;
 
   function passwordFail(code: string) {
-    const field =
-      code === "invalidPassword"
-        ? "current"
-        : code === "passwordMinLength"
-          ? "new"
-          : null;
-    setPasswordError(t(code));
-    setPasswordField(field);
+    const field = PASSWORD_FIELD[code];
+    setPasswordError(code);
     if (field) {
       document.getElementById(`settings-${field}-password`)?.focus();
     }
@@ -62,8 +61,7 @@ function PasswordSection({ username }: { username: string }) {
       return;
     }
     setIsChanging(true);
-    setPasswordError("");
-    setPasswordField(null);
+    setPasswordError(null);
     try {
       const { ok, data } = await sendJson("/api/auth/password", "POST", {
         currentPassword,
@@ -129,7 +127,10 @@ function PasswordSection({ username }: { username: string }) {
             className="field"
           />
         </div>
-        <FormError id="settings-password-error" message={passwordError} />
+        <FormError
+          id="settings-password-error"
+          message={passwordError ? t(passwordError) : ""}
+        />
         <button
           type="submit"
           disabled={isChanging || !currentPassword || !newPassword}
@@ -145,15 +146,14 @@ function PasswordSection({ username }: { username: string }) {
 function DeleteAccountSection() {
   const { t } = useTranslation("dashboard");
   const [deletePassword, setDeletePassword] = useState("");
-  const [deleteError, setDeleteError] = useState("");
-  const [deletePasswordWrong, setDeletePasswordWrong] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const deletePasswordWrong = deleteError === "invalidPassword";
 
   async function handleDelete(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsDeleting(true);
-    setDeleteError("");
-    setDeletePasswordWrong(false);
+    setDeleteError(null);
     let leaving = false;
     try {
       const { ok, data } = await sendJson("/api/auth/account", "DELETE", {
@@ -161,8 +161,7 @@ function DeleteAccountSection() {
       });
       if (!ok) {
         const code = data.code ?? "somethingWentWrong";
-        setDeleteError(t(code));
-        setDeletePasswordWrong(code === "invalidPassword");
+        setDeleteError(code);
         if (code === "invalidPassword") {
           document.getElementById("settings-delete-password")?.focus();
         }
@@ -172,7 +171,7 @@ function DeleteAccountSection() {
       // A full load drops the account from memory; replace keeps Back off the dashboard.
       window.location.replace("/");
     } catch {
-      setDeleteError(t(failureCode("couldNotDeleteAccount")));
+      setDeleteError(failureCode("couldNotDeleteAccount"));
     } finally {
       if (!leaving) {
         setIsDeleting(false);
@@ -203,7 +202,10 @@ function DeleteAccountSection() {
             className="field"
           />
         </div>
-        <FormError id="settings-delete-error" message={deleteError} />
+        <FormError
+          id="settings-delete-error"
+          message={deleteError ? t(deleteError) : ""}
+        />
         <button
           type="submit"
           disabled={isDeleting || !deletePassword}

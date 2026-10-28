@@ -7,7 +7,7 @@ import {
   serverErrorResponse,
   unauthorizedResponse,
 } from "@/lib/api/responses";
-import { getUserByUsername, updatePassword } from "@/lib/api/users";
+import { getUser, updatePassword } from "@/lib/api/users";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const existing = await getUserByUsername(username);
+    const existing = await getUser(username);
     if (!existing) {
       return unauthorizedResponse();
     }
