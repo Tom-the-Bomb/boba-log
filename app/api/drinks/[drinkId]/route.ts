@@ -14,7 +14,7 @@ function drinkNotFoundResponse() {
   return errorResponse("drinkNotFound", "Drink not found.", 404);
 }
 
-export async function PATCH(
+export async function PUT(
   request: NextRequest,
   { params }: RouteContext<"/api/drinks/[drinkId]">,
 ) {
@@ -34,12 +34,20 @@ export async function PATCH(
       return invalidRequestResponse();
     }
 
-    const parsed = parseDrinkInput(body, false);
+    const parsed = parseDrinkInput(body);
     if (!parsed.ok) {
       return errorResponse(parsed.code, "Invalid drink.", 400);
     }
+    if (!Number.isInteger(body.shopId)) {
+      return errorResponse("shopNotFound", "Shop not found.", 404);
+    }
 
-    const drink = await updateDrink(username, drinkId, parsed.value);
+    const drink = await updateDrink(
+      username,
+      drinkId,
+      body.shopId as number,
+      parsed.value,
+    );
     if (!drink) {
       return drinkNotFoundResponse();
     }

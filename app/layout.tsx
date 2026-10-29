@@ -11,7 +11,7 @@ import {
 import "@fontsource/lxgw-wenkai-tc/400.css";
 import "@fontsource/noto-sans-sc/300.css";
 import "@fontsource/noto-sans-sc/400.css";
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 import { Toaster } from "sonner";
@@ -73,10 +73,6 @@ export const metadata: Metadata = {
   category: "productivity",
 };
 
-export const viewport: Viewport = {
-  themeColor: "#f4f0e8",
-};
-
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -97,7 +93,7 @@ export default async function RootLayout({
                 unstyled: true,
                 classNames: {
                   toast:
-                    "flex w-[min(26rem,calc(100vw-2rem))] items-center gap-3 rounded-lg border border-rule bg-surface px-4 py-3 text-sm text-text shadow-(--lift)",
+                    "flex w-[min(26rem,calc(100vw-2rem))] items-center gap-3 rounded-lg border border-rule bg-surface px-4 py-3 text-sm shadow-(--lift)",
                   error: "text-danger",
                   icon: "shrink-0",
                   content: "min-w-0 flex-1",

@@ -21,12 +21,11 @@ const TABS = [
 function AccountMenu() {
   const { user, logout } = useUser();
   const { t } = useTranslation("dashboard");
-  const { t: tc } = useTranslation("common");
 
   return (
     <MenuTrigger>
       <Button
-        aria-label={tc("account")}
+        aria-label={t("account")}
         className="tap-target relative flex h-10 max-w-40 min-w-0 items-center rounded-md px-2 text-sm text-text-2 outline-none hover:bg-hover hover:text-text data-focus-visible:focus-ring sm:h-9"
       >
         <span className="truncate">{user?.username}</span>
@@ -36,7 +35,7 @@ function AccountMenu() {
           {t("signedInAs", { username: user?.username ?? "" })}
         </p>
         <Menu
-          aria-label={tc("account")}
+          aria-label={t("account")}
           onAction={async () => {
             await logout();
             // A full load drops the account from memory; replace keeps Back off the dashboard.
@@ -45,7 +44,7 @@ function AccountMenu() {
         >
           <MenuItem id="logout">
             <LogOut size={15} strokeWidth={1.5} className="text-text-2" />
-            {tc("logout")}
+            {t("logout")}
           </MenuItem>
         </Menu>
       </Popover>
@@ -56,12 +55,11 @@ function AccountMenu() {
 export default function AppHeader() {
   const pathname = usePathname();
   const { t } = useTranslation("dashboard");
-  const { t: tc } = useTranslation("common");
   const showRange = pathname !== "/dashboard/settings";
 
   const tabs = (
     <nav
-      aria-label={tc("siteName")}
+      aria-label={t("siteName")}
       className="flex h-full items-stretch gap-6 sm:gap-7"
     >
       {TABS.map((tab) => {
@@ -90,9 +88,9 @@ export default function AppHeader() {
         href="#main-content"
         className="sr-only rounded-md bg-surface text-sm text-text shadow-(--lift) focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:px-3 focus:py-2"
       >
-        {tc("skipToContent")}
+        {t("skipToContent")}
       </a>
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:gap-8 sm:px-8 lg:px-12">
+      <div className="page flex h-16 items-center gap-3 sm:gap-8">
         <BrandLink />
         <div className="hidden h-full md:block">{tabs}</div>
         <div className="ml-auto flex min-w-0 items-center gap-0.5 sm:gap-1">

@@ -7,7 +7,7 @@ import type { AuthMode } from "@/lib/types";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useRef, type ChangeEvent, type FormEvent } from "react";
+import { useRef, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import InvisibleTurnstile from "../components/invisible-turnstile";
 import SiteFooter from "../components/site-footer";
@@ -34,52 +34,6 @@ function passwordProblem(value: string, mode: AuthMode) {
     return "passwordRequired";
   }
   return mode === "signup" && value.length < 6 ? "passwordMinLength" : null;
-}
-
-interface PasswordInputProps {
-  value: string;
-  visible: boolean;
-  autoComplete: string;
-  error: string;
-  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
-  onToggle: () => void;
-}
-
-function PasswordInput({
-  value,
-  visible,
-  autoComplete,
-  error,
-  onChange,
-  onToggle,
-}: PasswordInputProps) {
-  const { t } = useTranslation("auth");
-  const Icon = visible ? EyeOff : Eye;
-
-  return (
-    <div className="relative">
-      <input
-        id="auth-password"
-        type={visible ? "text" : "password"}
-        value={value}
-        autoComplete={autoComplete}
-        onChange={onChange}
-        className="field h-11 pr-11"
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? "auth-password-error" : undefined}
-      />
-      {value && (
-        <button
-          type="button"
-          onClick={onToggle}
-          className="tap-target absolute top-1/2 right-1 grid size-9 -translate-y-1/2 place-items-center rounded-md text-text-2 hover:text-text"
-          aria-label={visible ? t("hidePassword") : t("showPassword")}
-        >
-          <Icon size={17} strokeWidth={1.5} />
-        </button>
-      )}
-    </div>
-  );
 }
 
 export default function AuthPage() {
@@ -130,6 +84,7 @@ export default function AuthPage() {
   }
 
   const isLogin = form.mode === "login";
+  const PasswordIcon = form.showPassword ? EyeOff : Eye;
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -143,7 +98,7 @@ export default function AuthPage() {
 
           <Segmented
             className="mt-8"
-            label={t("welcomeBack")}
+            label={t("account")}
             value={form.mode}
             options={[
               { value: "login", label: t("loginTab") },
@@ -182,16 +137,37 @@ export default function AuthPage() {
               <label htmlFor="auth-password" className="label">
                 {t("password")}
               </label>
-              <PasswordInput
-                value={form.password}
-                visible={form.showPassword}
-                autoComplete={isLogin ? "current-password" : "new-password"}
-                error={form.passwordError}
-                onChange={(event) =>
-                  dispatch({ type: "set_password", value: event.target.value })
-                }
-                onToggle={() => dispatch({ type: "toggle_password" })}
-              />
+              <div className="relative">
+                <input
+                  id="auth-password"
+                  type={form.showPassword ? "text" : "password"}
+                  value={form.password}
+                  autoComplete={isLogin ? "current-password" : "new-password"}
+                  onChange={(event) =>
+                    dispatch({
+                      type: "set_password",
+                      value: event.target.value,
+                    })
+                  }
+                  className="field h-11 pr-11"
+                  aria-invalid={form.passwordError ? true : undefined}
+                  aria-describedby={
+                    form.passwordError ? "auth-password-error" : undefined
+                  }
+                />
+                {form.password && (
+                  <button
+                    type="button"
+                    onClick={() => dispatch({ type: "toggle_password" })}
+                    className="tap-target absolute top-1/2 right-1 grid size-9 -translate-y-1/2 place-items-center rounded-md text-text-2 hover:text-text"
+                    aria-label={
+                      form.showPassword ? t("hidePassword") : t("showPassword")
+                    }
+                  >
+                    <PasswordIcon size={17} strokeWidth={1.5} />
+                  </button>
+                )}
+              </div>
               <FormError
                 id="auth-password-error"
                 message={form.passwordError}

@@ -73,10 +73,7 @@ export async function verifyToken(token: string) {
     throw new Error("Invalid token payload.");
   }
 
-  // Tokens signed before `iat` was added still carry `exp`.
-  const issuedAt = payload.iat ?? (payload.exp ?? 0) - AUTH_COOKIE_MAX_AGE;
-
-  return { username: payload.username, issuedAt };
+  return { username: payload.username, issuedAt: payload.iat ?? 0 };
 }
 
 export async function setAuthCookie(response: NextResponse, username: string) {

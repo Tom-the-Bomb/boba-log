@@ -28,7 +28,7 @@ export default function DropLegend({
       <li className="flex items-center gap-1.5">
         <span
           aria-hidden="true"
-          className="inline-block size-4 rounded-full outline-[1.5px] outline-seal outline-dashed"
+          className="size-4 rounded-full outline-[1.5px] outline-seal outline-dashed"
         />
         {t("legendToday")}
       </li>

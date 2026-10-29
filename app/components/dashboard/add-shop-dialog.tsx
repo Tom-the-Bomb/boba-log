@@ -9,6 +9,7 @@ import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import { ImagePlus, X } from "lucide-react";
 import Image from "next/image";
 import { useRef, useState, type FormEvent } from "react";
+import { Button, FileTrigger } from "react-aria-components";
 import { useTranslation } from "react-i18next";
 import useShopDraft from "../../hooks/use-shop-draft";
 import InvisibleTurnstile from "../invisible-turnstile";
@@ -28,19 +29,17 @@ export default function AddShopDialog({
   onAdded,
 }: AddShopDialogProps) {
   const { t } = useTranslation("dashboard");
-  const { t: tc } = useTranslation("common");
   const {
     shopName,
     setShopName,
     avatarFile,
     avatarPreview,
-    handleAvatarInputChange,
+    handleAvatarFile,
     selectPreset,
     clearAvatar,
     resetDraft,
   } = useShopDraft();
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const turnstileRef = useRef<TurnstileInstance>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -58,11 +57,6 @@ export default function AddShopDialog({
     const trimmedShopName = shopName.trim();
     if (!trimmedShopName) {
       setNameError(t("shopNameRequired"));
-      return;
-    }
-
-    if (trimmedShopName.length > MAX_SHOP_NAME_LENGTH) {
-      setNameError(t("shopNameTooLong"));
       return;
     }
 
@@ -151,19 +145,6 @@ export default function AddShopDialog({
           <span id="add-shop-avatar-label" className="label">
             {t("avatarImage")}
           </span>
-          <input
-            ref={fileInputRef}
-            id="add-shop-avatar"
-            aria-hidden="true"
-            type="file"
-            accept="image/*"
-            onChange={async (event) => {
-              const errorKey = await handleAvatarInputChange(event);
-              setError(errorKey ? t(errorKey) : "");
-            }}
-            className="sr-only"
-            tabIndex={-1}
-          />
           <div className="flex items-center gap-3">
             {avatarPreview ? (
               <Image
@@ -180,16 +161,22 @@ export default function AddShopDialog({
                 className="size-11 rounded-full bg-glaze-0 ring-1 ring-rule ring-inset"
               />
             )}
-            <button
-              type="button"
-              id="add-shop-avatar-choose"
-              aria-labelledby="add-shop-avatar-label add-shop-avatar-choose"
-              onClick={() => fileInputRef.current?.click()}
-              className="btn btn-quiet h-9 px-3"
+            <FileTrigger
+              acceptedFileTypes={["image/*"]}
+              onSelect={async (files) => {
+                const errorKey = await handleAvatarFile(files?.[0]);
+                setError(errorKey ? t(errorKey) : "");
+              }}
             >
-              <ImagePlus size={15} strokeWidth={1.5} />
-              {t("chooseFile")}
-            </button>
+              <Button
+                id="add-shop-avatar-choose"
+                aria-labelledby="add-shop-avatar-label add-shop-avatar-choose"
+                className="btn btn-quiet h-9 px-3"
+              >
+                <ImagePlus size={15} strokeWidth={1.5} />
+                {t("chooseFile")}
+              </Button>
+            </FileTrigger>
             {avatarFile ? (
               <button
                 type="button"
@@ -211,7 +198,7 @@ export default function AddShopDialog({
 
         <div className="flex items-center justify-end gap-3 border-t border-rule pt-5">
           <button type="button" onClick={handleClose} className="btn btn-quiet">
-            {tc("cancel")}
+            {t("cancel")}
           </button>
           <button
             type="submit"

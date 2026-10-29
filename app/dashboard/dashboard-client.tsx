@@ -26,7 +26,7 @@ export default function DashboardClient() {
   return (
     <main
       id="main-content"
-      className="mx-auto grid max-w-7xl grid-cols-1 gap-x-10 gap-y-12 px-4 pt-8 pb-20 [grid-template-areas:'shops'_'recent'_'main'] sm:px-8 sm:pt-10 md:grid-cols-2 md:[grid-template-areas:'shops_recent'_'main_main'] lg:grid-cols-[22rem_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:gap-x-16 lg:px-12 lg:[grid-template-areas:'shops_main'_'recent_main'] xl:gap-x-20"
+      className="page grid grid-cols-1 gap-x-10 gap-y-12 pt-8 pb-20 [grid-template-areas:'shops'_'recent'_'main'] sm:pt-10 md:grid-cols-2 md:[grid-template-areas:'shops_recent'_'main_main'] lg:grid-cols-[22rem_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:gap-x-16 lg:[grid-template-areas:'shops_main'_'recent_main'] xl:gap-x-20"
     >
       <h1 className="sr-only">{t("tabLog")}</h1>
       <div className="[grid-area:shops]">

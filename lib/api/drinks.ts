@@ -3,20 +3,14 @@ import { getDb } from "./db";
 
 const DRINK_COLUMNS =
   "id, shop_id AS shopId, day, created_at AS createdAt, name, price_cents AS priceCents, note";
-const SELECT_USER_DRINKS = `SELECT ${DRINK_COLUMNS} FROM drinks
-  WHERE shop_id IN (SELECT id FROM shops WHERE username = ?)`;
-
-const UPDATABLE_COLUMNS = {
-  day: "day",
-  shopId: "shop_id",
-  name: "name",
-  priceCents: "price_cents",
-  note: "note",
-} as const satisfies Record<keyof DrinkInput, string>;
 
 export async function listDrinks(username: string): Promise<Drink[]> {
   const { results } = await getDb()
-    .prepare(`${SELECT_USER_DRINKS} ORDER BY day, created_at, id`)
+    .prepare(
+      `SELECT ${DRINK_COLUMNS} FROM drinks
+       WHERE shop_id IN (SELECT id FROM shops WHERE username = ?)
+       ORDER BY day, created_at, id`,
+    )
     .bind(username)
     .all<Drink>();
   return results;
@@ -25,7 +19,7 @@ export async function listDrinks(username: string): Promise<Drink[]> {
 export async function createDrink(
   username: string,
   shopId: number,
-  input: DrinkInput & { day: string },
+  input: Required<DrinkInput>,
 ): Promise<Drink | null> {
   return getDb()
     .prepare(
@@ -36,9 +30,9 @@ export async function createDrink(
     .bind(
       input.day,
       Math.floor(Date.now() / 1000),
-      input.name ?? null,
-      input.priceCents ?? null,
-      input.note ?? null,
+      input.name,
+      input.priceCents,
+      input.note,
       shopId,
       username,
     )
@@ -48,30 +42,26 @@ export async function createDrink(
 export async function updateDrink(
   username: string,
   drinkId: number,
-  input: DrinkInput,
+  shopId: number,
+  input: Required<DrinkInput>,
 ): Promise<Drink | null> {
-  const entries = Object.entries(input) as [keyof DrinkInput, unknown][];
-  if (entries.length === 0) {
-    return getDrink(username, drinkId);
-  }
-
-  const assignments = entries.map(([key]) => `${UPDATABLE_COLUMNS[key]} = ?`);
-  const values = entries.map(([, value]) => value ?? null);
-
   return getDb()
     .prepare(
-      `UPDATE drinks SET ${assignments.join(", ")}
+      `UPDATE drinks SET shop_id = ?, day = ?, name = ?, price_cents = ?, note = ?
        WHERE id = ?
          AND shop_id IN (SELECT id FROM shops WHERE username = ?)
-         AND (? IS NULL OR ? IN (SELECT id FROM shops WHERE username = ?))
+         AND ? IN (SELECT id FROM shops WHERE username = ?)
        RETURNING ${DRINK_COLUMNS}`,
     )
     .bind(
-      ...values,
+      shopId,
+      input.day,
+      input.name,
+      input.priceCents,
+      input.note,
       drinkId,
       username,
-      input.shopId ?? null,
-      input.shopId ?? null,
+      shopId,
       username,
     )
     .first<Drink>();
@@ -89,14 +79,4 @@ export async function deleteDrink(
     .bind(drinkId, username)
     .run();
   return result.meta.changes > 0;
-}
-
-async function getDrink(
-  username: string,
-  drinkId: number,
-): Promise<Drink | null> {
-  return getDb()
-    .prepare(`${SELECT_USER_DRINKS} AND id = ?`)
-    .bind(username, drinkId)
-    .first<Drink>();
 }

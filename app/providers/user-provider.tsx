@@ -30,11 +30,11 @@ interface UserContextValue {
   logout: () => Promise<void>;
   addShop: (shop: BobaShop) => void;
   removeShop: (shopId: number) => void;
-  logDrink: (
-    shopId: number,
-    input: DrinkInput & { day: string },
-  ) => Promise<Drink | string>;
-  updateDrink: (id: number, input: DrinkInput) => MutationResult;
+  logDrink: (shopId: number, input: DrinkInput) => Promise<Drink | string>;
+  updateDrink: (
+    id: number,
+    input: DrinkInput & { shopId: number },
+  ) => MutationResult;
   removeDrink: (drink: Drink) => MutationResult;
   setCurrency: (currency: string) => MutationResult;
 }
@@ -127,7 +127,7 @@ export default function UserProvider({ children }: { children: ReactNode }) {
   );
 
   const logDrink = useCallback(
-    async (shopId: number, input: DrinkInput & { day: string }) => {
+    async (shopId: number, input: DrinkInput) => {
       const tempId = nextTempId.current--;
       dispatch({
         type: "add_drink",
@@ -162,11 +162,11 @@ export default function UserProvider({ children }: { children: ReactNode }) {
   );
 
   const updateDrink = useCallback(
-    async (id: number, input: DrinkInput) => {
+    async (id: number, input: DrinkInput & { shopId: number }) => {
       try {
         const { ok, data } = await send<DrinkMutationResponse>(
           `/api/drinks/${id}`,
-          "PATCH",
+          "PUT",
           input,
         );
         if (ok && data.drink) {

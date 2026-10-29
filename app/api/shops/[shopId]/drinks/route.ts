@@ -30,15 +30,12 @@ export async function POST(
       return invalidRequestResponse();
     }
 
-    const parsed = parseDrinkInput(body, true);
+    const parsed = parseDrinkInput(body);
     if (!parsed.ok) {
       return errorResponse(parsed.code, "Invalid drink.", 400);
     }
 
-    const drink = await createDrink(username, shopId, {
-      ...parsed.value,
-      day: parsed.value.day!,
-    });
+    const drink = await createDrink(username, shopId, parsed.value);
     if (!drink) {
       return errorResponse("shopNotFound", "Shop not found.", 404);
     }

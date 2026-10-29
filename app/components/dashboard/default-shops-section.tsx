@@ -5,9 +5,9 @@ import {
   type DefaultShopPresetOption,
 } from "@/lib/default-shops";
 import { ChevronDown } from "lucide-react";
+import Image from "next/image";
 import { useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import DefaultShopPresetCard from "./default-shop-preset-card";
 
 interface DefaultShopsSectionProps {
   onPresetSelect: (preset: DefaultShopPresetOption) => void;
@@ -16,7 +16,7 @@ interface DefaultShopsSectionProps {
 export default function DefaultShopsSection({
   onPresetSelect,
 }: DefaultShopsSectionProps) {
-  const { t } = useTranslation("dashboard");
+  const { t, i18n } = useTranslation("dashboard");
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isCollapsible, setIsCollapsible] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -52,11 +52,23 @@ export default function DefaultShopsSection({
       >
         <div ref={containerRef} className="flex flex-wrap gap-2 p-px">
           {DEFAULT_SHOPS.map((preset) => (
-            <DefaultShopPresetCard
+            <button
               key={preset.en}
-              preset={preset}
-              onSelect={onPresetSelect}
-            />
+              type="button"
+              onClick={() => onPresetSelect(preset)}
+              className="tap-target relative inline-flex h-9 items-center gap-2 rounded-full border border-rule bg-ground py-1 pr-3.5 pl-1 text-left hover:border-rule-strong"
+            >
+              <Image
+                src={preset.avatar}
+                alt=""
+                width={26}
+                height={26}
+                className="size-6.5 rounded-full object-cover"
+              />
+              <span className="text-sm whitespace-nowrap text-text">
+                {preset[i18n.language as keyof DefaultShopPresetOption]}
+              </span>
+            </button>
           ))}
         </div>
       </div>

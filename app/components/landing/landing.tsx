@@ -19,7 +19,6 @@ const POINTS = [
 
 export default function Landing({ signedIn = false }) {
   const { t } = useTranslation("landing");
-  const { t: tc } = useTranslation("common");
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -36,8 +35,8 @@ export default function Landing({ signedIn = false }) {
 
       <main className="flex-1">
         <div className="relative isolate">
-          <InkMountains className="absolute inset-x-0 bottom-0 -z-10 h-[clamp(14rem,58vw,22rem)] w-full sm:h-56 lg:h-72" />
-          <section className="mx-auto grid max-w-7xl gap-y-12 px-4 pt-8 pb-[clamp(14rem,58vw,22rem)] sm:px-8 sm:pt-12 sm:pb-60 lg:px-12 xl:grid-cols-[minmax(0,420px)_minmax(0,1fr)] xl:items-start xl:gap-x-14 xl:gap-y-0 xl:pt-5 xl:pb-75">
+          <InkMountains className="absolute inset-x-0 bottom-0 -z-10 h-[clamp(14rem,58vw,22rem)] sm:h-56 lg:h-72" />
+          <section className="page grid gap-y-12 pt-8 pb-[clamp(14rem,58vw,22rem)] sm:pt-12 sm:pb-60 xl:grid-cols-[minmax(0,420px)_minmax(0,1fr)] xl:items-start xl:gap-x-14 xl:gap-y-0 xl:pt-5 xl:pb-75">
             <div className="xl:row-span-2 xl:self-center">
               <h1 className="font-kai text-5xl leading-[1.12] text-text sm:text-6xl xl:text-7xl">
                 {t("headingLine1")}
@@ -60,7 +59,7 @@ export default function Landing({ signedIn = false }) {
                   rel="noreferrer"
                   className="tap-target relative inline-flex items-center gap-1 text-sm text-text-2 hover:text-text hover:underline"
                 >
-                  {tc("sourceOnGitHub")}
+                  {t("sourceOnGitHub")}
                   <ArrowUpRight size={15} strokeWidth={1.5} />
                 </a>
               </div>
@@ -76,7 +75,7 @@ export default function Landing({ signedIn = false }) {
                 >
                   <ShopAvatar src={shop.avatar} name={shop.name} size={28} />
                   <span className="flex min-w-0 flex-col leading-tight sm:flex-row sm:items-center sm:gap-2.5">
-                    <span className="truncate text-[13px] whitespace-nowrap text-text sm:text-sm">
+                    <span className="truncate text-[13px] text-text sm:text-sm">
                       {shop.name}
                     </span>
                     <span className="font-kai text-base text-text tabular-nums sm:text-lg">
@@ -89,7 +88,7 @@ export default function Landing({ signedIn = false }) {
           </section>
         </div>
 
-        <section className="mx-auto max-w-7xl px-4 pb-24 sm:px-8 lg:px-12">
+        <section className="page pb-24">
           <ul className="grid gap-10 pt-4 md:grid-cols-3 md:gap-12">
             {POINTS.map((point) => (
               <li key={point.title}>

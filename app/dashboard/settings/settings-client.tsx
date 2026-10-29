@@ -154,29 +154,24 @@ function DeleteAccountSection() {
     event.preventDefault();
     setIsDeleting(true);
     setDeleteError(null);
-    let leaving = false;
     try {
       const { ok, data } = await sendJson("/api/auth/account", "DELETE", {
         password: deletePassword,
       });
-      if (!ok) {
-        const code = data.code ?? "somethingWentWrong";
-        setDeleteError(code);
-        if (code === "invalidPassword") {
-          document.getElementById("settings-delete-password")?.focus();
-        }
+      if (ok) {
+        // A full load drops the account from memory; replace keeps Back off the dashboard.
+        window.location.replace("/");
         return;
       }
-      leaving = true;
-      // A full load drops the account from memory; replace keeps Back off the dashboard.
-      window.location.replace("/");
+      const code = data.code ?? "somethingWentWrong";
+      setDeleteError(code);
+      if (code === "invalidPassword") {
+        document.getElementById("settings-delete-password")?.focus();
+      }
     } catch {
       setDeleteError(failureCode("couldNotDeleteAccount"));
-    } finally {
-      if (!leaving) {
-        setIsDeleting(false);
-      }
     }
+    setIsDeleting(false);
   }
 
   return (

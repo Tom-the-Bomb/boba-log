@@ -22,7 +22,6 @@ export default function DeleteShopDialog({
   onDeleted,
 }: DeleteShopDialogProps) {
   const { t, i18n } = useTranslation("dashboard");
-  const { t: tc } = useTranslation("common");
   const [isDeleting, setIsDeleting] = useState(false);
   const name = shop ? translateShopName(shop.name, i18n.language) : "";
 
@@ -64,7 +63,7 @@ export default function DeleteShopDialog({
           disabled={isDeleting}
           className="btn btn-quiet"
         >
-          {tc("cancel")}
+          {t("cancel")}
         </button>
         <button
           type="button"

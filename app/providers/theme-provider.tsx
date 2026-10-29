@@ -1,25 +1,15 @@
 "use client";
 
 import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes";
-import { useEffect, type ReactNode } from "react";
+import type { ReactNode } from "react";
+import useMounted from "../hooks/use-mounted";
 
 export const THEME_STORAGE_KEY = "boba_theme";
 
 function ThemeColor() {
   const { resolvedTheme } = useTheme();
-  useEffect(() => {
-    // Waits a frame for the theme class to apply.
-    const frame = requestAnimationFrame(() => {
-      const color = getComputedStyle(document.documentElement)
-        .getPropertyValue("--ground")
-        .trim();
-      document
-        .querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')
-        .forEach((meta) => meta.setAttribute("content", color));
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [resolvedTheme]);
-  return null;
+  const dark = useMounted() && resolvedTheme === "dark";
+  return <meta name="theme-color" content={dark ? "#1a1816" : "#f4f0e8"} />;
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
