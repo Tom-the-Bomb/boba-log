@@ -36,10 +36,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    url: SITE_URL,
     siteName: SITE_NAME,
-    title: DEFAULT_SEO_TITLE,
-    description: DEFAULT_SEO_DESCRIPTION,
     images: [
       {
         url: SOCIAL_IMAGE_URL,
@@ -51,9 +48,6 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary",
-    title: DEFAULT_SEO_TITLE,
-    description: DEFAULT_SEO_DESCRIPTION,
-    images: [SOCIAL_IMAGE_URL],
   },
   robots: {
     index: true,

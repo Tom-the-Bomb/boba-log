@@ -72,7 +72,6 @@ export default function DrinksClient() {
 
   const editor = (drink: Drink) => (
     <DrinkForm
-      key={drink.id}
       shops={user.shops}
       currency={user.currency}
       drink={drink}

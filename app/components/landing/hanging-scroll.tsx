@@ -8,7 +8,6 @@ import {
   type RefObject,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -298,11 +297,6 @@ export default function HangingScroll({ className = "" }) {
   const [tip, setTip] = useState<Tip | null>(null);
   const hideTip = useCallback(() => setTip(null), []);
 
-  const monthNames = useMemo(
-    () => MONTHS.map(({ month }) => monthName(month, i18n.language)),
-    [i18n.language],
-  );
-
   useRoller(rootRef, lengthRef, rollerRef, hideTip);
 
   function showTip(event: ReactPointerEvent) {
@@ -362,7 +356,7 @@ export default function HangingScroll({ className = "" }) {
                   {MONTHS.map(({ month, days, total }) => (
                     <div key={month} className={styles.month}>
                       <span className={styles.monthName}>
-                        {monthNames[month]}
+                        {monthName(month, i18n.language)}
                       </span>
                       <div className={styles.days}>
                         {days.map((day, index) => {

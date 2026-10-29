@@ -17,7 +17,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
     redirect("/auth");
   }
 
-  if (loadFailed && !isLoadingUser) {
+  if (loadFailed) {
     return (
       <ErrorScreen
         title={t("loadFailedTitle")}

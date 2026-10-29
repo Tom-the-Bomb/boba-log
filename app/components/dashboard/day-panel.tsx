@@ -36,6 +36,8 @@ export default function DayPanel() {
     }
   }, [focus]);
 
+  useEffect(() => () => setFocus(null), [setFocus]);
+
   if (focus !== focusKey) {
     setFocusKey(focus);
     setEditingId(focus?.drinkId ?? null);
@@ -139,7 +141,6 @@ export default function DayPanel() {
               {editingId === drink.id ? (
                 <div className="py-4">
                   <DrinkForm
-                    key={drink.id}
                     shops={user.shops}
                     currency={user.currency}
                     drink={drink}

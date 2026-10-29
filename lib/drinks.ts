@@ -74,7 +74,7 @@ export function formatMoneyShort(
 }
 
 export function parsePriceInput(value: string): number | null | undefined {
-  const cleaned = value.replace(/[^\d.]/g, "");
+  const cleaned = value.replace(/,(?=\d{1,2}$)/, ".").replace(/[^\d.]/g, "");
   if (!cleaned) {
     return null;
   }
