@@ -26,8 +26,7 @@ export interface PublicUser {
 }
 
 export interface DrinkInput {
-  day?: string;
-  shopId?: number;
+  day: string;
   name?: string | null;
   priceCents?: number | null;
   note?: string | null;

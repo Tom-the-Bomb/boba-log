@@ -17,10 +17,9 @@ interface YearSheetProps {
   year: number;
   counts: ReadonlyMap<string, number>;
   today: string;
-  range?: DayRange;
-  selectedDay?: string | null;
-  onSelectDay?: (day: string) => void;
-  label: string;
+  range: DayRange;
+  selectedDay: string | null;
+  onSelectDay: (day: string) => void;
   tileLabel: (day: string, count: number) => string;
   levelOf?: (value: number) => number;
   formatTotal?: (value: number) => string;
@@ -60,32 +59,12 @@ interface DayTileProps {
   day: string;
   count: number;
   today: string;
-  range?: DayRange;
-  selectedDay?: string | null;
+  range: DayRange;
+  selectedDay: string | null;
   tabStop: string;
-  onSelectDay?: (day: string) => void;
+  onSelectDay: (day: string) => void;
   tileLabel: (day: string, count: number) => string;
   levelOf?: (value: number) => number;
-}
-
-function tileClass(
-  day: string,
-  today: string,
-  selectedDay?: string | null,
-  range?: DayRange,
-) {
-  const outside = range !== undefined && (day < range.start || day > range.end);
-  const ring =
-    day === selectedDay
-      ? "outline-[1.5px] outline-offset-2 outline-text"
-      : day === today
-        ? "outline-[1.5px] outline-offset-1 outline-seal outline-dashed"
-        : "";
-  return [
-    "relative block aspect-square w-full rounded-full",
-    outside && day <= today ? "opacity-35" : "",
-    ring,
-  ].join(" ");
 }
 
 function TileMark({
@@ -129,10 +108,21 @@ function DayTile({
   levelOf,
 }: DayTileProps) {
   const future = day > today;
-  const className = tileClass(day, today, selectedDay, range);
+  const outside = day < range.start || day > range.end;
+  const ring =
+    day === selectedDay
+      ? "outline-[1.5px] outline-offset-2 outline-text"
+      : day === today
+        ? "outline-[1.5px] outline-offset-1 outline-seal outline-dashed"
+        : "";
+  const className = [
+    "relative block aspect-square w-full rounded-full",
+    outside && !future ? "opacity-35" : "",
+    ring,
+  ].join(" ");
   const content = <TileMark count={count} future={future} levelOf={levelOf} />;
 
-  if (onSelectDay && !future) {
+  if (!future) {
     return (
       <button
         type="button"
@@ -148,14 +138,7 @@ function DayTile({
     );
   }
 
-  return (
-    <span
-      className={className}
-      title={future ? undefined : tileLabel(day, count)}
-    >
-      {content}
-    </span>
-  );
+  return <span className={className}>{content}</span>;
 }
 
 interface MonthRowProps extends Omit<DayTileProps, "day" | "count"> {
@@ -217,7 +200,6 @@ export default function YearSheet({
   range,
   selectedDay,
   onSelectDay,
-  label,
   tileLabel,
   levelOf,
   formatTotal,
@@ -296,7 +278,7 @@ export default function YearSheet({
       }
       placeTip(day, x, row.getBoundingClientRect().top - 28);
     },
-    onCommit: (day) => onSelectDay?.(day),
+    onCommit: onSelectDay,
   });
 
   const hasTip = tip !== undefined;
@@ -315,30 +297,27 @@ export default function YearSheet({
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     const day = (event.target as HTMLElement).dataset.day;
-    if (!day || !onSelectDay) {
+    if (!day) {
       return;
     }
-    let next = keyTarget(event.key, day, year);
+    const next = keyTarget(event.key, day, year);
     if (next === undefined) {
       return;
     }
-
     event.preventDefault();
-    if (!next || !next.startsWith(`${year}-`)) {
-      return;
+    if (next?.startsWith(`${year}-`)) {
+      event.currentTarget
+        .querySelector<HTMLElement>(
+          `[data-day="${next > lastDay ? lastDay : next}"]`,
+        )
+        ?.focus();
     }
-    if (next > lastDay) {
-      next = lastDay;
-    }
-    event.currentTarget
-      .querySelector<HTMLElement>(`[data-day="${next}"]`)
-      ?.focus();
   }
 
   return (
     <div
       role="group"
-      aria-label={label}
+      aria-label={String(year)}
       onKeyDown={handleKeyDown}
       onPointerOver={(event) => {
         if (event.pointerType !== "touch") {
@@ -384,8 +363,8 @@ export default function YearSheet({
 
       <div
         ref={monthsRef}
-        {...(onSelectDay ? scrub : {})}
-        className={`space-y-1.25 sm:space-y-1.5 ${onSelectDay ? "touch-pan-y touch-pinch-zoom" : ""}`}
+        {...scrub}
+        className="touch-pan-y touch-pinch-zoom space-y-1.25 sm:space-y-1.5"
       >
         {MONTHS.map((month) => (
           <MonthRow

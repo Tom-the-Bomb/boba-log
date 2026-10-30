@@ -11,13 +11,13 @@ import { formatMoney } from "@/lib/drinks";
 import type { Drink } from "@/lib/types";
 import { Download } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import DrinkForm from "../../components/dashboard/drink-form";
-import { DrinkActions } from "../../components/dashboard/drink-item";
+import DrinkItem, { DrinkActions } from "../../components/dashboard/drink-item";
 import ShopAvatar from "../../components/dashboard/shop-avatar";
 import { Select } from "../../components/ui/fields";
-import useRemoveDrink from "../../hooks/use-remove-drink";
+import useRemoveDrink, { focusEdit } from "../../hooks/use-remove-drink";
 import { useUser } from "../../providers/user-provider";
 import { useDashboard } from "../dashboard-context";
 
@@ -38,18 +38,16 @@ export default function DrinksClient() {
   }
   const [editingId, setEditingId] = useState<number | null>(null);
 
-  const drinks = useMemo(() => {
-    const inRange = drinksInRange(user?.drinks ?? [], range);
-    const filtered =
-      shopFilter === "all"
-        ? inRange
-        : inRange.filter((drink) => String(drink.shopId) === shopFilter);
-    return sortNewestFirst(filtered);
-  }, [user?.drinks, range, shopFilter]);
-
   if (!user) {
     return null;
   }
+
+  const inRange = drinksInRange(user.drinks, range);
+  const drinks = sortNewestFirst(
+    shopFilter === "all"
+      ? inRange
+      : inRange.filter((drink) => String(drink.shopId) === shopFilter),
+  );
 
   const shopsById = new Map(user.shops.map((shop) => [shop.id, shop]));
   const spend = spendSummary(drinks);
@@ -72,19 +70,19 @@ export default function DrinksClient() {
 
   const editor = (drink: Drink) => (
     <DrinkForm
-      key={drink.id}
       shops={user.shops}
       currency={user.currency}
       drink={drink}
-      showDate
       initialDay={drink.day}
-      maxDay={today}
-      submitLabel={t("save")}
-      onCancel={() => setEditingId(null)}
+      onCancel={() => {
+        setEditingId(null);
+        focusEdit(drink.id);
+      }}
       onSubmit={async (shopId, input) => {
         const error = await updateDrink(drink.id, { ...input, shopId });
         if (!error) {
           setEditingId(null);
+          focusEdit(drink.id);
         }
         return error;
       }}
@@ -100,10 +98,7 @@ export default function DrinksClient() {
   );
 
   return (
-    <main
-      id="main-content"
-      className="mx-auto max-w-7xl px-4 pt-8 pb-20 sm:px-8 sm:pt-10 lg:px-12"
-    >
+    <main id="main-content" className="page pt-8 pb-20 sm:pt-10">
       <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-5 border-b border-rule pb-6">
         <div>
           <h1
@@ -203,7 +198,7 @@ export default function DrinksClient() {
                     </td>
                     <td className="py-2.5">
                       <span
-                        className="flex min-w-0 items-center gap-2.5"
+                        className="flex items-center gap-2.5"
                         title={shopName(drink)}
                       >
                         <ShopAvatar
@@ -241,32 +236,21 @@ export default function DrinksClient() {
               <li
                 key={drink.id}
                 data-drink-row={drink.id}
-                className="border-b border-rule py-3"
+                className="border-b border-rule"
               >
                 {editingId === drink.id ? (
-                  <div className="py-2">{editor(drink)}</div>
+                  <div className="py-5">{editor(drink)}</div>
                 ) : (
-                  <div className="flex items-center gap-3">
-                    <ShopAvatar
-                      src={shopsById.get(drink.shopId)?.avatar ?? null}
-                      name={shopName(drink)}
-                      size={30}
-                    />
-                    <div className="min-w-0 flex-1 text-sm">
-                      <p className="truncate text-text">
-                        {shopName(drink)}
-                        {drink.name && (
-                          <span className="text-text-2"> · {drink.name}</span>
-                        )}
-                      </p>
-                      <p className="mt-0.5 truncate text-xs text-text-2">
-                        {date(drink)}
-                        {drink.note && ` · ${drink.note}`}
-                      </p>
-                    </div>
-                    <span className="text-sm tabular-nums">{price(drink)}</span>
-                    {actions(drink)}
-                  </div>
+                  <DrinkItem
+                    drink={drink}
+                    shop={shopsById.get(drink.shopId)}
+                    currency={user.currency}
+                    date={date(drink)}
+                    onEdit={() => setEditingId(drink.id)}
+                    onRemove={(fromKeyboard) =>
+                      void remove(drink, fromKeyboard)
+                    }
+                  />
                 )}
               </li>
             ))}

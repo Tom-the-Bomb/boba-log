@@ -24,15 +24,16 @@ import MeasureToggle from "./measure-toggle";
 import { useRangeLabel } from "./range-picker";
 import ShopAvatar from "./shop-avatar";
 
-type TrendMode = "day" | "month" | "weekday" | "year" | "shop";
+const MODES = ["day", "month", "weekday", "year", "shop"] as const;
+type TrendMode = (typeof MODES)[number];
 
-const MODES: readonly { value: TrendMode; key: string }[] = [
-  { value: "day", key: "trendDay" },
-  { value: "month", key: "trendMonth" },
-  { value: "weekday", key: "trendWeekday" },
-  { value: "year", key: "trendYear" },
-  { value: "shop", key: "trendShop" },
-];
+const MODE_LABELS: Record<TrendMode, string> = {
+  day: "trendDay",
+  month: "trendMonth",
+  weekday: "trendWeekday",
+  year: "trendYear",
+  shop: "trendShop",
+};
 
 const DATE_FORMAT: Intl.DateTimeFormatOptions = {
   month: "short",
@@ -53,7 +54,6 @@ export default function TrendsSection({ drinks, inRange }: TrendsSectionProps) {
   const [measure, setMeasure] = useState<Measure>("drinks");
   const { canSpend, spent, counts, levelOf, tileLabel, currency } =
     useDayValues(drinks, measure, DATE_FORMAT);
-  const spend = useMemo(() => spendSummary(inRange), [inRange]);
 
   const bars = useMemo<InkBar[]>(() => {
     const weigh = spent ? priceOf : undefined;
@@ -88,7 +88,7 @@ export default function TrendsSection({ drinks, inRange }: TrendsSectionProps) {
         );
       case "shop": {
         const byShop = countsByShop(inRange, weigh);
-        return [...(user?.shops ?? [])]
+        return (user?.shops ?? [])
           .map((shop) => ({ shop, value: byShop.get(shop.id) ?? 0 }))
           .sort((a, b) => b.value - a.value)
           .map(({ shop, value }) => {
@@ -132,9 +132,9 @@ export default function TrendsSection({ drinks, inRange }: TrendsSectionProps) {
             compact
             label={t("trends")}
             value={mode}
-            options={MODES.map((option) => ({
-              value: option.value,
-              label: t(option.key),
+            options={MODES.map((value) => ({
+              value,
+              label: t(MODE_LABELS[value]),
             }))}
             onChange={setMode}
           />
@@ -153,15 +153,12 @@ export default function TrendsSection({ drinks, inRange }: TrendsSectionProps) {
             levelOf={levelOf}
             onSelectDay={(day) => setFocus({ day })}
           />
-        ) : spent && spend.priced === 0 ? (
+        ) : spent && spendSummary(inRange).priced === 0 ? (
           <p className="grid h-full place-items-center border-b border-rule-strong px-6 text-center text-sm text-text-2">
             {t("spentEmpty")}
           </p>
         ) : (
-          <InkBars
-            bars={bars}
-            label={t(MODES.find((m) => m.value === mode)?.key ?? MODES[0].key)}
-          />
+          <InkBars bars={bars} label={t(MODE_LABELS[mode])} />
         )}
       </div>
     </section>

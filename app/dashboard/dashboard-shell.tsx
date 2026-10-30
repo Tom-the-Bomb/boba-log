@@ -17,7 +17,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
     redirect("/auth");
   }
 
-  if (loadFailed && !isLoadingUser) {
+  if (loadFailed) {
     return (
       <ErrorScreen
         title={t("loadFailedTitle")}
@@ -34,10 +34,8 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
 
   return (
     <DashboardProvider>
-      <div className="min-h-dvh">
-        <AppHeader />
-        {children}
-      </div>
+      <AppHeader />
+      {children}
     </DashboardProvider>
   );
 }

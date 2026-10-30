@@ -8,7 +8,6 @@ import {
   type RefObject,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -106,15 +105,13 @@ function useRoller(
 
     const setRolled = (rolled: number) =>
       root.style.setProperty("--open", String(1 - rolled));
-    const inlineRolled = () => {
-      const open = parseFloat(root.style.getPropertyValue("--open"));
-      return Number.isNaN(open) ? 0 : 1 - open;
-    };
+    const inlineRolled = () =>
+      1 - parseFloat(root.style.getPropertyValue("--open"));
 
     function grab() {
       const open = Number(getComputedStyle(root!).getPropertyValue("--open"));
       root!.getAnimations().forEach((animation) => animation.cancel());
-      const rolled = Number.isNaN(open) ? 0 : 1 - open;
+      const rolled = 1 - open;
       setRolled(rolled);
       return rolled;
     }
@@ -298,16 +295,15 @@ export default function HangingScroll({ className = "" }) {
   const [tip, setTip] = useState<Tip | null>(null);
   const hideTip = useCallback(() => setTip(null), []);
 
-  const monthNames = useMemo(
-    () => MONTHS.map(({ month }) => monthName(month, i18n.language)),
-    [i18n.language],
-  );
-
   useRoller(rootRef, lengthRef, rollerRef, hideTip);
 
   function showTip(event: ReactPointerEvent) {
+    if (rootRef.current?.dataset.grabbing !== undefined) {
+      return;
+    }
     const cell = (event.target as Element).closest<HTMLElement>("[data-day]");
-    if (!cell || rootRef.current?.dataset.grabbing !== undefined) {
+    if (!cell) {
+      setTip(null);
       return;
     }
     const day = cell.dataset.day!;
@@ -352,14 +348,13 @@ export default function HangingScroll({ className = "" }) {
                 </p>
                 <div
                   aria-hidden="true"
-                  className={styles.grid}
                   onPointerOver={showTip}
                   onPointerLeave={() => setTip(null)}
                 >
                   {MONTHS.map(({ month, days, total }) => (
                     <div key={month} className={styles.month}>
                       <span className={styles.monthName}>
-                        {monthNames[month]}
+                        {monthName(month, i18n.language)}
                       </span>
                       <div className={styles.days}>
                         {days.map((day, index) => {

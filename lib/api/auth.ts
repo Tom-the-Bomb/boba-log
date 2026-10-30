@@ -14,20 +14,8 @@ const AUTH_COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
 
 const encoder = new TextEncoder();
 
-function getJwtSecret() {
-  const jwtSecret = process.env.JWT_SECRET;
-  if (!jwtSecret) {
-    throw new Error("Missing JWT_SECRET in environment variables.");
-  }
-  return jwtSecret;
-}
-
 interface AuthTokenPayload {
   username: string;
-}
-
-interface VerifiedToken extends AuthTokenPayload {
-  issuedAt: number;
 }
 
 async function pbkdf2(password: string, salt: Uint8Array): Promise<Uint8Array> {
@@ -70,29 +58,24 @@ export async function comparePassword(
   return constantTimeEqual(hash, hexToBuf(hashHex));
 }
 
-async function signToken(payload: AuthTokenPayload): Promise<string> {
-  const now = Math.floor(Date.now() / 1000);
-  return jwt.sign(
-    { ...payload, iat: now, exp: now + AUTH_COOKIE_MAX_AGE },
-    getJwtSecret(),
-  );
-}
-
-export async function verifyToken(token: string): Promise<VerifiedToken> {
-  const payload = (await jwt.verify<AuthTokenPayload>(token, getJwtSecret()))
-    ?.payload;
+export async function verifyToken(token: string) {
+  const payload = (
+    await jwt.verify<AuthTokenPayload>(token, process.env.JWT_SECRET)
+  )?.payload;
   if (!payload || typeof payload.username !== "string") {
     throw new Error("Invalid token payload.");
   }
 
-  // Tokens signed before `iat` was added still carry `exp`.
-  const issuedAt = payload.iat ?? (payload.exp ?? 0) - AUTH_COOKIE_MAX_AGE;
-
-  return { username: payload.username, issuedAt };
+  return { username: payload.username, issuedAt: payload.iat ?? 0 };
 }
 
 export async function setAuthCookie(response: NextResponse, username: string) {
-  response.cookies.set(AUTH_COOKIE_NAME, await signToken({ username }), {
+  const now = Math.floor(Date.now() / 1000);
+  const token = await jwt.sign(
+    { username, iat: now, exp: now + AUTH_COOKIE_MAX_AGE },
+    process.env.JWT_SECRET,
+  );
+  response.cookies.set(AUTH_COOKIE_NAME, token, {
     ...AUTH_COOKIE_OPTIONS,
     maxAge: AUTH_COOKIE_MAX_AGE,
   });
@@ -100,10 +83,7 @@ export async function setAuthCookie(response: NextResponse, username: string) {
 }
 
 export function clearAuthCookie(response: NextResponse) {
-  response.cookies.set(AUTH_COOKIE_NAME, "", {
-    ...AUTH_COOKIE_OPTIONS,
-    maxAge: 0,
-  });
+  response.cookies.delete({ name: AUTH_COOKIE_NAME, ...AUTH_COOKIE_OPTIONS });
   return response;
 }
 

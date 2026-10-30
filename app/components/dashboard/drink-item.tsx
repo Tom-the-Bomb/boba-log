@@ -21,9 +21,10 @@ export function DrinkActions({ drink, onEdit, onRemove }: DrinkActionsProps) {
     <div className="flex shrink-0 justify-end">
       <button
         type="button"
+        data-edit
         disabled={saving}
         onClick={onEdit}
-        className="icon-btn size-10 text-text-3 sm:size-9"
+        className="icon-btn size-10 text-text-3 hover:text-text sm:size-9"
         aria-label={t("editDrinkAria")}
       >
         <Pencil size={15} strokeWidth={1.5} />
@@ -45,17 +46,20 @@ export function DrinkActions({ drink, onEdit, onRemove }: DrinkActionsProps) {
 interface DrinkItemProps extends DrinkActionsProps {
   shop: BobaShop | undefined;
   currency: string;
+  date?: string;
 }
 
 export default function DrinkItem({
   drink,
   shop,
   currency,
+  date,
   onEdit,
   onRemove,
 }: DrinkItemProps) {
   const { i18n } = useTranslation("dashboard");
   const shopName = shop ? translateShopName(shop.name, i18n.language) : "";
+  const detail = [date, drink.note].filter(Boolean).join(" · ");
 
   return (
     <div className="flex items-center gap-3 py-3">
@@ -65,8 +69,8 @@ export default function DrinkItem({
           {shopName}
           {drink.name && <span className="text-text-2"> · {drink.name}</span>}
         </p>
-        {drink.note && (
-          <p className="mt-0.5 truncate text-xs text-text-2">{drink.note}</p>
+        {detail && (
+          <p className="mt-0.5 truncate text-xs text-text-2">{detail}</p>
         )}
       </div>
       {drink.priceCents !== null && (

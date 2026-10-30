@@ -1,98 +1,18 @@
 "use client";
 
-import { MAX_USERNAME_LENGTH } from "@/lib/drinks";
-import { failureCode } from "@/lib/network";
+import { passwordProblem, usernameProblem } from "@/lib/drinks";
+import { failureCode, sendJson } from "@/lib/network";
 import { waitForToken } from "@/lib/turnstile";
-import type { ApiErrorResponse, AuthMode } from "@/lib/types";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
-import type { ChangeEvent, SubmitEventHandler } from "react";
-import { useRef } from "react";
+import { useRef, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import InvisibleTurnstile from "../components/invisible-turnstile";
 import SiteFooter from "../components/site-footer";
 import SiteHeader from "../components/site-header";
-import { Segmented } from "../components/ui/fields";
+import { FormError, Segmented } from "../components/ui/fields";
 import useAuthFormReducer from "../reducers/auth-form-reducer";
-
-function usernameProblem(value: string, mode: AuthMode) {
-  const normalized = value.trim();
-  if (!normalized) {
-    return "usernameRequired";
-  }
-  if (mode === "login") {
-    return null;
-  }
-  if (normalized.length < 3) {
-    return "usernameMinLength";
-  }
-  return normalized.length > MAX_USERNAME_LENGTH ? "usernameMaxLength" : null;
-}
-
-function passwordProblem(value: string, mode: AuthMode) {
-  if (!value) {
-    return "passwordRequired";
-  }
-  return mode === "signup" && value.length < 6 ? "passwordMinLength" : null;
-}
-
-function FieldError({ id, message }: { id: string; message: string }) {
-  if (!message) {
-    return null;
-  }
-  return (
-    <p id={id} className="mt-2 text-sm text-danger" role="alert">
-      {message}
-    </p>
-  );
-}
-
-interface PasswordInputProps {
-  value: string;
-  visible: boolean;
-  autoComplete: string;
-  error: string;
-  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
-  onToggle: () => void;
-}
-
-function PasswordInput({
-  value,
-  visible,
-  autoComplete,
-  error,
-  onChange,
-  onToggle,
-}: PasswordInputProps) {
-  const { t } = useTranslation("auth");
-  const Icon = visible ? EyeOff : Eye;
-
-  return (
-    <div className="relative">
-      <input
-        id="auth-password"
-        type={visible ? "text" : "password"}
-        value={value}
-        autoComplete={autoComplete}
-        onChange={onChange}
-        className="field h-11 pr-11"
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? "auth-password-error" : undefined}
-      />
-      {value && (
-        <button
-          type="button"
-          onClick={onToggle}
-          className="tap-target absolute top-1/2 right-1 grid size-9 -translate-y-1/2 place-items-center rounded-md text-text-2 hover:text-text"
-          aria-label={visible ? t("hidePassword") : t("showPassword")}
-        >
-          <Icon size={17} strokeWidth={1.5} />
-        </button>
-      )}
-    </div>
-  );
-}
 
 export default function AuthPage() {
   const router = useRouter();
@@ -100,9 +20,7 @@ export default function AuthPage() {
   const [form, dispatch] = useAuthFormReducer();
   const turnstileRef = useRef<TurnstileInstance>(null);
 
-  async function handleSubmit(
-    event: Parameters<SubmitEventHandler<HTMLFormElement>>[0],
-  ) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const usernameKey = usernameProblem(form.username, form.mode);
@@ -125,19 +43,13 @@ export default function AuthPage() {
         dispatch({ type: "set_error", error: t("turnstileTimeout") });
         return;
       }
-      const response = await fetch("/api/auth", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          mode: form.mode,
-          username: form.username,
-          password: form.password,
-          turnstileToken: token,
-        }),
+      const { ok, data } = await sendJson("/api/auth", "POST", {
+        mode: form.mode,
+        username: form.username,
+        password: form.password,
+        turnstileToken: token,
       });
-
-      if (!response.ok) {
-        const data = (await response.json()) as ApiErrorResponse;
+      if (!ok) {
         dispatch({ type: "set_error", error: t(data.code ?? "authFailed") });
         return;
       }
@@ -150,6 +62,7 @@ export default function AuthPage() {
   }
 
   const isLogin = form.mode === "login";
+  const PasswordIcon = form.showPassword ? EyeOff : Eye;
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -163,7 +76,7 @@ export default function AuthPage() {
 
           <Segmented
             className="mt-8"
-            label={t("welcomeBack")}
+            label={t("account")}
             value={form.mode}
             options={[
               { value: "login", label: t("loginTab") },
@@ -192,38 +105,57 @@ export default function AuthPage() {
                   form.usernameError ? "auth-username-error" : undefined
                 }
               />
-              <FieldError
+              <FormError
                 id="auth-username-error"
                 message={form.usernameError}
+                className="mt-2"
               />
             </div>
             <div>
               <label htmlFor="auth-password" className="label">
                 {t("password")}
               </label>
-              <PasswordInput
-                value={form.password}
-                visible={form.showPassword}
-                autoComplete={isLogin ? "current-password" : "new-password"}
-                error={form.passwordError}
-                onChange={(event) =>
-                  dispatch({ type: "set_password", value: event.target.value })
-                }
-                onToggle={() => dispatch({ type: "toggle_password" })}
-              />
-              <FieldError
+              <div className="relative">
+                <input
+                  id="auth-password"
+                  type={form.showPassword ? "text" : "password"}
+                  value={form.password}
+                  autoComplete={isLogin ? "current-password" : "new-password"}
+                  onChange={(event) =>
+                    dispatch({
+                      type: "set_password",
+                      value: event.target.value,
+                    })
+                  }
+                  className="field h-11 pr-11"
+                  aria-invalid={form.passwordError ? true : undefined}
+                  aria-describedby={
+                    form.passwordError ? "auth-password-error" : undefined
+                  }
+                />
+                {form.password && (
+                  <button
+                    type="button"
+                    onClick={() => dispatch({ type: "toggle_password" })}
+                    className="tap-target absolute top-1/2 right-1 grid size-9 -translate-y-1/2 place-items-center rounded-md text-text-2 hover:text-text"
+                    aria-label={
+                      form.showPassword ? t("hidePassword") : t("showPassword")
+                    }
+                  >
+                    <PasswordIcon size={17} strokeWidth={1.5} />
+                  </button>
+                )}
+              </div>
+              <FormError
                 id="auth-password-error"
                 message={form.passwordError}
+                className="mt-2"
               />
             </div>
 
             <InvisibleTurnstile ref={turnstileRef} />
 
-            {form.error && (
-              <p className="text-sm text-danger" role="alert">
-                {form.error}
-              </p>
-            )}
+            <FormError message={form.error} />
 
             <button
               type="submit"

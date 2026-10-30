@@ -26,7 +26,7 @@ export default function SiteHeader({ action }: { action?: ReactNode }) {
   const { t } = useTranslation("common");
 
   return (
-    <header className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-3 px-4 sm:h-20 sm:gap-6 sm:px-8 lg:px-12">
+    <header className="page flex h-16 w-full items-center justify-between gap-3 sm:h-20 sm:gap-6">
       <BrandLink />
       <nav
         aria-label={t("siteName")}

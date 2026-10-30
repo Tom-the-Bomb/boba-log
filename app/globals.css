@@ -67,7 +67,6 @@
   --drop-num-4: #1a1816;
   --band: #2f2a22;
   --seal: #cf6857;
-  --on-seal: #fbf5ec;
   --danger: #e07a68;
   --scrim: rgb(0 0 0 / 0.55);
   --fibre-opacity: 0.06;
@@ -122,15 +121,19 @@
   }
 
   body {
-    position: relative;
-    min-height: 100dvh;
     font-weight: 300;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     caret-color: var(--accent);
   }
 
-  body::before {
+  /* On a wrapper, not body: react-aria places popovers wrongly in a positioned body. */
+  .paper {
+    position: relative;
+    min-height: 100dvh;
+  }
+
+  .paper::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -147,8 +150,7 @@
   }
 
   :focus-visible {
-    outline: 1.5px solid var(--focus);
-    outline-offset: 2px;
+    @apply focus-ring;
   }
 
   h1,
@@ -158,8 +160,7 @@
   }
 
   p,
-  li,
-  figcaption {
+  li {
     text-wrap: pretty;
   }
 
@@ -173,10 +174,13 @@
     cursor: pointer;
   }
 
-  input::-ms-reveal,
-  input::-ms-clear {
+  input::-ms-reveal {
     display: none;
   }
+}
+
+@utility page {
+  @apply mx-auto max-w-7xl px-4 sm:px-8 lg:px-12;
 }
 
 @utility focus-ring {
@@ -229,7 +233,6 @@
 @utility steep {
   transition:
     background-color 100ms ease-out,
-    box-shadow 100ms ease-out,
     color 100ms ease-out;
 
   @media (prefers-reduced-motion: reduce) {

@@ -6,19 +6,11 @@ import {
   unauthorizedResponse,
 } from "@/lib/api/responses";
 import { listShopRows } from "@/lib/api/shops";
-import { getUserRow } from "@/lib/api/users";
+import { getUser } from "@/lib/api/users";
 import { dayFromUTCDate } from "@/lib/date";
 import { NextRequest } from "next/server";
 
-const HEADER = [
-  "date",
-  "shop",
-  "drink",
-  "price",
-  "currency",
-  "note",
-  "logged_at",
-];
+const HEADER = "date,shop,drink,price,currency,note,logged_at";
 
 // Quote every field, and defuse cells a spreadsheet would run as a formula.
 function csvField(value: string | number | null): string {
@@ -37,7 +29,7 @@ export async function GET(request: NextRequest) {
     }
 
     const [user, shops, drinks] = await Promise.all([
-      getUserRow(username),
+      getUser(username),
       listShopRows(username),
       listDrinks(username),
     ]);
@@ -46,7 +38,7 @@ export async function GET(request: NextRequest) {
     }
 
     const shopNames = new Map(shops.map((shop) => [shop.id, shop.name]));
-    const lines = [HEADER.join(",")];
+    const lines = [HEADER];
     for (const drink of drinks) {
       lines.push(
         [
@@ -66,7 +58,7 @@ export async function GET(request: NextRequest) {
     }
 
     const filename = `boba-log-${dayFromUTCDate(new Date())}.csv`;
-    return new Response(`﻿${lines.join("\r\n")}\r\n`, {
+    return new Response(`\uFEFF${lines.join("\r\n")}\r\n`, {
       headers: {
         "Content-Type": "text/csv; charset=utf-8",
         "Content-Disposition": `attachment; filename="${filename}"`,

@@ -5,13 +5,11 @@ export async function resizeImageToWebP(file: File): Promise<File> {
   const canvas = new OffscreenCanvas(SIZE, SIZE);
   const ctx = canvas.getContext("2d")!;
 
-  const scale = Math.max(SIZE / bitmap.width, SIZE / bitmap.height);
-  const sw = SIZE / scale;
-  const sh = SIZE / scale;
-  const sx = (bitmap.width - sw) / 2;
-  const sy = (bitmap.height - sh) / 2;
+  const side = Math.min(bitmap.width, bitmap.height);
+  const sx = (bitmap.width - side) / 2;
+  const sy = (bitmap.height - side) / 2;
 
-  ctx.drawImage(bitmap, sx, sy, sw, sh, 0, 0, SIZE, SIZE);
+  ctx.drawImage(bitmap, sx, sy, side, side, 0, 0, SIZE, SIZE);
   bitmap.close();
 
   const blob = await canvas.convertToBlob({

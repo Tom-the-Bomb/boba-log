@@ -36,15 +36,14 @@ export function Menu<T extends object>(props: MenuProps<T>) {
 
 export function MenuItem({
   tone = "default",
-  className = "",
   ...props
-}: MenuItemProps & { tone?: "default" | "danger"; className?: string }) {
+}: MenuItemProps & { tone?: "default" | "danger" }) {
   return (
     <AriaMenuItem
       {...props}
       className={`flex h-9 cursor-pointer items-center gap-2.5 rounded-md px-3 text-sm outline-none data-focused:bg-hover pointer-coarse:h-11 ${
         tone === "danger" ? "text-danger" : "text-text"
-      } ${className}`}
+      }`}
     />
   );
 }

@@ -50,7 +50,7 @@ export default function InkBars({
         {bars.map((bar) => (
           <li
             key={bar.key}
-            className="flex min-w-0 flex-1 justify-center text-xs text-text-2"
+            className="flex min-w-0 flex-1 justify-center text-xs whitespace-nowrap text-text-2"
           >
             {bar.label}
           </li>

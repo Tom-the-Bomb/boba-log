@@ -6,7 +6,6 @@ import { translateShopName } from "@/lib/default-shops";
 import { formatMoney } from "@/lib/drinks";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useDashboard } from "../../dashboard/dashboard-context";
 import { useUser } from "../../providers/user-provider";
@@ -18,14 +17,11 @@ export default function RecentDrinks() {
   const { today, setFocus } = useDashboard();
   const { t, i18n } = useTranslation("dashboard");
 
-  const recent = useMemo(
-    () => sortNewestFirst(user?.drinks ?? []).slice(0, RECENT_COUNT),
-    [user?.drinks],
-  );
-
   if (!user || user.shops.length === 0) {
     return null;
   }
+
+  const recent = sortNewestFirst(user.drinks).slice(0, RECENT_COUNT);
 
   const shopsById = new Map(user.shops.map((shop) => [shop.id, shop]));
   const yesterday = addDays(today, -1);
@@ -67,6 +63,7 @@ export default function RecentDrinks() {
               <li key={drink.id} className="border-b border-rule">
                 <button
                   type="button"
+                  disabled={drink.id < 0}
                   onClick={() => {
                     setFocus({ day: drink.day, drinkId: drink.id });
                   }}

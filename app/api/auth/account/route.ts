@@ -9,7 +9,7 @@ import {
   unauthorizedResponse,
 } from "@/lib/api/responses";
 import { listShopRows } from "@/lib/api/shops";
-import { deleteUser, getUserByUsername } from "@/lib/api/users";
+import { deleteUser, getUser } from "@/lib/api/users";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function DELETE(request: NextRequest) {
@@ -24,7 +24,7 @@ export async function DELETE(request: NextRequest) {
       return invalidRequestResponse();
     }
 
-    const existing = await getUserByUsername(username);
+    const existing = await getUser(username);
     if (!existing) {
       return unauthorizedResponse();
     }

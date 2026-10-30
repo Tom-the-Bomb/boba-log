@@ -19,7 +19,7 @@ Boba Log is a Next.js app for logging bubble tea drinks, deployed to Cloudflare 
 - **Database:** Cloudflare D1 (SQLite)
 - **Object Storage:** Cloudflare R2
 - **Package Manager:** Bun
-- **Auth:** JWT (100k iterations, SHA-256) via HttpOnly cookie (30-day expiry)
+- **Auth:** JWT in an HttpOnly cookie (30-day expiry), passwords hashed with PBKDF2 (100k iterations, SHA-256)
 - **Security:** Cloudflare Ratelimiter + Turnstile
 - **Localization:** Chinese (simplified) + English with i18next and [simplelocalize.io](https://simplelocalize.io)
 
@@ -112,7 +112,7 @@ bun preview
 
 ## Database (D1)
 
-This project uses the `D1` D1 binding from `wrangler.jsonc` with database name `boba-log`.
+This project uses the `DB` D1 binding from `wrangler.jsonc` with database name `boba-log`.
 
 ### Create database
 
@@ -201,7 +201,7 @@ The `NEXT_PUBLIC_TURNSTILE_SITE_KEY` must be available at build time since Next.
 
 ## Ratelimiting
 
-- `/api/auth` route: (10 requests / min / IP)
+- `/api/auth` routes except logout: (10 requests / min / IP)
 - All other `/api/` routes: (100 requests / min / IP)
 
 ## Default Shop Avatars

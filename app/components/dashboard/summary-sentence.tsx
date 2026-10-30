@@ -45,7 +45,6 @@ export default function SummarySentence({
           values={{
             start,
             end,
-            count,
             shops,
             perWeek: rate.toLocaleString(i18n.language, {
               maximumFractionDigits: 1,
@@ -61,7 +60,6 @@ export default function SummarySentence({
             i18nKey="spendLine"
             count={spend.priced}
             values={{
-              count: spend.priced,
               spent: formatMoney(spend.cents, currency, i18n.language),
               average: formatMoney(
                 Math.round(spend.cents / spend.priced),

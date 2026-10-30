@@ -11,9 +11,9 @@ import {
 import "@fontsource/lxgw-wenkai-tc/400.css";
 import "@fontsource/noto-sans-sc/300.css";
 import "@fontsource/noto-sans-sc/400.css";
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { Toaster } from "sonner";
 import { SealCarveFilter } from "./components/brand/seal-mark";
 import "./fonts/marks.css";
@@ -36,10 +36,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    url: SITE_URL,
     siteName: SITE_NAME,
-    title: DEFAULT_SEO_TITLE,
-    description: DEFAULT_SEO_DESCRIPTION,
     images: [
       {
         url: SOCIAL_IMAGE_URL,
@@ -51,9 +48,6 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary",
-    title: DEFAULT_SEO_TITLE,
-    description: DEFAULT_SEO_DESCRIPTION,
-    images: [SOCIAL_IMAGE_URL],
   },
   robots: {
     index: true,
@@ -79,10 +73,6 @@ export const metadata: Metadata = {
   category: "productivity",
 };
 
-export const viewport: Viewport = {
-  themeColor: "#f4f0e8",
-};
-
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -96,18 +86,17 @@ export default async function RootLayout({
         <SealCarveFilter />
         <LocaleProvider locale={locale}>
           <ThemeProvider>
-            {children}
+            <div className="paper">{children}</div>
             <Toaster
               position="bottom-center"
+              style={{ "--width": "26rem" } as CSSProperties}
               toastOptions={{
                 unstyled: true,
                 classNames: {
                   toast:
-                    "flex w-[min(26rem,calc(100vw-2rem))] items-center gap-3 rounded-lg border border-rule bg-surface px-4 py-3 text-sm text-text shadow-(--lift)",
+                    "flex w-full items-center gap-3 rounded-lg border border-rule bg-surface px-4 py-3 font-sans text-sm shadow-(--lift)",
                   error: "text-danger",
-                  icon: "shrink-0",
                   content: "min-w-0 flex-1",
-                  title: "w-full",
                 },
               }}
             />

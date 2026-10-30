@@ -1,9 +1,8 @@
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
-import type React from "react";
+import type { RefObject } from "react";
 
 export function waitForToken(
-  ref: React.RefObject<TurnstileInstance | null>,
-  timeout = 10000,
+  ref: RefObject<TurnstileInstance | null>,
 ): Promise<string> {
   const existing = ref.current?.getResponse();
   if (existing) {
@@ -13,7 +12,7 @@ export function waitForToken(
     const start = Date.now();
     const id = setInterval(() => {
       const token = ref.current?.getResponse();
-      if (token || Date.now() - start >= timeout) {
+      if (token || Date.now() - start >= 10_000) {
         clearInterval(id);
         resolve(token ?? "");
       }

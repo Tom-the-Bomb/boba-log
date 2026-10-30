@@ -7,34 +7,21 @@ import {
   parsePriceInput,
   priceInputValue,
 } from "@/lib/drinks";
-import { failureCode } from "@/lib/network";
 import type { BobaShop, Drink, DrinkInput } from "@/lib/types";
 import { useId, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
+import { useDashboard } from "../../dashboard/dashboard-context";
 import DatePicker from "../ui/date-picker";
+import { FormError } from "../ui/fields";
 import ShopAvatar from "./shop-avatar";
-
-type Field = "name" | "price" | "note";
-
-const FIELD_OF_CODE: Partial<Record<string, Field>> = {
-  invalidPrice: "price",
-  drinkNameTooLong: "name",
-  drinkNoteTooLong: "note",
-};
 
 interface DrinkFormProps {
   shops: readonly BobaShop[];
   currency: string;
   drink?: Drink;
   initialShopId?: number;
-  showDate?: boolean;
   initialDay: string;
-  maxDay: string;
-  submitLabel: string;
-  onSubmit: (
-    shopId: number,
-    input: DrinkInput & { day: string },
-  ) => Promise<string | null>;
+  onSubmit: (shopId: number, input: DrinkInput) => Promise<string | null>;
   onCancel?: () => void;
 }
 
@@ -43,18 +30,15 @@ export default function DrinkForm({
   currency,
   drink,
   initialShopId,
-  showDate = false,
   initialDay,
-  maxDay,
-  submitLabel,
   onSubmit,
   onCancel,
 }: DrinkFormProps) {
   const { t, i18n } = useTranslation("dashboard");
-  const { t: tc } = useTranslation("common");
+  const { today } = useDashboard();
   const id = useId();
   const [shopId, setShopId] = useState(
-    drink?.shopId ?? initialShopId ?? shops[0]?.id ?? 0,
+    drink?.shopId ?? initialShopId ?? shops[0].id,
   );
   const [day, setDay] = useState(drink?.day ?? initialDay);
   const [name, setName] = useState(drink?.name ?? "");
@@ -62,55 +46,30 @@ export default function DrinkForm({
     priceInputValue(drink?.priceCents ?? null),
   );
   const [note, setNote] = useState(drink?.note ?? "");
-  const [error, setError] = useState("");
-  const [errorField, setErrorField] = useState<Field | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const errorId = `${id}-error`;
-
-  function fail(code: string) {
-    const field = FIELD_OF_CODE[code] ?? null;
-    setError(t(code));
-    setErrorField(field);
-    if (field) {
-      document.getElementById(`${id}-${field}`)?.focus();
-    }
-  }
-
-  const invalid = (field: Field) =>
-    errorField === field
-      ? { "aria-invalid": true, "aria-describedby": errorId }
-      : {};
+  const priceInvalid = error === "invalidPrice";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const priceCents = parsePriceInput(price);
     if (priceCents === undefined) {
-      fail("invalidPrice");
+      setError("invalidPrice");
+      document.getElementById(`${id}-price`)?.focus();
       return;
     }
-    if (!shopId) {
-      fail("shopNotFound");
-      return;
-    }
-
     setIsSaving(true);
-    setError("");
-    setErrorField(null);
-    let code: string | null;
-    try {
-      code = await onSubmit(shopId, {
-        day,
-        name: name.trim() || null,
-        priceCents,
-        note: note.trim() || null,
-      });
-    } catch {
-      code = failureCode("couldNotSave");
-    } finally {
-      setIsSaving(false);
-    }
+    setError(null);
+    const code = await onSubmit(shopId, {
+      day,
+      name: name.trim() || null,
+      priceCents,
+      note: note.trim() || null,
+    });
+    setIsSaving(false);
     if (code) {
-      fail(code);
+      setError(code);
     } else if (!drink) {
       setName("");
       setPrice("");
@@ -159,7 +118,6 @@ export default function DrinkForm({
           </label>
           <input
             id={`${id}-name`}
-            {...invalid("name")}
             className="field"
             value={name}
             maxLength={MAX_DRINK_NAME_LENGTH}
@@ -174,7 +132,8 @@ export default function DrinkForm({
           </label>
           <input
             id={`${id}-price`}
-            {...invalid("price")}
+            aria-invalid={priceInvalid || undefined}
+            aria-describedby={priceInvalid ? errorId : undefined}
             className="field tabular-nums"
             value={price}
             inputMode="decimal"
@@ -186,7 +145,7 @@ export default function DrinkForm({
       </div>
 
       <div
-        className={`grid gap-3 ${showDate ? "sm:grid-cols-[minmax(0,1.6fr)_minmax(0,0.8fr)]" : ""}`}
+        className={`grid gap-3 ${drink ? "sm:grid-cols-[minmax(0,1.6fr)_minmax(0,0.8fr)]" : ""}`}
       >
         <div>
           <label htmlFor={`${id}-note`} className="label">
@@ -194,7 +153,6 @@ export default function DrinkForm({
           </label>
           <input
             id={`${id}-note`}
-            {...invalid("note")}
             className="field"
             value={note}
             maxLength={MAX_DRINK_NOTE_LENGTH}
@@ -203,30 +161,26 @@ export default function DrinkForm({
             onChange={(event) => setNote(event.target.value)}
           />
         </div>
-        {showDate && (
+        {drink && (
           <DatePicker
             label={t("colDate")}
             value={day}
-            maxDay={maxDay}
+            maxDay={today}
             onChange={setDay}
           />
         )}
       </div>
 
-      {error && (
-        <p id={errorId} className="text-sm text-danger" role="alert">
-          {error}
-        </p>
-      )}
+      <FormError id={errorId} message={error ? t(error) : ""} />
 
       <div className="flex items-center justify-end gap-3">
         {onCancel && (
           <button type="button" onClick={onCancel} className="btn btn-quiet">
-            {tc("cancel")}
+            {t("cancel")}
           </button>
         )}
         <button type="submit" disabled={isSaving} className="btn btn-primary">
-          {isSaving ? t("saving") : submitLabel}
+          {isSaving ? t("saving") : t(drink ? "save" : "addDrink")}
         </button>
       </div>
     </form>

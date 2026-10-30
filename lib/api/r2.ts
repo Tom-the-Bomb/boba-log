@@ -37,7 +37,7 @@ export async function getAvatarUrl(shopId: number) {
     const object = await getR2().head(avatarKey(shopId));
     return rememberAvatar(shopId, object ? object.uploaded.getTime() : null);
   } catch {
-    return rememberAvatar(shopId, null);
+    return null;
   }
 }
 
@@ -57,9 +57,6 @@ export function avatarType(bytes: Uint8Array) {
   if (ascii(1, 4) === "PNG" && bytes[0] === 0x89) {
     return "image/png";
   }
-  if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
-    return "image/jpeg";
-  }
   return null;
 }
 
@@ -69,10 +66,7 @@ export async function uploadAvatar(
   contentType: string,
 ) {
   const object = await getR2().put(avatarKey(shopId), body, {
-    httpMetadata: {
-      contentType,
-      cacheControl: "public, max-age=31536000, immutable",
-    },
+    httpMetadata: { contentType },
   });
   if (!object) {
     throw new Error("Avatar upload failed.");

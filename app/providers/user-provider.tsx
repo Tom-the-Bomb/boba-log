@@ -1,6 +1,6 @@
 "use client";
 
-import { failureCode } from "@/lib/network";
+import { failureCode, sendJson } from "@/lib/network";
 import type {
   ApiErrorResponse,
   BobaShop,
@@ -30,11 +30,11 @@ interface UserContextValue {
   logout: () => Promise<void>;
   addShop: (shop: BobaShop) => void;
   removeShop: (shopId: number) => void;
-  logDrink: (
-    shopId: number,
-    input: DrinkInput & { day: string },
-  ) => Promise<Drink | string>;
-  updateDrink: (id: number, input: DrinkInput) => MutationResult;
+  logDrink: (shopId: number, input: DrinkInput) => Promise<Drink | string>;
+  updateDrink: (
+    id: number,
+    input: DrinkInput & { shopId: number },
+  ) => MutationResult;
   removeDrink: (drink: Drink) => MutationResult;
   setCurrency: (currency: string) => MutationResult;
 }
@@ -42,22 +42,17 @@ interface UserContextValue {
 const UserContext = createContext<UserContextValue | null>(null);
 
 class SessionExpiredError extends Error {}
-class RateLimitedError extends Error {}
 
-async function sendJson<T extends ApiErrorResponse>(
+async function send<T extends ApiErrorResponse>(
   url: string,
   method: string,
   body?: unknown,
-): Promise<{ ok: boolean; data: T }> {
-  const response = await fetch(url, {
-    method,
-    headers: body ? { "Content-Type": "application/json" } : undefined,
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (response.status === 401) {
+) {
+  const result = await sendJson<T>(url, method, body);
+  if (result.status === 401) {
     throw new SessionExpiredError();
   }
-  return { ok: response.ok, data: (await response.json()) as T };
+  return result;
 }
 
 export default function UserProvider({ children }: { children: ReactNode }) {
@@ -90,32 +85,30 @@ export default function UserProvider({ children }: { children: ReactNode }) {
   const hydrate = useCallback(async () => {
     dispatch({ type: "loading" });
     try {
-      const response = await fetch("/api/user");
-      if (response.status === 401) {
-        throw new SessionExpiredError();
+      const { ok, data } = await send<ApiErrorResponse & { user: PublicUser }>(
+        "/api/user",
+        "GET",
+      );
+      if (ok) {
+        dispatch({ type: "loaded", user: data.user });
+      } else {
+        dispatch({
+          type: "load_failed",
+          reason:
+            data.code === "tooManyRequests"
+              ? "tooManyRequests"
+              : "loadFailedBody",
+        });
       }
-      if (response.status === 429) {
-        throw new RateLimitedError();
-      }
-      if (!response.ok) {
-        throw new Error("Could not load account.");
-      }
-      const data = (await response.json()) as { user: PublicUser };
-      dispatch({ type: "loaded", user: data.user });
     } catch (error) {
       if (error instanceof SessionExpiredError) {
         await expire();
       } else {
         dispatch({
           type: "load_failed",
-          reason:
-            error instanceof RateLimitedError
-              ? "tooManyRequests"
-              : failureCode("loadFailedBody"),
+          reason: failureCode("loadFailedBody"),
         });
       }
-    } finally {
-      dispatch({ type: "done_loading" });
     }
   }, [dispatch, expire]);
 
@@ -134,7 +127,7 @@ export default function UserProvider({ children }: { children: ReactNode }) {
   );
 
   const logDrink = useCallback(
-    async (shopId: number, input: DrinkInput & { day: string }) => {
+    async (shopId: number, input: DrinkInput) => {
       const tempId = nextTempId.current--;
       dispatch({
         type: "add_drink",
@@ -149,7 +142,7 @@ export default function UserProvider({ children }: { children: ReactNode }) {
         },
       });
       try {
-        const { ok, data } = await sendJson<DrinkMutationResponse>(
+        const { ok, data } = await send<DrinkMutationResponse>(
           `/api/shops/${shopId}/drinks`,
           "POST",
           input,
@@ -169,11 +162,11 @@ export default function UserProvider({ children }: { children: ReactNode }) {
   );
 
   const updateDrink = useCallback(
-    async (id: number, input: DrinkInput) => {
+    async (id: number, input: DrinkInput & { shopId: number }) => {
       try {
-        const { ok, data } = await sendJson<DrinkMutationResponse>(
+        const { ok, data } = await send<DrinkMutationResponse>(
           `/api/drinks/${id}`,
-          "PATCH",
+          "PUT",
           input,
         );
         if (ok && data.drink) {
@@ -192,7 +185,7 @@ export default function UserProvider({ children }: { children: ReactNode }) {
     async (drink: Drink) => {
       dispatch({ type: "remove_drink", id: drink.id });
       try {
-        const { ok, data } = await sendJson<ApiErrorResponse>(
+        const { ok, data } = await send<ApiErrorResponse>(
           `/api/drinks/${drink.id}`,
           "DELETE",
         );
@@ -212,7 +205,7 @@ export default function UserProvider({ children }: { children: ReactNode }) {
   const setCurrency = useCallback(
     async (currency: string) => {
       try {
-        const { ok, data } = await sendJson<ApiErrorResponse>(
+        const { ok, data } = await send<ApiErrorResponse>(
           "/api/user",
           "PATCH",
           { currency },
@@ -256,7 +249,7 @@ export default function UserProvider({ children }: { children: ReactNode }) {
     ],
   );
 
-  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
+  return <UserContext value={value}>{children}</UserContext>;
 }
 
 export function useUser() {

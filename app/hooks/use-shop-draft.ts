@@ -2,7 +2,6 @@
 
 import type { DefaultShopPresetOption } from "@/lib/default-shops";
 import { resizeImageToWebP } from "@/lib/resize-image";
-import type { ChangeEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -32,11 +31,9 @@ export default function useShopDraft() {
     setAvatarPreview(preview);
   }
 
-  async function handleAvatarInputChange(
-    event: ChangeEvent<HTMLInputElement>,
+  async function handleAvatarFile(
+    file: File | undefined,
   ): Promise<string | null> {
-    const file = event.target.files?.[0];
-    event.target.value = "";
     if (!file) {
       return null;
     }
@@ -72,8 +69,7 @@ export default function useShopDraft() {
       }
       const blob = await response.blob();
       if (!signal.aborted) {
-        const name = preset.avatar.split("/").pop() ?? "avatar.webp";
-        setAvatarFile(new File([blob], name, { type: "image/webp" }));
+        setAvatarFile(new File([blob], "avatar.webp", { type: "image/webp" }));
       }
     } catch {
       if (!signal.aborted) {
@@ -97,7 +93,7 @@ export default function useShopDraft() {
     setShopName,
     avatarFile,
     avatarPreview,
-    handleAvatarInputChange,
+    handleAvatarFile,
     selectPreset,
     clearAvatar,
     resetDraft,

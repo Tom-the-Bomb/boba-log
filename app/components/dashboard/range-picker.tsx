@@ -72,13 +72,11 @@ export default function RangePicker() {
             minValue={parseDate(EARLIEST_DAY)}
             maxValue={parseDate(today)}
             onChange={(value) => {
-              if (value) {
-                setCustomRange({
-                  start: value.start.toString(),
-                  end: value.end.toString(),
-                });
-                setIsOpen(false);
-              }
+              setCustomRange({
+                start: value.start.toString(),
+                end: value.end.toString(),
+              });
+              setIsOpen(false);
             }}
           />
         </Dialog>

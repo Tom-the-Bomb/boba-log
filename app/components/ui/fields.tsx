@@ -1,7 +1,6 @@
 "use client";
 
 import { Check, ChevronDown } from "lucide-react";
-import type { Key } from "react";
 import {
   Select as AriaSelect,
   Button,
@@ -39,12 +38,8 @@ export function Select<K extends string>({
 }: SelectProps<K>) {
   return (
     <AriaSelect
-      selectedKey={value}
-      onSelectionChange={(key: Key | null) => {
-        if (key !== null) {
-          onChange(String(key) as K);
-        }
-      }}
+      value={value}
+      onChange={(key) => onChange(String(key) as K)}
       className={className}
     >
       <Label className={hideLabel ? "sr-only" : "label"}>{label}</Label>
@@ -108,12 +103,7 @@ export function Segmented<K extends string>({
       selectionMode="single"
       disallowEmptySelection
       selectedKeys={[value]}
-      onSelectionChange={(keys) => {
-        const [next] = keys;
-        if (next !== undefined) {
-          onChange(String(next) as K);
-        }
-      }}
+      onSelectionChange={([next]) => onChange(String(next) as K)}
       className={`grid auto-cols-fr grid-flow-col rounded-lg border border-rule p-1 ${className}`}
     >
       {options.map((option) => (
@@ -121,11 +111,30 @@ export function Segmented<K extends string>({
           key={option.value}
           id={option.value}
           isDisabled={option.disabled}
-          className={`${compact ? "h-8 px-3 text-[13px]" : "h-9 min-w-24 px-4 text-sm"} tap-target relative cursor-pointer rounded-md text-text-2 outline-none hover:text-text data-disabled:cursor-default data-disabled:opacity-45 data-focus-visible:focus-ring data-focus-visible:outline-offset-0 data-selected:forced-selected data-selected:bg-band data-selected:text-text data-selected:shadow-[inset_0_0_0_1px_var(--rule)]`}
+          className={`${compact ? "h-8 px-3 text-[13px]" : "h-9 min-w-24 px-4 text-sm"} tap-target relative rounded-md text-text-2 outline-none hover:text-text data-disabled:opacity-45 data-focus-visible:focus-ring data-focus-visible:outline-offset-0 data-selected:forced-selected data-selected:bg-band data-selected:text-text data-selected:shadow-[inset_0_0_0_1px_var(--rule)]`}
         >
           {option.label}
         </ToggleButton>
       ))}
     </ToggleButtonGroup>
+  );
+}
+
+export function FormError({
+  id,
+  message,
+  className = "",
+}: {
+  id?: string;
+  message: string;
+  className?: string;
+}) {
+  if (!message) {
+    return null;
+  }
+  return (
+    <p id={id} role="alert" className={`text-sm text-danger ${className}`}>
+      {message}
+    </p>
   );
 }

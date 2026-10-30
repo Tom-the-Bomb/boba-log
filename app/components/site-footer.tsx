@@ -7,7 +7,7 @@ export default function SiteFooter() {
   const { t } = useTranslation("common");
 
   return (
-    <footer className="mx-auto w-full max-w-7xl px-4 sm:px-8 lg:px-12">
+    <footer className="page w-full">
       <div className="flex items-center justify-between gap-4 border-t border-rule py-6 text-sm text-text-2">
         <p>{t("footerTagline", { author: AUTHOR_NAME })}</p>
         <div className="flex items-center gap-5">

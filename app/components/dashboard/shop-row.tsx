@@ -66,7 +66,7 @@ export default function ShopRow({
           className="mt-2 block h-0.5 max-w-36 rounded-full bg-rule"
         >
           <span
-            className="block h-full rounded-full bg-glaze-2 steep"
+            className="block h-full rounded-full bg-glaze-2"
             style={{ width: `${Math.round(share * 100)}%` }}
           />
         </span>
@@ -78,7 +78,7 @@ export default function ShopRow({
         <MenuTrigger>
           <Button
             aria-label={t("shopMenuAria", { name })}
-            className="icon-btn size-10 text-text-3 outline-none data-focus-visible:focus-ring sm:size-9"
+            className="icon-btn size-10 text-text-3 outline-none hover:text-text data-focus-visible:focus-ring sm:size-9"
           >
             <MoreHorizontal size={17} strokeWidth={1.5} />
           </Button>

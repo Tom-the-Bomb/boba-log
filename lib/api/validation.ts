@@ -56,58 +56,40 @@ function parseOptionalPrice(value: unknown): ParseResult<number | null> {
 
 export function parseDrinkInput(
   body: Record<string, unknown>,
-  requireDay: boolean,
-): ParseResult<DrinkInput> {
-  const input: DrinkInput = {};
-
-  if (requireDay || "day" in body) {
-    const day = parseDay(body.day);
-    if (!day.ok) {
-      return day;
-    }
-    input.day = day.value;
+): ParseResult<Required<DrinkInput>> {
+  const day = parseDay(body.day);
+  if (!day.ok) {
+    return day;
   }
-
-  if ("shopId" in body) {
-    if (!Number.isInteger(body.shopId)) {
-      return { ok: false, code: "shopNotFound" };
-    }
-    input.shopId = body.shopId as number;
+  const name = parseOptionalText(
+    body.name,
+    MAX_DRINK_NAME_LENGTH,
+    "drinkNameTooLong",
+  );
+  if (!name.ok) {
+    return name;
   }
-
-  if ("name" in body) {
-    const name = parseOptionalText(
-      body.name,
-      MAX_DRINK_NAME_LENGTH,
-      "drinkNameTooLong",
-    );
-    if (!name.ok) {
-      return name;
-    }
-    input.name = name.value;
+  const price = parseOptionalPrice(body.priceCents);
+  if (!price.ok) {
+    return price;
   }
-
-  if ("priceCents" in body) {
-    const price = parseOptionalPrice(body.priceCents);
-    if (!price.ok) {
-      return price;
-    }
-    input.priceCents = price.value;
+  const note = parseOptionalText(
+    body.note,
+    MAX_DRINK_NOTE_LENGTH,
+    "drinkNoteTooLong",
+  );
+  if (!note.ok) {
+    return note;
   }
-
-  if ("note" in body) {
-    const note = parseOptionalText(
-      body.note,
-      MAX_DRINK_NOTE_LENGTH,
-      "drinkNoteTooLong",
-    );
-    if (!note.ok) {
-      return note;
-    }
-    input.note = note.value;
-  }
-
-  return { ok: true, value: input };
+  return {
+    ok: true,
+    value: {
+      day: day.value,
+      name: name.value,
+      priceCents: price.value,
+      note: note.value,
+    },
+  };
 }
 
 export function parseId(value: string): number | null {
