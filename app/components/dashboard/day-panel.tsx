@@ -4,7 +4,7 @@ import { sortNewestFirst } from "@/lib/dashboard-metrics";
 import { addDays, formatDay } from "@/lib/date";
 import { EARLIEST_DAY } from "@/lib/drinks";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDashboard } from "../../dashboard/dashboard-context";
 import useRemoveDrink, { focusEdit } from "../../hooks/use-remove-drink";
@@ -44,17 +44,14 @@ export default function DayPanel() {
   }
 
   const day = focus?.day ?? null;
-  const drinks = useMemo(
-    () =>
-      day && user
-        ? sortNewestFirst(user.drinks.filter((drink) => drink.day === day))
-        : [],
-    [day, user],
-  );
 
   if (!day || !user) {
     return null;
   }
+
+  const drinks = sortNewestFirst(
+    user.drinks.filter((drink) => drink.day === day),
+  );
 
   const shopsById = new Map(user.shops.map((shop) => [shop.id, shop]));
 
@@ -69,12 +66,10 @@ export default function DayPanel() {
   return (
     <section
       ref={panelRef}
-      id="day-panel"
       aria-labelledby="day-panel-heading"
       onKeyDown={(event) => {
         if (
           event.key === "Escape" &&
-          !event.defaultPrevented &&
           !(event.target as HTMLElement).closest("input")
         ) {
           close(true);

@@ -249,7 +249,7 @@ export default function UserProvider({ children }: { children: ReactNode }) {
     ],
   );
 
-  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
+  return <UserContext value={value}>{children}</UserContext>;
 }
 
 export function useUser() {

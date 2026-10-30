@@ -69,8 +69,7 @@ export default function useShopDraft() {
       }
       const blob = await response.blob();
       if (!signal.aborted) {
-        const name = preset.avatar.split("/").pop() ?? "avatar.webp";
-        setAvatarFile(new File([blob], name, { type: "image/webp" }));
+        setAvatarFile(new File([blob], "avatar.webp", { type: "image/webp" }));
       }
     } catch {
       if (!signal.aborted) {

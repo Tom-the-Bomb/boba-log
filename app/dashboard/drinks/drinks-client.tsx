@@ -11,7 +11,7 @@ import { formatMoney } from "@/lib/drinks";
 import type { Drink } from "@/lib/types";
 import { Download } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import DrinkForm from "../../components/dashboard/drink-form";
 import DrinkItem, { DrinkActions } from "../../components/dashboard/drink-item";
@@ -38,18 +38,16 @@ export default function DrinksClient() {
   }
   const [editingId, setEditingId] = useState<number | null>(null);
 
-  const drinks = useMemo(() => {
-    const inRange = drinksInRange(user?.drinks ?? [], range);
-    const filtered =
-      shopFilter === "all"
-        ? inRange
-        : inRange.filter((drink) => String(drink.shopId) === shopFilter);
-    return sortNewestFirst(filtered);
-  }, [user?.drinks, range, shopFilter]);
-
   if (!user) {
     return null;
   }
+
+  const inRange = drinksInRange(user.drinks, range);
+  const drinks = sortNewestFirst(
+    shopFilter === "all"
+      ? inRange
+      : inRange.filter((drink) => String(drink.shopId) === shopFilter),
+  );
 
   const shopsById = new Map(user.shops.map((shop) => [shop.id, shop]));
   const spend = spendSummary(drinks);

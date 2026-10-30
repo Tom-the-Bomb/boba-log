@@ -14,14 +14,6 @@ const AUTH_COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
 
 const encoder = new TextEncoder();
 
-function getJwtSecret() {
-  const jwtSecret = process.env.JWT_SECRET;
-  if (!jwtSecret) {
-    throw new Error("Missing JWT_SECRET in environment variables.");
-  }
-  return jwtSecret;
-}
-
 interface AuthTokenPayload {
   username: string;
 }
@@ -67,8 +59,9 @@ export async function comparePassword(
 }
 
 export async function verifyToken(token: string) {
-  const payload = (await jwt.verify<AuthTokenPayload>(token, getJwtSecret()))
-    ?.payload;
+  const payload = (
+    await jwt.verify<AuthTokenPayload>(token, process.env.JWT_SECRET)
+  )?.payload;
   if (!payload || typeof payload.username !== "string") {
     throw new Error("Invalid token payload.");
   }
@@ -80,7 +73,7 @@ export async function setAuthCookie(response: NextResponse, username: string) {
   const now = Math.floor(Date.now() / 1000);
   const token = await jwt.sign(
     { username, iat: now, exp: now + AUTH_COOKIE_MAX_AGE },
-    getJwtSecret(),
+    process.env.JWT_SECRET,
   );
   response.cookies.set(AUTH_COOKIE_NAME, token, {
     ...AUTH_COOKIE_OPTIONS,
@@ -90,10 +83,7 @@ export async function setAuthCookie(response: NextResponse, username: string) {
 }
 
 export function clearAuthCookie(response: NextResponse) {
-  response.cookies.set(AUTH_COOKIE_NAME, "", {
-    ...AUTH_COOKIE_OPTIONS,
-    maxAge: 0,
-  });
+  response.cookies.delete({ name: AUTH_COOKIE_NAME, ...AUTH_COOKIE_OPTIONS });
   return response;
 }
 

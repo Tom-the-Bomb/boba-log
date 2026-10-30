@@ -1,9 +1,7 @@
 import type { ApiErrorResponse } from "./types";
 
 export function failureCode<T extends string>(fallback: T): T | "offline" {
-  return typeof navigator !== "undefined" && navigator.onLine === false
-    ? "offline"
-    : fallback;
+  return navigator.onLine ? fallback : "offline";
 }
 
 export async function sendJson<T extends ApiErrorResponse = ApiErrorResponse>(

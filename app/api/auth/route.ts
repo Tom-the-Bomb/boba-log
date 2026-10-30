@@ -7,7 +7,7 @@ import {
 } from "@/lib/api/responses";
 import { checkTurnstile } from "@/lib/api/turnstile";
 import { createUser, getUser } from "@/lib/api/users";
-import { MAX_USERNAME_LENGTH } from "@/lib/drinks";
+import { passwordProblem, usernameProblem } from "@/lib/drinks";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -26,36 +26,14 @@ export async function POST(request: Request) {
       .trim()
       .toLowerCase();
     const password = String(body.password ?? "");
-    if (!username || !password) {
-      return errorResponse(
-        "fieldsRequired",
-        "Username and password are required.",
-        400,
-      );
+    const mode = body.mode === "signup" ? "signup" : "login";
+    const problem =
+      usernameProblem(username, mode) ?? passwordProblem(password, mode);
+    if (problem) {
+      return errorResponse(problem, "Invalid username or password.", 400);
     }
 
-    if (body.mode === "signup") {
-      if (username.length < 3) {
-        return errorResponse(
-          "usernameMinLength",
-          "Username must be at least 3 characters.",
-          400,
-        );
-      }
-      if (username.length > MAX_USERNAME_LENGTH) {
-        return errorResponse(
-          "usernameMaxLength",
-          `Username must be at most ${MAX_USERNAME_LENGTH} characters.`,
-          400,
-        );
-      }
-      if (password.length < 6) {
-        return errorResponse(
-          "passwordMinLength",
-          "Password must be at least 6 characters.",
-          400,
-        );
-      }
+    if (mode === "signup") {
       if (!(await createUser(username, await hashPassword(password)))) {
         return errorResponse("accountExists", "Account already exists.", 409);
       }

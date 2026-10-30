@@ -1,9 +1,8 @@
 "use client";
 
-import { MAX_USERNAME_LENGTH } from "@/lib/drinks";
+import { passwordProblem, usernameProblem } from "@/lib/drinks";
 import { failureCode, sendJson } from "@/lib/network";
 import { waitForToken } from "@/lib/turnstile";
-import type { AuthMode } from "@/lib/types";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -14,27 +13,6 @@ import SiteFooter from "../components/site-footer";
 import SiteHeader from "../components/site-header";
 import { FormError, Segmented } from "../components/ui/fields";
 import useAuthFormReducer from "../reducers/auth-form-reducer";
-
-function usernameProblem(value: string, mode: AuthMode) {
-  const normalized = value.trim();
-  if (!normalized) {
-    return "usernameRequired";
-  }
-  if (mode === "login") {
-    return null;
-  }
-  if (normalized.length < 3) {
-    return "usernameMinLength";
-  }
-  return normalized.length > MAX_USERNAME_LENGTH ? "usernameMaxLength" : null;
-}
-
-function passwordProblem(value: string, mode: AuthMode) {
-  if (!value) {
-    return "passwordRequired";
-  }
-  return mode === "signup" && value.length < 6 ? "passwordMinLength" : null;
-}
 
 export default function AuthPage() {
   const router = useRouter();

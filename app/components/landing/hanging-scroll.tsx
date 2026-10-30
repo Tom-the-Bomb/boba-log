@@ -105,15 +105,13 @@ function useRoller(
 
     const setRolled = (rolled: number) =>
       root.style.setProperty("--open", String(1 - rolled));
-    const inlineRolled = () => {
-      const open = parseFloat(root.style.getPropertyValue("--open"));
-      return Number.isNaN(open) ? 0 : 1 - open;
-    };
+    const inlineRolled = () =>
+      1 - parseFloat(root.style.getPropertyValue("--open"));
 
     function grab() {
       const open = Number(getComputedStyle(root!).getPropertyValue("--open"));
       root!.getAnimations().forEach((animation) => animation.cancel());
-      const rolled = Number.isNaN(open) ? 0 : 1 - open;
+      const rolled = 1 - open;
       setRolled(rolled);
       return rolled;
     }

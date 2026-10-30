@@ -158,7 +158,7 @@ export default function AddShopDialog({
             ) : (
               <span
                 aria-hidden="true"
-                className="size-11 rounded-full bg-glaze-0 ring-1 ring-rule ring-inset"
+                className="size-11 shrink-0 rounded-full bg-glaze-0 ring-1 ring-rule ring-inset"
               />
             )}
             <FileTrigger

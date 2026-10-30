@@ -144,7 +144,6 @@
 }
 
 .silk {
-  position: relative;
   padding: 0 var(--hs-side);
   clip-path: inset(0 0 calc((1 - var(--open)) * 100%) 0);
   background:

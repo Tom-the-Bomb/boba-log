@@ -54,7 +54,6 @@ export default function TrendsSection({ drinks, inRange }: TrendsSectionProps) {
   const [measure, setMeasure] = useState<Measure>("drinks");
   const { canSpend, spent, counts, levelOf, tileLabel, currency } =
     useDayValues(drinks, measure, DATE_FORMAT);
-  const spend = useMemo(() => spendSummary(inRange), [inRange]);
 
   const bars = useMemo<InkBar[]>(() => {
     const weigh = spent ? priceOf : undefined;
@@ -154,7 +153,7 @@ export default function TrendsSection({ drinks, inRange }: TrendsSectionProps) {
             levelOf={levelOf}
             onSelectDay={(day) => setFocus({ day })}
           />
-        ) : spent && spend.priced === 0 ? (
+        ) : spent && spendSummary(inRange).priced === 0 ? (
           <p className="grid h-full place-items-center border-b border-rule-strong px-6 text-center text-sm text-text-2">
             {t("spentEmpty")}
           </p>

@@ -4,7 +4,7 @@ import { countsByShop, lastDayByShop } from "@/lib/dashboard-metrics";
 import { translateShopName } from "@/lib/default-shops";
 import type { BobaShop, Drink } from "@/lib/types";
 import { Plus } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { useDashboard } from "../../dashboard/dashboard-context";
@@ -22,19 +22,12 @@ export default function ShopList({ inRange }: { inRange: readonly Drink[] }) {
   const [deleting, setDeleting] = useState<BobaShop | null>(null);
 
   const shops = user?.shops ?? [];
-  const drinks = useMemo(() => user?.drinks ?? [], [user?.drinks]);
-
-  const { rangeCounts, todayCounts, lastDays, totalCounts, max } =
-    useMemo(() => {
-      const rangeCounts = countsByShop(inRange);
-      return {
-        rangeCounts,
-        todayCounts: countsByShop(drinks.filter((d) => d.day === today)),
-        lastDays: lastDayByShop(drinks),
-        totalCounts: countsByShop(drinks),
-        max: Math.max(1, ...rangeCounts.values()),
-      };
-    }, [drinks, inRange, today]);
+  const drinks = user?.drinks ?? [];
+  const rangeCounts = countsByShop(inRange);
+  const todayCounts = countsByShop(drinks.filter((d) => d.day === today));
+  const lastDays = lastDayByShop(drinks);
+  const totalCounts = countsByShop(drinks);
+  const max = Math.max(1, ...rangeCounts.values());
 
   async function handleLog(shop: BobaShop) {
     const name = translateShopName(shop.name, i18n.language);
@@ -55,6 +48,8 @@ export default function ShopList({ inRange }: { inRange: readonly Drink[] }) {
             }
           }}
           onAddDetails={async () => {
+            // Sonner refocuses +1 when focus leaves the toast; let it before the panel takes focus.
+            (document.activeElement as HTMLElement | null)?.blur();
             toast.dismiss(id);
             const result = await pending;
             if (typeof result !== "string") {

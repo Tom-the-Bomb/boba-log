@@ -39,11 +39,7 @@ export function Select<K extends string>({
   return (
     <AriaSelect
       value={value}
-      onChange={(key) => {
-        if (key !== null) {
-          onChange(String(key) as K);
-        }
-      }}
+      onChange={(key) => onChange(String(key) as K)}
       className={className}
     >
       <Label className={hideLabel ? "sr-only" : "label"}>{label}</Label>
@@ -107,12 +103,7 @@ export function Segmented<K extends string>({
       selectionMode="single"
       disallowEmptySelection
       selectedKeys={[value]}
-      onSelectionChange={(keys) => {
-        const [next] = keys;
-        if (next !== undefined) {
-          onChange(String(next) as K);
-        }
-      }}
+      onSelectionChange={([next]) => onChange(String(next) as K)}
       className={`grid auto-cols-fr grid-flow-col rounded-lg border border-rule p-1 ${className}`}
     >
       {options.map((option) => (

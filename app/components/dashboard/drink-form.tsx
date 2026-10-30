@@ -15,14 +15,6 @@ import DatePicker from "../ui/date-picker";
 import { FormError } from "../ui/fields";
 import ShopAvatar from "./shop-avatar";
 
-type Field = "name" | "price" | "note";
-
-const FIELD_OF_CODE: Partial<Record<string, Field>> = {
-  invalidPrice: "price",
-  drinkNameTooLong: "name",
-  drinkNoteTooLong: "note",
-};
-
 interface DrinkFormProps {
   shops: readonly BobaShop[];
   currency: string;
@@ -57,43 +49,27 @@ export default function DrinkForm({
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const errorId = `${id}-error`;
-  const errorField = error ? FIELD_OF_CODE[error] : undefined;
-
-  function fail(code: string) {
-    const field = FIELD_OF_CODE[code];
-    setError(code);
-    if (field) {
-      document.getElementById(`${id}-${field}`)?.focus();
-    }
-  }
-
-  const invalid = (field: Field) =>
-    errorField === field
-      ? { "aria-invalid": true, "aria-describedby": errorId }
-      : {};
+  const priceInvalid = error === "invalidPrice";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const priceCents = parsePriceInput(price);
     if (priceCents === undefined) {
-      fail("invalidPrice");
+      setError("invalidPrice");
+      document.getElementById(`${id}-price`)?.focus();
       return;
     }
     setIsSaving(true);
     setError(null);
-    let code: string | null;
-    try {
-      code = await onSubmit(shopId, {
-        day,
-        name: name.trim() || null,
-        priceCents,
-        note: note.trim() || null,
-      });
-    } finally {
-      setIsSaving(false);
-    }
+    const code = await onSubmit(shopId, {
+      day,
+      name: name.trim() || null,
+      priceCents,
+      note: note.trim() || null,
+    });
+    setIsSaving(false);
     if (code) {
-      fail(code);
+      setError(code);
     } else if (!drink) {
       setName("");
       setPrice("");
@@ -142,7 +118,6 @@ export default function DrinkForm({
           </label>
           <input
             id={`${id}-name`}
-            {...invalid("name")}
             className="field"
             value={name}
             maxLength={MAX_DRINK_NAME_LENGTH}
@@ -157,7 +132,8 @@ export default function DrinkForm({
           </label>
           <input
             id={`${id}-price`}
-            {...invalid("price")}
+            aria-invalid={priceInvalid || undefined}
+            aria-describedby={priceInvalid ? errorId : undefined}
             className="field tabular-nums"
             value={price}
             inputMode="decimal"
@@ -177,7 +153,6 @@ export default function DrinkForm({
           </label>
           <input
             id={`${id}-note`}
-            {...invalid("note")}
             className="field"
             value={note}
             maxLength={MAX_DRINK_NOTE_LENGTH}

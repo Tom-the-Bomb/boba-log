@@ -76,7 +76,6 @@ export default function SheetSection({ drinks }: { drinks: readonly Drink[] }) {
         range={range}
         selectedDay={focus?.day ?? null}
         onSelectDay={selectDay}
-        label={String(sheetYear)}
         tileLabel={tileLabel}
         levelOf={levelOf}
         formatTotal={

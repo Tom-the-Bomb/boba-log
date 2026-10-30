@@ -20,7 +20,6 @@ interface YearSheetProps {
   range: DayRange;
   selectedDay: string | null;
   onSelectDay: (day: string) => void;
-  label: string;
   tileLabel: (day: string, count: number) => string;
   levelOf?: (value: number) => number;
   formatTotal?: (value: number) => string;
@@ -68,26 +67,6 @@ interface DayTileProps {
   levelOf?: (value: number) => number;
 }
 
-function tileClass(
-  day: string,
-  today: string,
-  selectedDay: string | null,
-  range: DayRange,
-) {
-  const outside = day < range.start || day > range.end;
-  const ring =
-    day === selectedDay
-      ? "outline-[1.5px] outline-offset-2 outline-text"
-      : day === today
-        ? "outline-[1.5px] outline-offset-1 outline-seal outline-dashed"
-        : "";
-  return [
-    "relative block aspect-square w-full rounded-full",
-    outside && day <= today ? "opacity-35" : "",
-    ring,
-  ].join(" ");
-}
-
 function TileMark({
   count,
   future,
@@ -129,7 +108,18 @@ function DayTile({
   levelOf,
 }: DayTileProps) {
   const future = day > today;
-  const className = tileClass(day, today, selectedDay, range);
+  const outside = day < range.start || day > range.end;
+  const ring =
+    day === selectedDay
+      ? "outline-[1.5px] outline-offset-2 outline-text"
+      : day === today
+        ? "outline-[1.5px] outline-offset-1 outline-seal outline-dashed"
+        : "";
+  const className = [
+    "relative block aspect-square w-full rounded-full",
+    outside && !future ? "opacity-35" : "",
+    ring,
+  ].join(" ");
   const content = <TileMark count={count} future={future} levelOf={levelOf} />;
 
   if (!future) {
@@ -210,7 +200,6 @@ export default function YearSheet({
   range,
   selectedDay,
   onSelectDay,
-  label,
   tileLabel,
   levelOf,
   formatTotal,
@@ -328,7 +317,7 @@ export default function YearSheet({
   return (
     <div
       role="group"
-      aria-label={label}
+      aria-label={String(year)}
       onKeyDown={handleKeyDown}
       onPointerOver={(event) => {
         if (event.pointerType !== "touch") {

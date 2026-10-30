@@ -67,7 +67,6 @@ function CalendarBody({ range = false }) {
                 isSelectionStart,
                 isSelectionEnd,
                 isDisabled,
-                isUnavailable,
                 isFocusVisible,
                 isToday,
               }) => {
@@ -78,7 +77,7 @@ function CalendarBody({ range = false }) {
                     className={`mx-auto grid size-9 place-items-center rounded-full tabular-nums ${
                       isEndpoint
                         ? "forced-selected bg-accent text-on-accent"
-                        : isDisabled || isUnavailable
+                        : isDisabled
                           ? "cursor-not-allowed text-text-3 opacity-40"
                           : isToday
                             ? "text-seal group-hover:bg-hover"

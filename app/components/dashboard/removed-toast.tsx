@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 interface RemovedToastProps {
@@ -17,19 +16,12 @@ export default function RemovedToast({
   onLeave,
 }: RemovedToastProps) {
   const { t } = useTranslation("dashboard");
-  const undoRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    if (autoFocus) {
-      undoRef.current?.focus();
-    }
-  }, [autoFocus]);
 
   return (
     <div className="-my-1 -mr-1.5 flex w-full items-center gap-3">
       <p className="min-w-0 flex-1 truncate">{t("removed")}</p>
       <button
-        ref={undoRef}
+        autoFocus={autoFocus}
         type="button"
         onClick={onUndo}
         onKeyDown={(event) => {

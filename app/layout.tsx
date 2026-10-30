@@ -13,7 +13,7 @@ import "@fontsource/noto-sans-sc/300.css";
 import "@fontsource/noto-sans-sc/400.css";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { Toaster } from "sonner";
 import { SealCarveFilter } from "./components/brand/seal-mark";
 import "./fonts/marks.css";
@@ -86,18 +86,17 @@ export default async function RootLayout({
         <SealCarveFilter />
         <LocaleProvider locale={locale}>
           <ThemeProvider>
-            {children}
+            <div className="paper">{children}</div>
             <Toaster
               position="bottom-center"
+              style={{ "--width": "26rem" } as CSSProperties}
               toastOptions={{
                 unstyled: true,
                 classNames: {
                   toast:
-                    "flex w-[min(26rem,calc(100vw-2rem))] items-center gap-3 rounded-lg border border-rule bg-surface px-4 py-3 text-sm shadow-(--lift)",
+                    "flex w-full items-center gap-3 rounded-lg border border-rule bg-surface px-4 py-3 font-sans text-sm shadow-(--lift)",
                   error: "text-danger",
-                  icon: "shrink-0",
                   content: "min-w-0 flex-1",
-                  title: "w-full",
                 },
               }}
             />

@@ -1,5 +1,6 @@
 "use client";
 
+import { translateShopName } from "@/lib/default-shops";
 import { SAMPLE, SAMPLE_SHOPS } from "@/lib/sample-year";
 import { REPO_URL } from "@/lib/site";
 import { ArrowUpRight } from "lucide-react";
@@ -18,7 +19,7 @@ const POINTS = [
 ] as const;
 
 export default function Landing({ signedIn = false }) {
-  const { t } = useTranslation("landing");
+  const { t, i18n } = useTranslation("landing");
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -76,7 +77,7 @@ export default function Landing({ signedIn = false }) {
                   <ShopAvatar src={shop.avatar} name={shop.name} size={28} />
                   <span className="flex min-w-0 flex-col leading-tight sm:flex-row sm:items-center sm:gap-2.5">
                     <span className="truncate text-[13px] text-text sm:text-sm">
-                      {shop.name}
+                      {translateShopName(shop.name, i18n.language)}
                     </span>
                     <span className="font-kai text-base text-text tabular-nums sm:text-lg">
                       {SAMPLE.shopTotals[index]}

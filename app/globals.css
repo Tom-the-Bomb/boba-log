@@ -121,15 +121,19 @@
   }
 
   body {
-    position: relative;
-    min-height: 100dvh;
     font-weight: 300;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     caret-color: var(--accent);
   }
 
-  body::before {
+  /* On a wrapper, not body: react-aria places popovers wrongly in a positioned body. */
+  .paper {
+    position: relative;
+    min-height: 100dvh;
+  }
+
+  .paper::before {
     content: "";
     position: absolute;
     inset: 0;

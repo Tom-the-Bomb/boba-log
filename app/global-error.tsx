@@ -35,7 +35,7 @@ export default function GlobalError() {
 
   return (
     <html lang={locale} className={dark ? "dark" : undefined}>
-      <body>
+      <body className="paper">
         <SealCarveFilter />
         <ErrorScreen
           title={text.errorTitle}
