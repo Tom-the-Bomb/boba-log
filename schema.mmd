@@ -1,23 +1,32 @@
+---
+config:
+  theme: redux-dark-color
+---
 erDiagram
   users ||--o{ shops : "owns"
-  shops ||--o{ shop_dates : "has"
+  shops ||--o{ drinks : "has"
 
   users {
     INTEGER id PK
     TEXT username UK "NOT NULL"
     TEXT hashed_password "NOT NULL"
     INTEGER created_at "NOT NULL, epoch seconds"
+    TEXT currency "NOT NULL, DEFAULT 'USD'"
+    INTEGER sessions_valid_after "NOT NULL, DEFAULT 0, epoch seconds"
   }
 
   shops {
     INTEGER id PK
     TEXT username FK "NOT NULL, CASCADE"
     TEXT name "NOT NULL"
-    INTEGER total "NOT NULL, DEFAULT 0"
   }
 
-  shop_dates {
-    INTEGER shop_id PK,FK "NOT NULL, CASCADE"
-    INTEGER date_key PK "NOT NULL, epoch seconds"
-    INTEGER count "NOT NULL, DEFAULT 0"
+  drinks {
+    INTEGER id PK
+    INTEGER shop_id FK "NOT NULL, CASCADE"
+    TEXT day "NOT NULL, YYYY-MM-DD local date"
+    INTEGER created_at "NOT NULL, epoch seconds"
+    TEXT name "nullable"
+    INTEGER price_cents "nullable"
+    TEXT note "nullable"
   }

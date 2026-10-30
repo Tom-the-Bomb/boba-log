@@ -1,43 +1,81 @@
-import type { BobaShop } from "@/lib/types";
+import type { BobaShop, Drink, PublicUser } from "@/lib/types";
 import { useReducer } from "react";
 
+export type LoadFailure = "offline" | "tooManyRequests" | "loadFailedBody";
+
 interface UserState {
-  username: string | null;
-  createdAt: number | null;
-  shops: BobaShop[];
+  user: PublicUser | null;
   isLoading: boolean;
+  loadFailed: LoadFailure | null;
 }
 
 type UserAction =
-  | { type: "loaded"; username: string; createdAt: number; shops: BobaShop[] }
+  | { type: "loaded"; user: PublicUser }
   | { type: "loading" }
   | { type: "done_loading" }
-  | { type: "update_shops"; updater: (current: BobaShop[]) => BobaShop[] };
+  | { type: "load_failed"; reason: LoadFailure }
+  | { type: "signed_out" }
+  | { type: "add_shop"; shop: BobaShop }
+  | { type: "remove_shop"; shopId: number }
+  | { type: "add_drink"; drink: Drink }
+  | { type: "replace_drink"; id: number; drink: Drink }
+  | { type: "remove_drink"; id: number }
+  | { type: "set_currency"; currency: string };
+
+const INITIAL_USER_STATE: UserState = {
+  user: null,
+  isLoading: true,
+  loadFailed: null,
+};
+
+function withUser(
+  state: UserState,
+  update: (user: PublicUser) => Partial<PublicUser>,
+): UserState {
+  return state.user
+    ? { ...state, user: { ...state.user, ...update(state.user) } }
+    : state;
+}
 
 function userReducer(state: UserState, action: UserAction): UserState {
   switch (action.type) {
     case "loaded":
-      return {
-        ...state,
-        username: action.username,
-        createdAt: action.createdAt,
-        shops: action.shops,
-      };
+      return { ...state, user: action.user, loadFailed: null };
     case "loading":
-      return { ...state, isLoading: true };
+      return { ...state, isLoading: true, loadFailed: null };
+    case "load_failed":
+      return { ...state, loadFailed: action.reason };
+    case "signed_out":
+      return { ...INITIAL_USER_STATE, isLoading: false };
     case "done_loading":
       return { ...state, isLoading: false };
-    case "update_shops":
-      return { ...state, shops: action.updater(state.shops) };
+    case "add_shop":
+      return withUser(state, ({ shops }) => ({
+        shops: [...shops, action.shop],
+      }));
+    case "remove_shop":
+      return withUser(state, ({ shops, drinks }) => ({
+        shops: shops.filter((shop) => shop.id !== action.shopId),
+        drinks: drinks.filter((drink) => drink.shopId !== action.shopId),
+      }));
+    case "add_drink":
+      return withUser(state, ({ drinks }) => ({
+        drinks: [...drinks, action.drink],
+      }));
+    case "replace_drink":
+      return withUser(state, ({ drinks }) => ({
+        drinks: drinks.map((drink) =>
+          drink.id === action.id ? action.drink : drink,
+        ),
+      }));
+    case "remove_drink":
+      return withUser(state, ({ drinks }) => ({
+        drinks: drinks.filter((drink) => drink.id !== action.id),
+      }));
+    case "set_currency":
+      return withUser(state, () => ({ currency: action.currency }));
   }
 }
-
-const INITIAL_USER_STATE: UserState = {
-  username: null,
-  createdAt: null,
-  shops: [],
-  isLoading: true,
-};
 
 export default function useUserReducer() {
   return useReducer(userReducer, INITIAL_USER_STATE);

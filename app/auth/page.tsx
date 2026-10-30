@@ -1,70 +1,128 @@
 "use client";
 
+import { MAX_USERNAME_LENGTH } from "@/lib/drinks";
+import { failureCode } from "@/lib/network";
 import { waitForToken } from "@/lib/turnstile";
-import type { ApiErrorResponse } from "@/lib/types";
-import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
+import type { ApiErrorResponse, AuthMode } from "@/lib/types";
+import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
-import type { SubmitEventHandler } from "react";
+import type { ChangeEvent, SubmitEventHandler } from "react";
 import { useRef } from "react";
 import { useTranslation } from "react-i18next";
-import AuthFooter from "../components/auth/footer";
-import { useUser } from "../providers/user-provider";
+import InvisibleTurnstile from "../components/invisible-turnstile";
+import SiteFooter from "../components/site-footer";
+import SiteHeader from "../components/site-header";
+import { Segmented } from "../components/ui/fields";
 import useAuthFormReducer from "../reducers/auth-form-reducer";
+
+function usernameProblem(value: string, mode: AuthMode) {
+  const normalized = value.trim();
+  if (!normalized) {
+    return "usernameRequired";
+  }
+  if (mode === "login") {
+    return null;
+  }
+  if (normalized.length < 3) {
+    return "usernameMinLength";
+  }
+  return normalized.length > MAX_USERNAME_LENGTH ? "usernameMaxLength" : null;
+}
+
+function passwordProblem(value: string, mode: AuthMode) {
+  if (!value) {
+    return "passwordRequired";
+  }
+  return mode === "signup" && value.length < 6 ? "passwordMinLength" : null;
+}
+
+function FieldError({ id, message }: { id: string; message: string }) {
+  if (!message) {
+    return null;
+  }
+  return (
+    <p id={id} className="mt-2 text-sm text-danger" role="alert">
+      {message}
+    </p>
+  );
+}
+
+interface PasswordInputProps {
+  value: string;
+  visible: boolean;
+  autoComplete: string;
+  error: string;
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  onToggle: () => void;
+}
+
+function PasswordInput({
+  value,
+  visible,
+  autoComplete,
+  error,
+  onChange,
+  onToggle,
+}: PasswordInputProps) {
+  const { t } = useTranslation("auth");
+  const Icon = visible ? EyeOff : Eye;
+
+  return (
+    <div className="relative">
+      <input
+        id="auth-password"
+        type={visible ? "text" : "password"}
+        value={value}
+        autoComplete={autoComplete}
+        onChange={onChange}
+        className="field h-11 pr-11"
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? "auth-password-error" : undefined}
+      />
+      {value && (
+        <button
+          type="button"
+          onClick={onToggle}
+          className="tap-target absolute top-1/2 right-1 grid size-9 -translate-y-1/2 place-items-center rounded-md text-text-2 hover:text-text"
+          aria-label={visible ? t("hidePassword") : t("showPassword")}
+        >
+          <Icon size={17} strokeWidth={1.5} />
+        </button>
+      )}
+    </div>
+  );
+}
 
 export default function AuthPage() {
   const router = useRouter();
-  const { login } = useUser();
   const { t } = useTranslation("auth");
-  const { t: tc } = useTranslation("common");
   const [form, dispatch] = useAuthFormReducer();
   const turnstileRef = useRef<TurnstileInstance>(null);
-
-  function validateUsername(value: string) {
-    const normalized = value.trim();
-    if (!normalized) {
-      return t("usernameRequired");
-    }
-    if (form.mode === "signup" && normalized.length < 3) {
-      return t("usernameMinLength");
-    }
-    return "";
-  }
-
-  function validatePassword(value: string) {
-    if (!value) {
-      return t("passwordRequired");
-    }
-    if (form.mode === "signup" && value.length < 6) {
-      return t("passwordMinLength");
-    }
-    return "";
-  }
 
   async function handleSubmit(
     event: Parameters<SubmitEventHandler<HTMLFormElement>>[0],
   ) {
     event.preventDefault();
 
-    const nextUsernameError = validateUsername(form.username);
-    const nextPasswordError = validatePassword(form.password);
+    const usernameKey = usernameProblem(form.username, form.mode);
+    const passwordKey = passwordProblem(form.password, form.mode);
     dispatch({
       type: "set_validation",
-      usernameError: nextUsernameError,
-      passwordError: nextPasswordError,
+      usernameError: usernameKey ? t(usernameKey) : "",
+      passwordError: passwordKey ? t(passwordKey) : "",
     });
 
-    if (nextUsernameError || nextPasswordError) {
+    if (usernameKey || passwordKey) {
       return;
     }
 
     dispatch({ type: "submit_start" });
 
     try {
-      const token = await waitForToken(turnstileRef, form.turnstileToken);
+      const token = await waitForToken(turnstileRef);
       if (!token) {
         dispatch({ type: "set_error", error: t("turnstileTimeout") });
-        turnstileRef.current?.reset();
         return;
       }
       const response = await fetch("/api/auth", {
@@ -78,159 +136,91 @@ export default function AuthPage() {
         }),
       });
 
-      const data = (await response.json()) as ApiErrorResponse;
       if (!response.ok) {
-        dispatch({
-          type: "set_error",
-          error: data.code ? t(data.code) : t("authFailed"),
-        });
-        turnstileRef.current?.reset();
+        const data = (await response.json()) as ApiErrorResponse;
+        dispatch({ type: "set_error", error: t(data.code ?? "authFailed") });
         return;
       }
-
-      await login();
-      router.push("/dashboard");
+      router.replace("/dashboard");
     } catch {
-      dispatch({ type: "set_error", error: t("connectionError") });
+      dispatch({ type: "set_error", error: t(failureCode("connectionError")) });
     } finally {
-      dispatch({ type: "submit_end" });
       turnstileRef.current?.reset();
     }
   }
 
+  const isLogin = form.mode === "login";
+
   return (
-    <div className="tea-grid-bg flex min-h-screen flex-col">
-      <div className="tea-line tea-page-padding-sm" />
+    <div className="flex min-h-dvh flex-col">
+      <SiteHeader />
 
-      <main className="tea-page-padding-sm flex flex-1 items-center justify-center py-16">
-        <section className="w-full max-w-sm" aria-label="Authentication">
-          <div className="mb-10">
-            <p className="text-xs tracking-[0.3em] text-tea-sage uppercase">
-              {form.mode === "login"
-                ? t("welcomeBack")
-                : t("joinSite", { siteName: tc("siteName") })}
-            </p>
-            <h1 className="mt-3 font-display text-4xl font-medium tracking-tight text-tea-charcoal">
-              {form.mode === "login"
-                ? t("signInTitle")
-                : t("createAccountTitle")}
-            </h1>
-          </div>
+      <main className="flex flex-1 items-start justify-center px-4 pt-10 pb-20 sm:items-center sm:pt-0">
+        <section className="w-full max-w-sm" aria-labelledby="auth-heading">
+          <h1 id="auth-heading" className="font-kai text-4xl text-text">
+            {isLogin ? t("welcomeBack") : t("createAccountTitle")}
+          </h1>
 
-          <div className="mb-8 flex gap-6 border-b border-tea-stone">
-            <button
-              type="button"
-              onClick={() => dispatch({ type: "set_mode", mode: "login" })}
-              className={`tea-auth-tab ${
-                form.mode === "login"
-                  ? "border-b-2 border-tea-charcoal text-tea-charcoal"
-                  : "text-tea-faint hover:text-tea-charcoal"
-              }`}
-            >
-              {t("loginTab")}
-            </button>
-            <button
-              type="button"
-              onClick={() => dispatch({ type: "set_mode", mode: "signup" })}
-              className={`tea-auth-tab ${
-                form.mode === "signup"
-                  ? "border-b-2 border-tea-charcoal text-tea-charcoal"
-                  : "text-tea-faint hover:text-tea-charcoal"
-              }`}
-            >
-              {t("signupTab")}
-            </button>
-          </div>
+          <Segmented
+            className="mt-8"
+            label={t("welcomeBack")}
+            value={form.mode}
+            options={[
+              { value: "login", label: t("loginTab") },
+              { value: "signup", label: t("signupTab") },
+            ]}
+            onChange={(mode) => dispatch({ type: "set_mode", mode })}
+          />
 
-          <form className="space-y-6" onSubmit={handleSubmit} noValidate>
+          <form className="mt-8 space-y-5" onSubmit={handleSubmit} noValidate>
             <div>
-              <label htmlFor="auth-username" className="tea-auth-form-label">
+              <label htmlFor="auth-username" className="label">
                 {t("username")}
               </label>
               <input
                 id="auth-username"
                 value={form.username}
+                autoComplete="username"
+                autoCapitalize="none"
+                spellCheck={false}
                 onChange={(event) =>
                   dispatch({ type: "set_username", value: event.target.value })
                 }
-                className={`tea-input-line ${
-                  form.usernameError ? "tea-input-error" : ""
-                }`}
+                className="field h-11"
+                aria-invalid={form.usernameError ? true : undefined}
                 aria-describedby={
                   form.usernameError ? "auth-username-error" : undefined
                 }
               />
-              {form.usernameError && (
-                <p
-                  id="auth-username-error"
-                  className="tea-form-error"
-                  role="alert"
-                >
-                  {form.usernameError}
-                </p>
-              )}
+              <FieldError
+                id="auth-username-error"
+                message={form.usernameError}
+              />
             </div>
             <div>
-              <label htmlFor="auth-password" className="tea-auth-form-label">
+              <label htmlFor="auth-password" className="label">
                 {t("password")}
               </label>
-              <div className="relative">
-                <input
-                  id="auth-password"
-                  type={form.showPassword ? "text" : "password"}
-                  value={form.password}
-                  onChange={(event) =>
-                    dispatch({
-                      type: "set_password",
-                      value: event.target.value,
-                    })
-                  }
-                  className={`tea-input-line pr-10 ${
-                    form.passwordError ? "tea-input-error" : ""
-                  }`}
-                  aria-describedby={
-                    form.passwordError ? "auth-password-error" : undefined
-                  }
-                />
-                <button
-                  type="button"
-                  onClick={() => dispatch({ type: "toggle_password" })}
-                  className="absolute right-0 bottom-2.5 p-1 text-tea-faint transition-colors hover:text-tea-charcoal"
-                  aria-label={
-                    form.showPassword ? t("hidePassword") : t("showPassword")
-                  }
-                >
-                  {form.password &&
-                    (form.showPassword ? (
-                      <Eye className="h-4.5 w-4.5" />
-                    ) : (
-                      <EyeOff className="h-4.5 w-4.5" />
-                    ))}
-                </button>
-              </div>
-              {form.passwordError && (
-                <p
-                  id="auth-password-error"
-                  className="tea-form-error"
-                  role="alert"
-                >
-                  {form.passwordError}
-                </p>
-              )}
+              <PasswordInput
+                value={form.password}
+                visible={form.showPassword}
+                autoComplete={isLogin ? "current-password" : "new-password"}
+                error={form.passwordError}
+                onChange={(event) =>
+                  dispatch({ type: "set_password", value: event.target.value })
+                }
+                onToggle={() => dispatch({ type: "toggle_password" })}
+              />
+              <FieldError
+                id="auth-password-error"
+                message={form.passwordError}
+              />
             </div>
 
-            <Turnstile
-              ref={turnstileRef}
-              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-              onSuccess={(token) => dispatch({ type: "set_turnstile", token })}
-              onError={() => dispatch({ type: "reset_turnstile" })}
-              onExpire={() => dispatch({ type: "reset_turnstile" })}
-              options={{ size: "invisible" }}
-              className="-mt-6"
-            />
+            <InvisibleTurnstile ref={turnstileRef} />
 
             {form.error && (
-              <p className="tea-form-error" role="alert">
+              <p className="text-sm text-danger" role="alert">
                 {form.error}
               </p>
             )}
@@ -238,19 +228,21 @@ export default function AuthPage() {
             <button
               type="submit"
               disabled={form.isSubmitting}
-              className="tea-cta mt-4 w-full py-3.5 text-xs tracking-[0.2em] uppercase disabled:opacity-50"
+              className="btn btn-primary h-11 w-full"
             >
-              {form.isSubmitting
-                ? t("pleaseWait")
-                : form.mode === "login"
-                  ? t("signInButton")
-                  : t("createAccountButton")}
+              {t(
+                form.isSubmitting
+                  ? "pleaseWait"
+                  : isLogin
+                    ? "signInButton"
+                    : "createAccountButton",
+              )}
             </button>
           </form>
         </section>
       </main>
 
-      <AuthFooter />
+      <SiteFooter />
     </div>
   );
 }

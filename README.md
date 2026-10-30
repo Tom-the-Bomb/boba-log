@@ -1,8 +1,13 @@
-# [Boba Log](https://boba.tomthebomb)
+<div align="center">
+  <img src="public/favicon.svg" alt="Boba Log" width="88" />
+
+# [Boba Log](https://boba.tomthebomb.dev)
 
 [![React Doctor](https://www.react.doctor/share/badge?p=boba-log&s=100)](https://www.react.doctor/share?p=boba-log&s=100)
 
-Boba Log is a Next.js app for tracking tea shop visits and drink totals,deployed to Cloudflare Workers.
+</div>
+
+Boba Log is a Next.js app for logging bubble tea drinks, deployed to Cloudflare Workers.
 
 ## Stack
 
@@ -20,8 +25,10 @@ Boba Log is a Next.js app for tracking tea shop visits and drink totals,deployed
 
 ### Libraries
 
-- **Charts:** `react-chartjs-2` (with `chart.js`) for dashboard visualizations
+- **Components:** `react-aria-components` for accessible UI primitives
 - **Icons:** `lucide-react` for UI icons
+- **Toasts:** `sonner`
+- **Fonts:** LXGW WenKai TC and Noto Sans SC
 
 ## Setup
 
@@ -65,10 +72,10 @@ TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
 
 ### Local database
 
-Initialize the local D1 database for `bun dev`:
+Apply the migrations to the local D1 database for `bun dev`:
 
 ```bash
-bunx wrangler d1 execute boba-log --local --file=schema.sql
+bun run db:migrate:local
 ```
 
 ### SimpleLocalize (i18n)
@@ -115,23 +122,56 @@ Create the D1 database:
 bunx wrangler d1 create boba-log
 ```
 
-Apply schema:
+### Migrations
+
+The schema lives in [`migrations/`](migrations):
 
 ```bash
-bunx wrangler d1 execute boba-log --remote --file=schema.sql
+bun run db:migrate:local   # local database used by `bun dev`
+bun run db:migrate         # remote (production) database
+bunx wrangler d1 migrations create boba-log <name>   # new migration
 ```
+
+`bun run deploy` applies pending remote migrations before uploading the Worker, so the CI token needs **D1 edit** permission.
+
+The legacy `shop_dates` table and `shops.total` column are unused but kept for rollout, and can be dropped in a later migration.
 
 ### Schema
 
-<!-- markdownlint-disable MD033 -->
-<p align="center">
-  <img
-    src="https://raw.githubusercontent.com/Tom-the-Bomb/boba-log/refs/heads/main/schema-mermaid.png"
-    alt="schema"
-    width="500"
-  />
-</p>
-<!-- markdownlint-enable MD033 -->
+```mermaid
+---
+config:
+  theme: redux-dark-color
+---
+erDiagram
+  users ||--o{ shops : "owns"
+  shops ||--o{ drinks : "has"
+
+  users {
+    INTEGER id PK
+    TEXT username UK "NOT NULL"
+    TEXT hashed_password "NOT NULL"
+    INTEGER created_at "NOT NULL, epoch seconds"
+    TEXT currency "NOT NULL, DEFAULT 'USD'"
+    INTEGER sessions_valid_after "NOT NULL, DEFAULT 0, epoch seconds"
+  }
+
+  shops {
+    INTEGER id PK
+    TEXT username FK "NOT NULL, CASCADE"
+    TEXT name "NOT NULL"
+  }
+
+  drinks {
+    INTEGER id PK
+    INTEGER shop_id FK "NOT NULL, CASCADE"
+    TEXT day "NOT NULL, YYYY-MM-DD local date"
+    INTEGER created_at "NOT NULL, epoch seconds"
+    TEXT name "nullable"
+    INTEGER price_cents "nullable"
+    TEXT note "nullable"
+  }
+```
 
 ## Object Storage (R2)
 
@@ -183,16 +223,20 @@ bun run deploy
 
 ## Scripts
 
-- `bun run dev` — Next.js dev server with local Cloudflare bindings
-- `bun run build` — Production build
-- `bun run preview` — OpenNext Cloudflare preview with remote bindings
-- `bun run deploy` — OpenNext Cloudflare deploy
-- `bun run assets:process` — Normalize `public/default-shops` images to `256x256` WebP
-- `bun run i18n:upload` — Dry run upload translations to SimpleLocalize
-- `bun run i18n:upload:confirm` — Upload translations to SimpleLocalize
-- `bun run i18n:download` — Download translations from SimpleLocalize
-- `bun run lint` — ESLint + Prettier check + TypeScript no-emit
-- `bun run lint:fix` — ESLint fix + Prettier write + TypeScript no-emit
-- `bun run format` — Prettier write
-- `bun run format:check` — Prettier check
-- `bun run doctor` — Run [react-doctor](https://github.com/millionco/react-doctor)
+- `bun run dev`: Next.js dev server with local Cloudflare bindings
+- `bun run build`: Production build
+- `bun run preview`: OpenNext Cloudflare preview with remote bindings
+- `bun run deploy`: OpenNext Cloudflare build, remote D1 migrations, then deploy
+- `bun run db:migrate`: Apply pending D1 migrations to the remote database
+- `bun run db:migrate:local`: Apply pending D1 migrations to the local database
+- `bun run assets:process`: Normalize `public/default-shops` images to `256x256` WebP
+- `bun run assets:textures`: Regenerate the paper and mountain textures in `public/textures`
+- `bun run assets:fonts`: Regenerate the subset Chinese fonts in `app/fonts` (run `pip install -r scripts/requirements.txt` first)
+- `bun run i18n:upload`: Dry run upload translations to SimpleLocalize
+- `bun run i18n:upload:confirm`: Upload translations to SimpleLocalize
+- `bun run i18n:download`: Download translations from SimpleLocalize
+- `bun run lint`: ESLint + Prettier check + TypeScript no-emit
+- `bun run lint:fix`: ESLint fix + Prettier write + TypeScript no-emit
+- `bun run format`: Prettier write
+- `bun run format:check`: Prettier check
+- `bun run doctor`: Run [react-doctor](https://github.com/millionco/react-doctor)

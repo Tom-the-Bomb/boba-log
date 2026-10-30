@@ -1,38 +1,32 @@
-import { deleteAvatarFromR2 } from "@/lib/api/r2";
+import { deleteAvatars } from "@/lib/api/r2";
 import { getUsernameFromRequest } from "@/lib/api/request-auth";
-import { ShopIdParams } from "@/lib/api/types";
-import { deleteShop } from "@/lib/api/users";
+import {
+  errorResponse,
+  serverErrorResponse,
+  unauthorizedResponse,
+} from "@/lib/api/responses";
+import { deleteShop } from "@/lib/api/shops";
+import type { ShopIdParams } from "@/lib/api/types";
+import { parseId } from "@/lib/api/validation";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function DELETE(request: NextRequest, { params }: ShopIdParams) {
   try {
     const username = await getUsernameFromRequest(request);
     if (!username) {
-      return NextResponse.json(
-        { error: "Unauthorized", code: "unauthorized" },
-        { status: 401 },
-      );
+      return unauthorizedResponse();
     }
 
-    const { shopId } = await params;
-    const shopIdNum = Number(shopId);
-    const deleted = await deleteShop(username, shopIdNum);
-    if (!deleted) {
-      return NextResponse.json(
-        { error: "Shop not found", code: "shopNotFound" },
-        { status: 404 },
-      );
+    const shopId = parseId((await params).shopId);
+    if (!shopId || !(await deleteShop(username, shopId))) {
+      return errorResponse("shopNotFound", "Shop not found", 404);
     }
-    await deleteAvatarFromR2(shopIdNum);
+    try {
+      await deleteAvatars([shopId]);
+    } catch {}
 
     return NextResponse.json({ success: true });
   } catch {
-    return NextResponse.json(
-      {
-        error: "Something went wrong.",
-        code: "somethingWentWrong",
-      },
-      { status: 500 },
-    );
+    return serverErrorResponse();
   }
 }

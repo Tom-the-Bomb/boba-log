@@ -18,22 +18,18 @@ export default function DefaultShopPresetCard({
 
   return (
     <button
-      key={presetName}
       type="button"
       onClick={() => onSelect(preset)}
-      className="inline-flex w-auto items-center gap-1.5 border border-tea-stone bg-tea-mist px-2 py-1.5 text-left hover:border-tea-sage dark:hover:border-tea-matcha"
+      className="tap-target relative inline-flex h-9 items-center gap-2 rounded-full border border-rule bg-ground py-1 pr-3.5 pl-1 text-left hover:border-rule-strong"
     >
       <Image
         src={preset.avatar}
-        alt={presetName}
-        width={22}
-        height={22}
-        className="h-5.5 w-5.5 rounded-full object-cover"
+        alt=""
+        width={26}
+        height={26}
+        className="size-6.5 rounded-full object-cover"
       />
-      <span className="text-xs whitespace-nowrap text-tea-charcoal">
-        {presetName}
-      </span>
-      <span className="text-sm leading-none text-tea-sage">+</span>
+      <span className="text-sm whitespace-nowrap text-text">{presetName}</span>
     </button>
   );
 }

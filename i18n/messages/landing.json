@@ -1,20 +1,36 @@
 {
   "en": {
-    "getStarted": "Get Started",
-    "headingLine1": "Your tea,",
-    "headingLine2": "your ritual.",
-    "learnMore": "Learn more",
-    "signIn": "Sign In",
-    "subheading": "A quiet space to log your favorite tea shops, track every drink, and find the patterns in what you love.",
-    "tagline": "Track · Discover · Savor"
+    "getStarted": "Get started",
+    "headingLine1": "How much",
+    "headingLine2": "boba?",
+    "openLog": "Open your log",
+    "pointSummaryBody": "Pick any date range and get a short summary of it (i.e., how much you drank and spent).",
+    "pointSummaryTitle": "Quick summaries",
+    "pointTrendsBody": "See how your drinking and spending change over time, and which shops you go to most.",
+    "pointTrendsTitle": "Trend charts",
+    "pointYearBody": "Your whole year laid out on one page, so you can see when (and how often) you drink.",
+    "pointYearTitle": "Yearly overview",
+    "sampleLabel": "A sample year of drinks",
+    "scrollRoller": "Scroll roller: drag it up to roll the scroll, let go to drop it",
+    "signIn": "Sign in",
+    "subheading": "More than you'd admit, probably. Log every cup in one tap and see the total (and the damage).",
+    "yourLog": "Your log"
   },
   "zh": {
     "getStarted": "立即开始",
-    "headingLine1": "你的茶，",
-    "headingLine2": "你的仪式。",
-    "learnMore": "了解更多",
+    "headingLine1": "你喝了",
+    "headingLine2": "多少奶茶？",
+    "openLog": "打开我的记录",
+    "pointSummaryBody": "选任意一段时间，就能看到它的总结（也就是喝了多少杯、花了多少钱）。",
+    "pointSummaryTitle": "时段总结",
+    "pointTrendsBody": "看看你喝的杯数和花费怎样随时间变化，以及你最常去的是哪几家店。",
+    "pointTrendsTitle": "图表趋势",
+    "pointYearBody": "一整年的记录都排在同一页上，什么时候喝了、喝了多少，一看就知道。",
+    "pointYearTitle": "全年总览",
+    "sampleLabel": "一年饮品记录示例",
+    "scrollRoller": "卷轴下轴：向上拖动卷起，松手落下",
     "signIn": "登录",
-    "subheading": "一个安静的空间，记录你喜爱的茶店，追踪每一杯饮品，发现你所爱的规律。",
-    "tagline": "记录 · 发现 · 品味"
+    "subheading": "大概比你愿意承认的还多。每杯点一下，就能看到总数（还有钱包的损失）。",
+    "yourLog": "我的记录"
   }
 }

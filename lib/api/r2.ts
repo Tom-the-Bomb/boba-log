@@ -1,73 +1,91 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 
-function getR2(): R2Bucket {
-  const { env } = getCloudflareContext();
-  return env.R2;
-}
-
-interface UploadAvatarInput {
-  shopId: number;
-  body: ArrayBuffer;
-}
-
-const AVATAR_EXISTS_CACHE_TTL_MS = 5 * 60 * 1000;
-const avatarExistsCache = new Map<
+const AVATAR_CACHE_TTL_MS = 5 * 60 * 1000;
+const MAX_AVATAR_BYTES = 512 * 1024;
+const avatarVersions = new Map<
   number,
-  { exists: boolean; expiresAt: number }
+  { version: number | null; expiresAt: number }
 >();
 
-export function getPublicAvatarUrl(shopId: number) {
-  return `/api/avatars/${shopId}`;
+function getR2(): R2Bucket {
+  return getCloudflareContext().env.R2;
 }
 
-export async function getPublicAvatar(shopId: number) {
-  const r2 = getR2();
-  return await r2.get(`${shopId}.webp`);
+function avatarKey(shopId: number) {
+  return `${shopId}.webp`;
 }
 
-export async function checkPublicAvatarExists(shopId: number) {
-  const now = Date.now();
-  const cached = avatarExistsCache.get(shopId);
-  if (cached && cached.expiresAt > now) {
-    return cached.exists;
+// The version changes with every upload, so the URL can be cached forever.
+function avatarUrl(shopId: number, version: number | null) {
+  return version === null ? null : `/api/avatars/${shopId}?v=${version}`;
+}
+
+function rememberAvatar(shopId: number, version: number | null) {
+  avatarVersions.set(shopId, {
+    version,
+    expiresAt: Date.now() + AVATAR_CACHE_TTL_MS,
+  });
+  return avatarUrl(shopId, version);
+}
+
+export async function getAvatarUrl(shopId: number) {
+  const cached = avatarVersions.get(shopId);
+  if (cached && cached.expiresAt > Date.now()) {
+    return avatarUrl(shopId, cached.version);
   }
-
   try {
-    const r2 = getR2();
-    const obj = await r2.head(`${shopId}.webp`);
-    const exists = obj !== null;
-    avatarExistsCache.set(shopId, {
-      exists,
-      expiresAt: now + AVATAR_EXISTS_CACHE_TTL_MS,
-    });
-    return exists;
+    const object = await getR2().head(avatarKey(shopId));
+    return rememberAvatar(shopId, object ? object.uploaded.getTime() : null);
   } catch {
-    avatarExistsCache.set(shopId, {
-      exists: false,
-      expiresAt: now + AVATAR_EXISTS_CACHE_TTL_MS,
-    });
-    return false;
+    return rememberAvatar(shopId, null);
   }
 }
 
-export async function uploadAvatarToR2({ shopId, body }: UploadAvatarInput) {
-  const r2 = getR2();
+export function getAvatar(shopId: number) {
+  return getR2().get(avatarKey(shopId));
+}
 
-  await r2.put(`${shopId}.webp`, body, {
+export function avatarType(bytes: Uint8Array) {
+  if (bytes.length > MAX_AVATAR_BYTES) {
+    return null;
+  }
+  const ascii = (start: number, end: number) =>
+    String.fromCharCode(...bytes.subarray(start, end));
+  if (ascii(0, 4) === "RIFF" && ascii(8, 12) === "WEBP") {
+    return "image/webp";
+  }
+  if (ascii(1, 4) === "PNG" && bytes[0] === 0x89) {
+    return "image/png";
+  }
+  if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
+    return "image/jpeg";
+  }
+  return null;
+}
+
+export async function uploadAvatar(
+  shopId: number,
+  body: Uint8Array,
+  contentType: string,
+) {
+  const object = await getR2().put(avatarKey(shopId), body, {
     httpMetadata: {
-      contentType: "image/webp",
+      contentType,
       cacheControl: "public, max-age=31536000, immutable",
     },
   });
-
-  avatarExistsCache.set(shopId, {
-    exists: true,
-    expiresAt: Date.now() + AVATAR_EXISTS_CACHE_TTL_MS,
-  });
+  if (!object) {
+    throw new Error("Avatar upload failed.");
+  }
+  return rememberAvatar(shopId, object.uploaded.getTime());
 }
 
-export async function deleteAvatarFromR2(shopId: number) {
-  const r2 = getR2();
-  await r2.delete(`${shopId}.webp`);
-  avatarExistsCache.delete(shopId);
+export async function deleteAvatars(shopIds: number[]) {
+  if (shopIds.length === 0) {
+    return;
+  }
+  await getR2().delete(shopIds.map(avatarKey));
+  for (const shopId of shopIds) {
+    rememberAvatar(shopId, null);
+  }
 }

@@ -1,11 +1,11 @@
 export const SITE_URL = "https://boba.tomthebomb.dev";
 export const SITE_NAME = "Boba Log";
 export const AUTHOR_NAME = "Tom the Bomb";
+export const REPO_URL = "https://github.com/Tom-the-Bomb/boba-log";
 
-export const DEFAULT_SEO_TITLE =
-  "Boba Log | Track Tea Shops, Drinks, and Trends";
+export const DEFAULT_SEO_TITLE = "Boba Log | Bubble Tea Tracker";
 export const DEFAULT_SEO_DESCRIPTION =
-  "Track every bubble tea visit in one clean dashboard. Log shops, upload avatars, count drinks by date, and spot weekly or monthly trends across your favorites.";
+  "Keep track of the bubble tea you drink. Tap a shop each time you buy one, then see how many you've had this year and how much you spent.";
 
 export const SOCIAL_IMAGE_URL = `${SITE_URL}/icon-512.png`;
 export const APP_ICON_ALT = `${SITE_NAME} app icon`;

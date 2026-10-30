@@ -1,22 +1,36 @@
 export type AuthMode = "login" | "signup";
 
-type DateCountMap = Record<string, number>;
-
-export interface ShopDocument {
+export interface Drink {
   id: number;
-  name: string;
-  total: number;
-  dates: DateCountMap;
+  shopId: number;
+  /** Calendar day the drink belongs to, `YYYY-MM-DD` in the user's local time. */
+  day: string;
+  createdAt: number;
+  name: string | null;
+  priceCents: number | null;
+  note: string | null;
 }
 
-export interface BobaShop extends ShopDocument {
+export interface BobaShop {
+  id: number;
+  name: string;
   avatar: string | null;
 }
 
 export interface PublicUser {
   username: string;
-  created_at: number;
+  createdAt: number;
+  currency: string;
   shops: BobaShop[];
+  drinks: Drink[];
+}
+
+export interface DrinkInput {
+  day?: string;
+  shopId?: number;
+  name?: string | null;
+  priceCents?: number | null;
+  note?: string | null;
 }
 
 export interface ApiErrorResponse {
@@ -26,4 +40,8 @@ export interface ApiErrorResponse {
 
 export interface ShopMutationResponse extends ApiErrorResponse {
   shop?: BobaShop;
+}
+
+export interface DrinkMutationResponse extends ApiErrorResponse {
+  drink?: Drink;
 }

@@ -46,3 +46,7 @@ next-env.d.ts
 
 # Simplelocalize
 simplelocalize.yml
+
+.impeccable/
+PRODUCT.md
+DESIGN.md

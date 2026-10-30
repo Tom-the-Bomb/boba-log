@@ -28,50 +28,28 @@ export default function DefaultShopsSection({
     }
 
     const measure = () => {
-      const items = Array.from(container.children) as HTMLElement[];
-      if (items.length === 0) {
-        dispatch({ type: "measured", isCollapsible: false });
-        return;
-      }
-
-      const firstTop = items[0].offsetTop;
-      let hasMultipleRows = false;
-
-      for (const item of items) {
-        if (item.offsetTop > firstTop + 1) {
-          hasMultipleRows = true;
-          break;
-        }
-      }
-
-      dispatch({ type: "measured", isCollapsible: hasMultipleRows });
+      const items = [...container.children] as HTMLElement[];
+      const firstTop = items[0]?.offsetTop ?? 0;
+      dispatch({
+        type: "measured",
+        isCollapsible: items.some((item) => item.offsetTop > firstTop + 1),
+      });
     };
-
-    const initialMeasureFrame = requestAnimationFrame(measure);
 
     const observer = new ResizeObserver(measure);
     observer.observe(container);
-    for (const child of Array.from(container.children)) {
-      observer.observe(child);
-    }
-
-    addEventListener("resize", measure);
-    return () => {
-      cancelAnimationFrame(initialMeasureFrame);
-      observer.disconnect();
-      removeEventListener("resize", measure);
-    };
+    return () => observer.disconnect();
   }, [dispatch]);
 
   return (
     <div>
-      <p className="tea-caps-10 mb-2 block text-tea-faint">{t("presets")}</p>
+      <p className="label">{t("presets")}</p>
       <div
         className={`overflow-hidden ${
           presets.hasMeasured ? "transition-[max-height] duration-200" : ""
-        } ${!presets.isExpanded ? "max-h-9" : "max-h-125"}`}
+        } ${!presets.isExpanded ? "max-h-9.5" : "max-h-125"}`}
       >
-        <div ref={containerRef} className="flex flex-wrap gap-2">
+        <div ref={containerRef} className="flex flex-wrap gap-2 p-px">
           {DEFAULT_SHOPS.map((preset) => (
             <DefaultShopPresetCard
               key={preset.en}
@@ -85,12 +63,12 @@ export default function DefaultShopsSection({
         <button
           type="button"
           onClick={() => dispatch({ type: "toggle" })}
-          className="tea-link mt-2 inline-flex items-center gap-1 py-1.5 text-[10px]!"
+          className="mt-2 inline-flex items-center gap-1 rounded-md py-1.5 text-sm text-accent-ink hover:underline"
         >
           {presets.isExpanded ? t("showLess") : t("showMore")}
           <ChevronDown
             aria-hidden="true"
-            className={`h-3 w-3 transition-transform ${presets.isExpanded ? "rotate-180" : ""}`}
+            className={`size-3.5 ${presets.isExpanded ? "rotate-180" : ""}`}
             strokeWidth={1.5}
           />
         </button>

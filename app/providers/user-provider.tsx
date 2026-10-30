@@ -1,140 +1,259 @@
 "use client";
 
-import { BobaShop, PublicUser } from "@/lib/types";
+import { failureCode } from "@/lib/network";
+import type {
+  ApiErrorResponse,
+  BobaShop,
+  Drink,
+  DrinkInput,
+  DrinkMutationResponse,
+  PublicUser,
+} from "@/lib/types";
 import {
   createContext,
-  ReactNode,
   useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
+  type ReactNode,
 } from "react";
-import useUserReducer from "../reducers/user-reducer";
+import useUserReducer, { type LoadFailure } from "../reducers/user-reducer";
 
-interface PublicUserResponse {
-  user: PublicUser;
-}
-
-interface UserSession {
-  username: string;
-  createdAt: number;
-  shops: BobaShop[];
-}
+type MutationResult = Promise<string | null>;
 
 interface UserContextValue {
-  user: UserSession | null;
+  user: PublicUser | null;
   isLoadingUser: boolean;
-  login: () => Promise<void>;
+  loadFailed: LoadFailure | null;
+  retryLoad: () => Promise<void>;
   logout: () => Promise<void>;
-  refreshUser: () => Promise<void>;
-  setUserShops: (updater: (current: BobaShop[]) => BobaShop[]) => void;
+  addShop: (shop: BobaShop) => void;
+  removeShop: (shopId: number) => void;
+  logDrink: (
+    shopId: number,
+    input: DrinkInput & { day: string },
+  ) => Promise<Drink | string>;
+  updateDrink: (id: number, input: DrinkInput) => MutationResult;
+  removeDrink: (drink: Drink) => MutationResult;
+  setCurrency: (currency: string) => MutationResult;
 }
 
 const UserContext = createContext<UserContextValue | null>(null);
 
-interface UserProviderProps {
-  children: ReactNode;
-  skipHydration?: boolean;
+class SessionExpiredError extends Error {}
+class RateLimitedError extends Error {}
+
+async function sendJson<T extends ApiErrorResponse>(
+  url: string,
+  method: string,
+  body?: unknown,
+): Promise<{ ok: boolean; data: T }> {
+  const response = await fetch(url, {
+    method,
+    headers: body ? { "Content-Type": "application/json" } : undefined,
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (response.status === 401) {
+    throw new SessionExpiredError();
+  }
+  return { ok: response.ok, data: (await response.json()) as T };
 }
 
-export default function UserProvider({
-  children,
-  skipHydration = false,
-}: UserProviderProps) {
+export default function UserProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useUserReducer();
-
-  const loadUser = useCallback(async () => {
-    const response = await fetch("/api/user");
-
-    if (!response.ok) {
-      throw new Error("Could not load account.");
-    }
-
-    const data = (await response.json()) as PublicUserResponse;
-    dispatch({
-      type: "loaded",
-      username: data.user.username,
-      createdAt: data.user.created_at,
-      shops: data.user.shops ?? [],
-    });
-  }, [dispatch]);
+  // Optimistic drinks carry negative ids until the server answers.
+  const nextTempId = useRef(-1);
 
   const logout = useCallback(async () => {
     await fetch("/api/auth/logout", { method: "POST" });
   }, []);
 
-  const refreshUser = useCallback(async () => {
-    if (!state.username) {
-      return;
-    }
-    dispatch({ type: "loading" });
+  const expire = useCallback(async () => {
     try {
-      await loadUser();
-    } finally {
-      dispatch({ type: "done_loading" });
-    }
-  }, [dispatch, loadUser, state.username]);
-
-  const login = useCallback(async () => {
-    dispatch({ type: "loading" });
-    try {
-      await loadUser();
-    } catch {
       await logout();
-      throw new Error("Could not load account.");
+    } catch {}
+    dispatch({ type: "signed_out" });
+  }, [dispatch, logout]);
+
+  const failure = useCallback(
+    (error: unknown, fallback: string) => {
+      if (error instanceof SessionExpiredError) {
+        void expire();
+        return "unauthorized";
+      }
+      return failureCode(fallback);
+    },
+    [expire],
+  );
+
+  const hydrate = useCallback(async () => {
+    dispatch({ type: "loading" });
+    try {
+      const response = await fetch("/api/user");
+      if (response.status === 401) {
+        throw new SessionExpiredError();
+      }
+      if (response.status === 429) {
+        throw new RateLimitedError();
+      }
+      if (!response.ok) {
+        throw new Error("Could not load account.");
+      }
+      const data = (await response.json()) as { user: PublicUser };
+      dispatch({ type: "loaded", user: data.user });
+    } catch (error) {
+      if (error instanceof SessionExpiredError) {
+        await expire();
+      } else {
+        dispatch({
+          type: "load_failed",
+          reason:
+            error instanceof RateLimitedError
+              ? "tooManyRequests"
+              : failureCode("loadFailedBody"),
+        });
+      }
     } finally {
       dispatch({ type: "done_loading" });
     }
-  }, [dispatch, loadUser, logout]);
+  }, [dispatch, expire]);
 
-  const setUserShops = useCallback(
-    (updater: (current: BobaShop[]) => BobaShop[]) => {
-      dispatch({ type: "update_shops", updater });
-    },
+  useEffect(() => {
+    void hydrate();
+  }, [hydrate]);
+
+  const addShop = useCallback(
+    (shop: BobaShop) => dispatch({ type: "add_shop", shop }),
     [dispatch],
   );
 
-  useEffect(() => {
-    if (skipHydration) {
-      dispatch({ type: "done_loading" });
-      return;
-    }
+  const removeShop = useCallback(
+    (shopId: number) => dispatch({ type: "remove_shop", shopId }),
+    [dispatch],
+  );
 
-    const hydrate = async () => {
+  const logDrink = useCallback(
+    async (shopId: number, input: DrinkInput & { day: string }) => {
+      const tempId = nextTempId.current--;
+      dispatch({
+        type: "add_drink",
+        drink: {
+          id: tempId,
+          shopId,
+          day: input.day,
+          createdAt: Math.floor(Date.now() / 1000),
+          name: input.name ?? null,
+          priceCents: input.priceCents ?? null,
+          note: input.note ?? null,
+        },
+      });
       try {
-        await loadUser();
-      } catch {
-        // No valid cookie => not logged in
-      } finally {
-        dispatch({ type: "done_loading" });
+        const { ok, data } = await sendJson<DrinkMutationResponse>(
+          `/api/shops/${shopId}/drinks`,
+          "POST",
+          input,
+        );
+        if (ok && data.drink) {
+          dispatch({ type: "replace_drink", id: tempId, drink: data.drink });
+          return data.drink;
+        }
+        dispatch({ type: "remove_drink", id: tempId });
+        return data.code ?? "couldNotLog";
+      } catch (error) {
+        dispatch({ type: "remove_drink", id: tempId });
+        return failure(error, "couldNotLog");
       }
-    };
+    },
+    [dispatch, failure],
+  );
 
-    void hydrate();
-  }, [dispatch, loadUser, skipHydration]);
+  const updateDrink = useCallback(
+    async (id: number, input: DrinkInput) => {
+      try {
+        const { ok, data } = await sendJson<DrinkMutationResponse>(
+          `/api/drinks/${id}`,
+          "PATCH",
+          input,
+        );
+        if (ok && data.drink) {
+          dispatch({ type: "replace_drink", id, drink: data.drink });
+          return null;
+        }
+        return data.code ?? "couldNotSave";
+      } catch (error) {
+        return failure(error, "couldNotSave");
+      }
+    },
+    [dispatch, failure],
+  );
 
-  const user = useMemo<UserSession | null>(() => {
-    if (!state.username || !state.createdAt) {
-      return null;
-    }
+  const removeDrink = useCallback(
+    async (drink: Drink) => {
+      dispatch({ type: "remove_drink", id: drink.id });
+      try {
+        const { ok, data } = await sendJson<ApiErrorResponse>(
+          `/api/drinks/${drink.id}`,
+          "DELETE",
+        );
+        if (ok || data.code === "drinkNotFound") {
+          return null;
+        }
+        dispatch({ type: "add_drink", drink });
+        return data.code ?? "couldNotRemove";
+      } catch (error) {
+        dispatch({ type: "add_drink", drink });
+        return failure(error, "couldNotRemove");
+      }
+    },
+    [dispatch, failure],
+  );
 
-    return {
-      username: state.username,
-      createdAt: state.createdAt,
-      shops: state.shops,
-    };
-  }, [state.username, state.createdAt, state.shops]);
+  const setCurrency = useCallback(
+    async (currency: string) => {
+      try {
+        const { ok, data } = await sendJson<ApiErrorResponse>(
+          "/api/user",
+          "PATCH",
+          { currency },
+        );
+        if (ok) {
+          dispatch({ type: "set_currency", currency });
+          return null;
+        }
+        return data.code ?? "couldNotSave";
+      } catch (error) {
+        return failure(error, "couldNotSave");
+      }
+    },
+    [dispatch, failure],
+  );
 
   const value = useMemo<UserContextValue>(
     () => ({
-      user,
+      user: state.user,
       isLoadingUser: state.isLoading,
-      login,
+      loadFailed: state.loadFailed,
+      retryLoad: hydrate,
       logout,
-      refreshUser,
-      setUserShops,
+      addShop,
+      removeShop,
+      logDrink,
+      updateDrink,
+      removeDrink,
+      setCurrency,
     }),
-    [user, state.isLoading, login, logout, refreshUser, setUserShops],
+    [
+      state,
+      hydrate,
+      logout,
+      addShop,
+      removeShop,
+      logDrink,
+      updateDrink,
+      removeDrink,
+      setCurrency,
+    ],
   );
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
