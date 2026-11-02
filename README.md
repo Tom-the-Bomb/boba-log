@@ -7,136 +7,60 @@
 
 </div>
 
-Boba Log is a Next.js app for logging bubble tea drinks, deployed to Cloudflare Workers.
+Boba Log is a Next.js app for logging bubble tea drinks. It runs on Cloudflare Workers.
 
 ## Stack
 
-- **Framework:** Next.js 16 (App Router)
-- **UI Library:** React 19
-- **Language:** TypeScript 5
-- **Styling:** Tailwind CSS 4
-- **Runtime and Deploy:** Cloudflare Workers (OpenNext)
-- **Database:** Cloudflare D1 (SQLite)
-- **Object Storage:** Cloudflare R2
-- **Package Manager:** Bun
-- **Auth:** JWT in an HttpOnly cookie (30-day expiry), passwords hashed with PBKDF2 (100k iterations, SHA-256)
-- **Security:** Cloudflare Ratelimiter + Turnstile
-- **Localization:** Chinese (simplified) + English with i18next and [simplelocalize.io](https://simplelocalize.io)
+- Next.js 16 (App Router), React 19, TypeScript 5, Tailwind CSS 4 and Bun
+- Cloudflare Workers through OpenNext, with D1 (SQLite) for data and R2 for shop avatars
+- Auth with a JWT in an HttpOnly cookie (30 days), and passwords hashed with PBKDF2 (100k iterations, SHA-256)
+- Cloudflare rate limiting and Turnstile against bots
+- English and Simplified Chinese with i18next, synced through [SimpleLocalize](https://simplelocalize.io)
+- `react-aria-components` for the UI, `lucide-react` icons, `sonner` toasts, and the LXGW WenKai TC and Noto Sans SC fonts
 
-### Libraries
+## Local setup
 
-- **Components:** `react-aria-components` for accessible UI primitives
-- **Icons:** `lucide-react` for UI icons
-- **Toasts:** `sonner`
-- **Fonts:** LXGW WenKai TC and Noto Sans SC
+You only need Bun (Wrangler comes with the dev dependencies).
 
-## Setup
+1. Install the packages: `bun install`
+2. Create a `.env` in the project root. Cloudflare's [test keys](https://developers.cloudflare.com/turnstile/troubleshooting/testing/) always pass Turnstile, so use them locally:
 
-### Prerequisites
+   ```env
+   JWT_SECRET=your-jwt-secret
+   NEXT_PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA
+   TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
+   ```
 
-- Bun
-- Wrangler CLI
+3. Create the local database: `bun run db:migrate:local`
+4. Start the dev server: `bun dev`
 
-### Install
+`bun dev` uses local copies of D1 and R2, so it never touches production. `bun preview` builds the real Worker bundle and runs it against the **remote** D1 and R2 (production data), for a final check before deploying.
 
-```bash
-bun install
-```
+## Production
 
-### Environment
+Deploy with `bun run deploy`. GitHub Actions runs it on every push to `main`.
 
-Create a `.env` file in the project root
-
-```env
-JWT_SECRET=your-jwt-secret
-NEXT_PUBLIC_TURNSTILE_SITE_KEY=your-turnstile-site-key
-TURNSTILE_SECRET_KEY=your-turnstile-secret-key
-```
-
-For local development, you can use [Cloudflare's test keys](https://developers.cloudflare.com/turnstile/troubleshooting/testing/) which always pass verification:
-
-```env
-NEXT_PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA
-TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
-```
-
-#### Production
-
-- Github Actions Secrets
-  - `CLOUDFLARE_API_TOKEN`
-  - `CLOUDFLARE_ACCOUNT_ID`
-  - `NEXT_PUBLIC_TURNSTILE_SITE_KEY`
-- Cloudflare Workers Secrets
-  - `JWT_SECRET`
-  - `TURNSTILE_SECRET_KEY`
-
-### Local database
-
-Apply the migrations to the local D1 database for `bun dev`:
-
-```bash
-bun run db:migrate:local
-```
-
-### SimpleLocalize (i18n)
-
-Translation files live in `i18n/messages/`. The `simplelocalize.yml` config is gitignored since it contains an API key. To set it up:
-
-1. Install the [SimpleLocalize CLI](https://simplelocalize.io/docs/cli/get-started/)
-2. Create a `simplelocalize.yml` with your API key and the upload/download paths pointing to `./i18n/messages/{ns}.json` (use `multi-language-json` format)
-3. Use the i18n scripts:
-
-```bash
-bun run i18n:upload          # dry run upload
-bun run i18n:upload:confirm  # upload to SimpleLocalize
-bun run i18n:download        # download translations
-```
-
-## Development
-
-### `bun dev`
-
-Runs the Next.js dev server with hot reload and local Cloudflare bindings (D1, R2). This is the recommended way to develop, bindings are local emulations so changes are fast and don't touch production data.
-
-```bash
-bun dev
-```
-
-### `bun preview`
-
-Builds the full Cloudflare Workers bundle and runs it locally via wrangler. Uses **remote** D1 and R2 bindings, so it hits your actual production data. Useful for final verification before deploying.
-
-```bash
-bun preview
-```
-
-## Database (D1)
-
-This project uses the `DB` D1 binding from `wrangler.jsonc` with database name `boba-log`.
-
-### Create database
-
-Create the D1 database:
+Create the D1 database and R2 bucket once (the names match `wrangler.jsonc`):
 
 ```bash
 bunx wrangler d1 create boba-log
+bunx wrangler r2 bucket create boba-log
 ```
 
-### Migrations
+For Turnstile, create a widget in the [Cloudflare dashboard](https://dash.cloudflare.com/) under **Security > Turnstile**, set the domain to your production hostname, and choose **Managed** mode.
 
-The schema lives in [`migrations/`](migrations):
+Secrets:
 
-```bash
-bun run db:migrate:local   # local database used by `bun dev`
-bun run db:migrate         # remote (production) database
-bunx wrangler d1 migrations create boba-log <name>   # new migration
-```
+- GitHub Actions: `CLOUDFLARE_API_TOKEN` (needs D1 Edit, since deploys run migrations), `CLOUDFLARE_ACCOUNT_ID` and `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (needed at build time, because Next.js inlines `NEXT_PUBLIC_*` variables into the client bundle)
+- Worker secrets: `JWT_SECRET` and `TURNSTILE_SECRET_KEY`
 
-`bun run deploy` applies pending remote migrations before uploading the Worker, so the CI token needs **D1 edit** permission.
+Rate limits are per IP: 10 requests a minute on `/api/auth` (except logout), and 100 a minute on every other `/api/` route.
 
-The legacy `shop_dates` table and `shops.total` column are unused but kept for rollout, and can be dropped in a later migration.
+## Database
 
-### Schema
+The schema lives in [`migrations/`](migrations), and `bun run deploy` applies any pending ones to the remote database before uploading the Worker. Create a new migration with `bunx wrangler d1 migrations create boba-log <name>`.
+
+The legacy `shop_dates` table and `shops.total` column are unused and can be dropped in a later migration.
 
 ```mermaid
 ---
@@ -173,70 +97,29 @@ erDiagram
   }
 ```
 
-## Object Storage (R2)
+Shop avatars are stored in R2 as `{shopId}.webp` and served by `/api/avatars/[shopId]`.
 
-This project uses the `R2` R2 binding from `wrangler.jsonc` with bucket name `boba-log` for storing shop avatar images.
+## Translations
 
-### Create bucket
-
-Create the R2 bucket:
-
-```bash
-bunx wrangler r2 bucket create boba-log
-```
-
-Avatars are uploaded as `{shopId}.webp` and served via the `/api/avatars/[shopId]` API route, which reads directly from the R2 binding.
-
-## Turnstile (Bot Protection)
-
-[Cloudflare Turnstile](https://developers.cloudflare.com/turnstile/) is used to protect the auth and shop creation forms from bots.
-
-### Create widget
-
-1. Create a Turnstile widget in the [Cloudflare dashboard](https://dash.cloudflare.com/) under **Security > Turnstile**
-2. Set the domain to your production hostname and choose **Managed** mode
-3. Add the site key and secret key as a secret, see [Environment](#environment)
-
-The `NEXT_PUBLIC_TURNSTILE_SITE_KEY` must be available at build time since Next.js inlines `NEXT_PUBLIC_*` variables into the client bundle.
-
-## Ratelimiting
-
-- `/api/auth` routes except logout: (10 requests / min / IP)
-- All other `/api/` routes: (100 requests / min / IP)
-
-## Default Shop Avatars
-
-Normalize all images in `public/default-shops` to square `256x256` WebP assets:
-
-```bash
-bun run assets:process
-```
-
-Supported source formats: `.jpg`, `.jpeg`, `.png`, `.webp`, `.avif`, `.tiff`.
-Non-WebP source files are replaced with generated `.webp` outputs.
-
-## Deployment
-
-```bash
-bun run deploy
-```
+Translations live in `i18n/messages/`. To sync them with SimpleLocalize, install its [CLI](https://simplelocalize.io/docs/cli/get-started/) and create a `simplelocalize.yml` (gitignored, since it holds your API key) with the upload and download paths set to `./i18n/messages/{ns}.json` in `multi-language-json` format.
 
 ## Scripts
 
-- `bun run dev`: Next.js dev server with local Cloudflare bindings
-- `bun run build`: Production build
-- `bun run preview`: OpenNext Cloudflare preview with remote bindings
-- `bun run deploy`: OpenNext Cloudflare build, remote D1 migrations, then deploy
-- `bun run db:migrate`: Apply pending D1 migrations to the remote database
-- `bun run db:migrate:local`: Apply pending D1 migrations to the local database
-- `bun run assets:process`: Normalize `public/default-shops` images to `256x256` WebP
-- `bun run assets:textures`: Regenerate the paper and mountain textures in `public/textures`
-- `bun run assets:fonts`: Regenerate the subset Chinese fonts in `app/fonts` (run `pip install -r scripts/requirements.txt` first)
-- `bun run i18n:upload`: Dry run upload translations to SimpleLocalize
-- `bun run i18n:upload:confirm`: Upload translations to SimpleLocalize
-- `bun run i18n:download`: Download translations from SimpleLocalize
-- `bun run lint`: ESLint + Prettier check + TypeScript no-emit
-- `bun run lint:fix`: ESLint fix + Prettier write + TypeScript no-emit
-- `bun run format`: Prettier write
-- `bun run format:check`: Prettier check
-- `bun run doctor`: Run [react-doctor](https://github.com/millionco/react-doctor)
+Run any of these with `bun run <script>`.
+
+| Script | What it does |
+| --- | --- |
+| `dev` | Dev server with local D1 and R2 |
+| `build` | Production build |
+| `preview` | Worker build run against remote D1 and R2 |
+| `deploy` | Build, apply remote migrations, then deploy |
+| `db:migrate` / `db:migrate:local` | Apply pending migrations to the remote or local database |
+| `assets:process` | Turn images in `public/default-shops` (`.jpg`, `.jpeg`, `.png`, `.webp`, `.avif` or `.tiff`) into 256x256 WebP, replacing the originals |
+| `assets:textures` | Regenerate the paper and mountain textures in `public/textures` |
+| `assets:fonts` | Regenerate the subset Chinese fonts in `app/fonts` (run `pip install -r scripts/requirements.txt` first) |
+| `i18n:upload` | Dry run of a SimpleLocalize upload |
+| `i18n:upload:confirm` | Upload translations to SimpleLocalize |
+| `i18n:download` | Download translations from SimpleLocalize |
+| `lint` / `lint:fix` | ESLint, Prettier and TypeScript (check, or fix) |
+| `format` / `format:check` | Prettier (write, or check) |
+| `doctor` | Run [react-doctor](https://github.com/millionco/react-doctor) |
