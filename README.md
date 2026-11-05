@@ -21,7 +21,7 @@ How much boba do you drink? More than you'd admit, probably. Boba Log lets you l
 
 ![Boba Log architecture](docs/architecture.png)
 
-Run `bun run docs:architecture` to sync `docs/architecture.excalidraw` with README
+Run `bun run docs:architecture` to sync [docs/architecture.excalidraw](docs/architecture.excalidraw) with README.
 
 ## Project structure
 
