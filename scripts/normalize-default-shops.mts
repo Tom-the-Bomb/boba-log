@@ -17,20 +17,23 @@ const SUPPORTED_EXTENSIONS = new Set([
   ".tiff",
 ]);
 
-function isFileLockError(error) {
+function isFileLockError(error: unknown) {
   return (
     error &&
     typeof error === "object" &&
     "code" in error &&
-    ["EBUSY", "EPERM", "UNKNOWN"].includes(error.code)
+    ["EBUSY", "EPERM", "UNKNOWN"].includes(error.code as string)
   );
 }
 
-function sleep(ms) {
+function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function withFileLockRetry(action, attempts = RETRY_ATTEMPTS) {
+async function withFileLockRetry<T>(
+  action: () => Promise<T>,
+  attempts = RETRY_ATTEMPTS,
+) {
   for (let attempt = 0; attempt < attempts; attempt += 1) {
     try {
       return await action();
@@ -54,7 +57,7 @@ async function listSupportedImageFiles() {
     .sort((a, b) => a.localeCompare(b));
 }
 
-async function normalizeImage(fileName) {
+async function normalizeImage(fileName: string) {
   const sourcePath = path.join(INPUT_DIR, fileName);
   const { name: baseName } = path.parse(fileName);
   const outputName = `${baseName}.webp`;
