@@ -109,6 +109,7 @@
   --color-glaze-4: var(--glaze-4);
   --color-band: var(--band);
   --color-seal: var(--seal);
+  --color-seal-mark: #b33a2a;
   --color-on-seal: var(--on-seal);
   --color-danger: var(--danger);
 }

@@ -23,7 +23,7 @@ export default function SealMark({ size = 30, text = "茶记" }: SealMarkProps) 
   return (
     <span
       aria-hidden="true"
-      className="inline-grid shrink-0 place-items-center rounded-sm bg-seal font-kai leading-[1.05] text-on-seal filter-[url(#seal-carve)] [writing-mode:vertical-rl]"
+      className="inline-grid shrink-0 place-items-center rounded-sm bg-seal-mark font-kai leading-[1.05] text-on-seal filter-[url(#seal-carve)] [writing-mode:vertical-rl]"
       style={{
         width: size,
         height: size,
